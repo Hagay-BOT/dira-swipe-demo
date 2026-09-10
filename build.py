@@ -10,7 +10,7 @@ html = (root / 'index.html').read_text(encoding='utf-8')
 css = (root / 'style.css').read_text(encoding='utf-8')
 
 html = html.replace('<link rel="stylesheet" href="style.css">', '<style>\n' + css + '\n</style>')
-for name in ['data.js', 'scenes.js', 'core.js', 'seeker.js', 'owner.js']:
+for name in ['data.js', 'scenes.js', 'core.js', 'deck.js', 'tabs.js', 'publish.js', 'owner.js']:
     code = (root / name).read_text(encoding='utf-8').replace('</script>', '<\\/script>')
     tag = f'<script src="{name}"></script>'
     assert tag in html, tag

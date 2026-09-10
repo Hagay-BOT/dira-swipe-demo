@@ -113,7 +113,7 @@
     const scr = A.mount(el(`
       <section class="screen match scroll">
         <div class="match-center">
-          <div class="sign">יש התאמה</div>
+          <span class="hello">✓ יש התאמה</span>
           <div class="match-art"><div class="photo">${window.SCENES.photo(apt, 0)}</div></div>
           <h2>${esc(s.first)} ${esc(s.last)} והדירה ב${esc(apt.street)}</h2>
           <p class="sub">עכשיו נחשפים הפרטים שלא ראית קודם</p>

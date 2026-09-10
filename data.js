@@ -153,3 +153,48 @@ window.DEMO = {
       income: 'עבודה חלקית', extra: 'קצבה', about: 'גרה לבד, בלי חיות, לא מעשנת.' }
   ]
 };
+
+/* ——— פרטים שנוספו בעקבות האב-טיפוס של ניר ——— */
+(function (D) {
+  const X = {
+    a1:  { title: 'דירת 3.5 חדרים עם מרפסת שמש ונוף למפרץ', beds: 2, baths: 1, type: 'דירה', cond: 'שמורה מאוד', vaad: 180, arnona: 780, contract: 12, guarantee: 10400, guarantors: false, partners: false, smoking: false },
+    a2:  { title: 'דירת 3 חדרים שקטה ליד הטכניון', beds: 2, baths: 1, type: 'דירה', cond: 'במצב טוב', vaad: 120, arnona: 620, contract: 12, guarantee: 0, guarantors: true, partners: true, smoking: false },
+    a3:  { title: '2.5 חדרים משופצת בבניין באוהאוס', beds: 1, baths: 1, type: 'דירה', cond: 'משופצת', vaad: 90, arnona: 480, contract: 12, guarantee: 0, guarantors: true, partners: false, smoking: true },
+    a4:  { title: '4 חדרים מרווחת עם מרפסת סוכה וחניה', beds: 3, baths: 2, type: 'דירה', cond: 'שמורה מאוד', vaad: 250, arnona: 980, contract: 24, guarantee: 12800, guarantors: false, partners: false, smoking: false },
+    a5:  { title: '4 חדרים עם מרפסת גדולה ליד הקניון', beds: 3, baths: 2, type: 'דירה', cond: 'במצב טוב', vaad: 150, arnona: 820, contract: 12, guarantee: 10800, guarantors: false, partners: false, smoking: false },
+    a6:  { title: '3 חדרים עם נוף פתוח לים', beds: 2, baths: 1, type: 'דירה', cond: 'משופצת', vaad: 220, arnona: 760, contract: 12, guarantee: 11800, guarantors: false, partners: false, smoking: false },
+    a7:  { title: '3.5 חדרים בקומה ראשונה, מתאימה גם עם כלב', beds: 2, baths: 1, type: 'דירה', cond: 'במצב טוב', vaad: 110, arnona: 700, contract: 12, guarantee: 0, guarantors: true, partners: false, smoking: false },
+    a8:  { title: '3 חדרים משופצת ומרוהטת, נכנסים עם מזוודה', beds: 2, baths: 1, type: 'דירה', cond: 'משופצת', vaad: 130, arnona: 690, contract: 12, guarantee: 9800, guarantors: false, partners: true, smoking: false },
+    a9:  { title: '2 חדרים מרוהטת ליד הכרמלית', beds: 1, baths: 1, type: 'דירה', cond: 'במצב טוב', vaad: 70, arnona: 420, contract: 6, guarantee: 0, guarantors: true, partners: false, smoking: true },
+    a10: { title: '4 חדרים בבניין חדש עם חניה ומחסן', beds: 3, baths: 2, type: 'דירה', cond: 'חדשה מהקבלן', vaad: 200, arnona: 840, contract: 24, guarantee: 9600, guarantors: false, partners: false, smoking: false },
+    a11: { title: 'דירת גג קטנה עם שקיעה מעל המפרץ', beds: 1, baths: 1, type: 'דירת גג', cond: 'שמורה מאוד', vaad: 160, arnona: 560, contract: 12, guarantee: 0, guarantors: true, partners: false, smoking: false },
+    a12: { title: '3 חדרים ברחוב ירוק ושקט', beds: 2, baths: 1, type: 'דירה', cond: 'במצב טוב', vaad: 100, arnona: 640, contract: 12, guarantee: 0, guarantors: true, partners: true, smoking: false },
+    a13: { title: 'דירת גן 3.5 חדרים עם חצר פרטית', beds: 2, baths: 1, type: 'דירת גן', cond: 'שמורה מאוד', vaad: 90, arnona: 760, contract: 12, guarantee: 10000, guarantors: false, partners: false, smoking: false },
+    a14: { title: 'פנטהאוז 5 חדרים עם נוף לים ושתי חניות', beds: 4, baths: 2, type: 'פנטהאוז', cond: 'חדשה מהקבלן', vaad: 350, arnona: 1400, contract: 24, guarantee: 21600, guarantors: false, partners: false, smoking: false },
+    a15: { title: '4 חדרים למשפחה ליד הפארק', beds: 3, baths: 2, type: 'דירה', cond: 'במצב טוב', vaad: 140, arnona: 900, contract: 12, guarantee: 12000, guarantors: false, partners: false, smoking: false }
+  };
+  D.apartments.forEach((a) => Object.assign(a, X[a.id] || {}));
+
+  const has = (f) => (a) => a.features.includes(f);
+  D.categories = [
+    { id: 'foryou', label: 'מותאם לך', badge: '✨', note: 'לפי הכוכבים שסימנת' },
+    { id: 'luxury', label: 'יוקרה', badge: '💎', test: (a) => a.rent >= 6000 || a.type === 'פנטהאוז' },
+    { id: 'balcony', label: 'מרפסת', badge: '🌤️', test: has('מרפסת') },
+    { id: 'sea', label: 'נוף לים', badge: '🌊', test: has('נוף לים') },
+    { id: 'small', label: 'עד 2.5 חדרים', badge: '🛋️', test: (a) => a.rooms <= 2.5 },
+    { id: 'family', label: '4 חדרים ומעלה', badge: '🏡', test: (a) => a.rooms >= 4 },
+    { id: 'mamad', label: 'ממ"ד', badge: '🛡️', test: has('ממ"ד') },
+    { id: 'parking', label: 'חניה', badge: '🅿️', test: has('חניה') },
+    { id: 'pets', label: 'חיות מחמד', badge: '🐾', test: has('חיות מחמד') },
+    { id: 'furnished', label: 'מרוהטת', badge: '🪑', test: has('מרוהטת') },
+    { id: 'garden', label: 'דירת גן', badge: '🌿', test: (a) => a.type === 'דירת גן' || a.features.includes('גינה') },
+    { id: 'renovated', label: 'משופצת', badge: '🔨', test: (a) => a.cond === 'משופצת' || a.cond === 'חדשה מהקבלן' }
+  ];
+
+  D.cities = ['חיפה', 'קריית ביאליק', 'קריית מוצקין', 'קריית אתא', 'קריית ים', 'נשר', 'טירת כרמל'];
+  D.streets = Array.from(new Set(D.apartments.map((a) => a.street).concat(['רחוב הנביאים', 'רחוב חסן שוקרי', 'שדרות הציונות', 'רחוב אלנבי', 'דרך הים'])));
+  D.types = ['דירה', 'דירת גן', 'דירת גג', 'פנטהאוז', 'דופלקס', 'לופט', 'קוטג׳/טאון-האוס', 'בית פרטי', 'סטודיו'];
+  D.conds = ['חדשה מהקבלן', 'משופצת', 'שמורה מאוד', 'במצב טוב', 'זקוקה לשיפוץ'];
+  D.featureList = ['מיזוג', 'מרפסת', 'ממ"ד', 'מחסן', 'נגישות', 'דוד שמש', 'חניה', 'מרוהטת', 'מעלית', 'חיות מחמד'];
+  D.acTypes = ['מזגן מרכזי', 'מזגן בכל החדרים', 'לא בכל החדרים', 'מזגן בסלון בלבד'];
+})(window.DEMO);

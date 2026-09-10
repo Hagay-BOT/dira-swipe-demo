@@ -1,11 +1,15 @@
 /* ליבה: מצב, שמירה, ניווט, הודעות, גיליון, שיחה ויומן */
 (function () {
   const D = window.DEMO;
-  const KEY = 'swipe-demo-v1';
+  const KEY = 'swipe-demo-v2';
   const app = document.getElementById('app');
 
   const fresh = () => ({
     prefs: null,              // { area, max, entry }
+    saved: {},                // id → { star, t } · «אהבתי»
+    filter: null,             // הסינון החכם
+    tune: {},                 // מה שהכוכבים לימדו
+    aiChat: [],
     swiped: {},               // id → 'L' | 'R'
     pen: {},                  // מה הוחלק שמאלה, לסידור הערימה
     likes: [],                // { id, t, status: 'wait' | 'match' }
@@ -64,14 +68,16 @@
     bannerEl = el('<button class="banner" type="button"></button>');
     app.append(toastEl, bannerEl);
   }
-  function toast(text, ms) {
+  function toast(text, ms, kind) {
     toastEl.textContent = text;
+    toastEl.className = 'toast' + (kind ? ' ' + kind : '');
+    void toastEl.offsetWidth;
     toastEl.classList.add('show');
     clearTimeout(toastTimer);
     toastTimer = setTimeout(() => toastEl.classList.remove('show'), ms || 2400);
   }
   function banner(title, text, onTap) {
-    bannerEl.innerHTML = `<span class="mini-sign">יש!</span><div><b>${esc(title)}</b><span>${esc(text)}</span></div>`;
+    bannerEl.innerHTML = `<span class="mini-sign">✓</span><div><b>${esc(title)}</b><span>${esc(text)}</span></div>`;
     bannerEl.onclick = () => { bannerEl.classList.remove('show'); onTap && onTap(); };
     bannerEl.classList.add('show');
     clearTimeout(bannerTimer);
@@ -106,13 +112,13 @@
   let current = { name: null, arg: null };
   function go(name, arg) {
     current = { name, arg };
-    (routes[name] || routes.open)(arg);
+    (routes[name] || routes.deck)(arg);
   }
   function startRoute() {
     const h = (location.hash || '').replace('#', '');
     if (h === 'owner') return go('owner');
     if (h === 'log') return go('log');
-    return go(state.prefs ? 'deck' : 'open');
+    return go('deck');
   }
   window.addEventListener('hashchange', startRoute);
 
