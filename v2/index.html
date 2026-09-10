@@ -1,0 +1,2107 @@
+<!doctype html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#EEF2F6">
+<title>דירה בהחלקה · דמו</title>
+<meta name="description" content="דמו לחיץ: מחליקים על דירות להשכרה במטרופולין חיפה, שומרים מה שאהבתם ושולחים פנייה לבעל הדירה.">
+<meta property="og:title" content="דירה בהחלקה · דמו">
+<meta property="og:description" content="מחליקים על דירות להשכרה. שומרים, מסמנים כוכב, ושולחים פנייה לבעל הדירה.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://hagay-bot.github.io/dira-swipe-demo/">
+<meta property="og:image" content="https://hagay-bot.github.io/dira-swipe-demo/og.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Assistant:wght@400;500;600;700;800&display=swap">
+<style>
+/* המראה לפי האב-טיפוס של ניר: נקי, אפור-כחלחל, כרטיסים לבנים, ניווט תחתון */
+:root {
+  --bg: #EEF2F6;
+  --surface: #FFFFFF;
+  --surface-2: #F5F7FA;
+  --ink: #1E2A38;
+  --ink-2: #5C6B7C;
+  --line: #D5DDE6;
+  --primary: #4E7196;
+  --primary-ink: #3F5F82;
+  --primary-soft: #DCE7F2;
+  --like: #2FA25A;
+  --like-soft: #E3F4E8;
+  --star: #2F74E8;
+  --nope: #E25B55;
+  --night: #1E2A38;
+  --font: "Assistant", "Segoe UI", Arial, sans-serif;
+  color-scheme: light;
+}
+
+* { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+[hidden] { display: none !important; }
+html, body { height: 100%; margin: 0; }
+body { background: var(--bg); color: var(--ink); font: 400 16px/1.5 var(--font); direction: rtl; -webkit-font-smoothing: antialiased; }
+button, input, select, textarea { font: inherit; color: inherit; }
+button { cursor: pointer; }
+:focus-visible { outline: 3px solid var(--primary); outline-offset: 2px; }
+
+#app { position: relative; max-width: 440px; height: 100vh; height: 100dvh; margin: 0 auto; overflow: hidden; background: var(--bg); }
+.aside { display: none; }
+@media (min-width: 760px) {
+  body { background: #DCE3EA; }
+  #app { height: min(880px, calc(100dvh - 40px)); margin: 20px auto; border-radius: 32px; box-shadow: 0 30px 80px rgba(30, 42, 56, .22); border: 8px solid #F7F9FB; }
+  .aside { display: block; position: fixed; top: 32px; right: 32px; max-width: 230px; color: var(--ink-2); font-size: 14px; }
+  .aside b { display: block; color: var(--ink); font-size: 15px; margin-bottom: 4px; }
+}
+
+.screen { position: absolute; inset: 0; display: flex; flex-direction: column; background: var(--bg); }
+.scroll { overflow-y: auto; -webkit-overflow-scrolling: touch; }
+.grow { flex: 1; min-height: 0; }
+
+/* ——— כותרת ——— */
+.app-top { direction: ltr; display: grid; grid-template-columns: 96px 1fr 96px; align-items: center; padding: 10px 12px 6px; }
+.top-icons { display: flex; gap: 4px; }
+.brand { display: flex; align-items: center; justify-content: center; gap: 6px; font-weight: 800; font-size: 21px; color: var(--primary-ink); direction: rtl; letter-spacing: -.2px; }
+.brand svg { width: 22px; height: 22px; color: var(--primary); }
+.icon-btn { position: relative; width: 42px; height: 42px; border: 0; border-radius: 50%; background: transparent; color: var(--primary-ink); display: grid; place-items: center; padding: 0; }
+.icon-btn:active { background: var(--primary-soft); }
+.icon-btn svg { width: 22px; height: 22px; }
+.icon-btn .dot { position: absolute; top: 8px; right: 8px; width: 8px; height: 8px; border-radius: 50%; background: var(--nope); }
+.page-top { display: flex; align-items: center; justify-content: center; position: relative; padding: 14px 16px 8px; font-weight: 700; font-size: 19px; }
+.page-top .icon-btn { position: absolute; right: 8px; top: 6px; }
+.page-top .end { position: absolute; left: 8px; top: 6px; }
+
+/* ——— ניווט תחתון ——— */
+.tabbar { display: flex; background: var(--surface); border-top: 1px solid var(--line); padding: 6px 4px calc(6px + env(safe-area-inset-bottom)); }
+.tab { position: relative; flex: 1; border: 0; background: none; display: grid; justify-items: center; gap: 2px; padding: 4px 0; color: var(--ink-2); font-size: 12.5px; font-weight: 600; }
+.tab svg { width: 23px; height: 23px; }
+.tab.on { color: var(--primary-ink); }
+.tab .badge { position: absolute; top: 0; left: calc(50% - 22px); min-width: 18px; height: 18px; border-radius: 999px; background: var(--nope); color: #fff; font-size: 11px; line-height: 18px; padding: 0 5px; }
+
+/* ——— כפתורים וטפסים ——— */
+.btn-primary { display: flex; align-items: center; justify-content: center; gap: 8px; width: 100%; border: 0; border-radius: 14px; padding: 14px 16px; background: var(--primary); color: #fff; font-weight: 700; font-size: 16.5px; text-decoration: none; }
+.btn-primary:active { background: var(--primary-ink); }
+.btn-primary svg { width: 20px; height: 20px; }
+.btn-ghost { display: flex; align-items: center; justify-content: center; gap: 8px; width: 100%; border: 1.5px solid var(--line); border-radius: 14px; padding: 12px 16px; background: var(--surface); color: var(--primary-ink); font-weight: 700; font-size: 15.5px; text-decoration: none; }
+.btn-ghost svg { width: 19px; height: 19px; }
+.btn-row { display: grid; gap: 10px; }
+.two-btn { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.chips { display: flex; gap: 8px; overflow-x: auto; padding: 4px 14px 8px; scrollbar-width: none; }
+.chips::-webkit-scrollbar { display: none; }
+.chip { flex: none; display: inline-flex; align-items: center; gap: 6px; border: 1.5px solid var(--line); background: var(--surface); color: var(--ink); border-radius: 10px; padding: 6px 12px; font-size: 14px; font-weight: 600; white-space: nowrap; }
+.chip.on, .chip[aria-pressed="true"] { background: var(--primary-soft); border-color: var(--primary-soft); color: var(--primary-ink); }
+.chip svg { width: 15px; height: 15px; }
+.opts { display: flex; flex-wrap: wrap; gap: 8px; }
+.opt { border: 1.5px solid var(--line); background: var(--surface); color: var(--ink); border-radius: 10px; padding: 8px 14px; font-weight: 600; font-size: 14.5px; }
+.opt[aria-pressed="true"] { background: var(--primary); border-color: var(--primary); color: #fff; }
+.field { display: grid; gap: 5px; }
+.field > label, .field > .label { font-size: 13.5px; font-weight: 700; color: var(--ink-2); }
+.field input, .field select, .field textarea { width: 100%; border: 0; border-bottom: 1.5px solid var(--line); background: transparent; border-radius: 0; padding: 9px 2px; font-size: 16px; }
+.field input:focus, .field select:focus, .field textarea:focus { outline: none; border-bottom-color: var(--primary); }
+.field textarea { min-height: 70px; resize: vertical; line-height: 1.5; }
+.field .err { color: var(--nope); font-size: 12.5px; }
+.field.bad input, .field.bad select { border-bottom-color: var(--nope); }
+.row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.row3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; }
+.note { font-size: 13px; color: var(--ink-2); background: var(--surface-2); border-radius: 12px; padding: 10px 12px; }
+.fine { font-size: 13px; color: var(--ink-2); text-align: center; margin: 10px 0 0; }
+.linkish { border: 0; background: none; color: var(--primary-ink); text-decoration: underline; text-underline-offset: 3px; font-weight: 700; padding: 4px 0; }
+
+/* ——— ערימה ——— */
+.filter-row { padding-top: 0; }
+.filter-row .chip { font-size: 13px; padding: 4px 10px; }
+.deck { position: relative; flex: 1; min-height: 0; margin: 4px 16px 0; }
+.card { position: absolute; inset: 0; border-radius: 22px; overflow: hidden; background: #C8D3DD; box-shadow: 0 14px 30px rgba(30, 42, 56, .18); touch-action: none; user-select: none; -webkit-user-select: none; will-change: transform; }
+.card.under { transform: scale(.955) translateY(12px); box-shadow: 0 6px 16px rgba(30, 42, 56, .1); }
+.card.fly { transition: transform .3s cubic-bezier(.3, .6, .4, 1), opacity .3s; }
+.card.snap { transition: transform .2s ease; }
+.photo, .photo svg, .photo img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; display: block; }
+.bars { position: absolute; top: 10px; left: 12px; right: 12px; display: flex; gap: 4px; direction: ltr; z-index: 2; }
+.bar { flex: 1; height: 3px; border-radius: 3px; background: rgba(255, 255, 255, .45); }
+.bar.on { background: #fff; }
+.card-tags { position: absolute; top: 22px; right: 12px; left: 12px; display: flex; gap: 6px; flex-wrap: wrap; z-index: 2; }
+.ex-tag, .mine-tag, .star-tag { font-size: 11.5px; font-weight: 700; border-radius: 8px; padding: 3px 8px; color: #fff; background: rgba(30, 42, 56, .6); backdrop-filter: blur(4px); }
+.mine-tag { background: var(--like); }
+.star-tag { background: var(--star); }
+.info { position: absolute; left: 0; right: 0; bottom: 0; z-index: 2; padding: 90px 18px 16px; color: #fff; background: linear-gradient(to top, rgba(18, 26, 36, .92), rgba(18, 26, 36, .55) 60%, rgba(18, 26, 36, 0)); }
+.info .title { font-size: 23px; font-weight: 800; line-height: 1.2; text-wrap: balance; }
+.loc { display: flex; align-items: center; gap: 4px; font-size: 14.5px; opacity: .9; margin-top: 4px; }
+.loc svg { width: 15px; height: 15px; flex: none; }
+.specs-row { display: flex; align-items: center; justify-content: space-between; margin-top: 10px; }
+.price { font-size: 24px; font-weight: 800; font-variant-numeric: tabular-nums; }
+.specs { display: flex; gap: 12px; font-size: 14.5px; font-weight: 600; font-variant-numeric: tabular-nums; }
+.specs span { display: inline-flex; align-items: center; gap: 4px; }
+.specs svg { width: 17px; height: 17px; opacity: .9; }
+.info .desc { font-size: 13.5px; opacity: .85; margin-top: 8px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.stamp { position: absolute; top: 70px; z-index: 3; opacity: 0; pointer-events: none; font-size: 26px; font-weight: 800; padding: 4px 14px; border-radius: 12px; border: 3px solid; background: rgba(255, 255, 255, .92); }
+.stamp-like { left: 20px; color: var(--like); transform: rotate(-12deg); }
+.stamp-nope { right: 20px; color: var(--nope); transform: rotate(12deg); }
+.stamp-star { left: 50%; top: auto; bottom: 46%; color: var(--star); transform: translateX(-50%); }
+.actions { direction: ltr; display: flex; justify-content: center; align-items: center; gap: 26px; padding: 14px 0 14px; }
+.rb { display: grid; place-items: center; width: 62px; height: 62px; border-radius: 50%; border: 0; background: var(--surface); box-shadow: 0 6px 16px rgba(30, 42, 56, .14); padding: 0; }
+.rb svg { width: 28px; height: 28px; }
+.rb-nope { color: var(--nope); }
+.rb-star { color: var(--star); width: 56px; height: 56px; }
+.rb-like { color: var(--like); }
+.rb:active { transform: scale(.94); }
+
+/* ——— הודעות ——— */
+.toast { position: absolute; left: 12px; right: 12px; bottom: 84px; z-index: 40; background: var(--night); color: #fff; border-radius: 10px; padding: 11px 14px; font-size: 14.5px; font-weight: 600; opacity: 0; transform: translateY(12px); pointer-events: none; transition: opacity .2s, transform .2s; }
+.toast.show { opacity: 1; transform: none; }
+.toast.ok { background: var(--like); }
+.banner { position: absolute; top: 10px; left: 12px; right: 12px; z-index: 45; display: flex; align-items: center; gap: 12px; padding: 10px 12px; background: var(--surface); border: 0; border-radius: 16px; box-shadow: 0 12px 30px rgba(30, 42, 56, .22); transform: translateY(-140%); transition: transform .3s ease; text-align: right; }
+.banner.show { transform: none; }
+.banner .mini-sign { flex: none; width: 38px; height: 38px; border-radius: 50%; background: var(--like-soft); color: var(--like); display: grid; place-items: center; font-weight: 800; font-size: 14px; }
+.banner b { display: block; font-size: 15px; }
+.banner span { font-size: 13.5px; color: var(--ink-2); }
+
+/* ——— גיליון ——— */
+.sheet { position: absolute; inset: 0; z-index: 50; display: flex; flex-direction: column; justify-content: flex-end; }
+.sheet-back { position: absolute; inset: 0; background: rgba(30, 42, 56, .42); border: 0; width: 100%; }
+.sheet-body { position: relative; max-height: 90%; overflow-y: auto; background: var(--surface); border-radius: 24px 24px 0 0; padding: 10px 18px 22px; animation: up .25s ease; }
+@keyframes up { from { transform: translateY(40px); opacity: .6; } to { transform: none; opacity: 1; } }
+.sheet-grip { width: 40px; height: 4px; border-radius: 4px; background: var(--line); margin: 0 auto 12px; }
+.sheet h3 { margin: 2px 0 2px; font-size: 20px; font-weight: 800; }
+.sheet .sub { color: var(--ink-2); font-size: 14px; margin: 0 0 12px; }
+.sheet-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; }
+.sheet-head h3 { display: flex; align-items: center; gap: 6px; }
+.sheet-head svg { width: 20px; height: 20px; color: var(--primary); }
+.q { margin-top: 16px; }
+.q-label { display: block; font-weight: 700; font-size: 14.5px; margin-bottom: 8px; }
+.range-pair { display: grid; gap: 4px; }
+.range { width: 100%; accent-color: var(--primary); height: 28px; margin: 0; }
+.range-out { font-weight: 700; font-variant-numeric: tabular-nums; color: var(--primary-ink); }
+.search { display: flex; align-items: center; gap: 8px; border: 1.5px solid var(--line); border-radius: 12px; padding: 0 12px; background: var(--surface); }
+.search input { flex: 1; border: 0; padding: 11px 0; font-size: 15.5px; background: transparent; min-width: 0; }
+.search input:focus { outline: none; }
+.search svg { width: 18px; height: 18px; color: var(--ink-2); }
+.sheet-photo { position: relative; height: 200px; border-radius: 16px; overflow: hidden; margin-bottom: 12px; }
+.detail-price { display: flex; justify-content: space-between; align-items: center; margin: 8px 0; }
+.detail-price .price { color: var(--ink); }
+.detail-price .specs { color: var(--ink-2); }
+.kv { display: grid; grid-template-columns: auto 1fr; gap: 7px 14px; margin: 10px 0; font-size: 15px; }
+.kv dt { color: var(--ink-2); }
+.kv dd { margin: 0; font-weight: 600; font-variant-numeric: tabular-nums; }
+.feat-list { display: flex; flex-wrap: wrap; gap: 6px; margin: 10px 0 12px; }
+.feat-list span { font-size: 13.5px; border-radius: 8px; padding: 4px 10px; background: var(--primary-soft); color: var(--primary-ink); font-weight: 600; }
+.sec-title { font-weight: 800; font-size: 15px; margin: 16px 0 4px; }
+.sent { text-align: center; font-weight: 700; color: var(--like); padding: 10px; background: var(--like-soft); border-radius: 12px; }
+
+/* ——— מסך ריק ——— */
+.empty { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 20px 28px; gap: 10px; }
+.empty .big { width: 72px; height: 72px; border-radius: 50%; background: var(--primary-soft); color: var(--primary); display: grid; place-items: center; }
+.empty .big svg { width: 34px; height: 34px; }
+.empty h2 { margin: 6px 0 0; font-size: 20px; }
+.empty p { margin: 0 0 8px; color: var(--ink-2); max-width: 30ch; }
+.empty .btn-row { width: 100%; max-width: 300px; }
+
+/* ——— אהבתי ——— */
+.fav-list { display: grid; gap: 10px; padding: 6px 14px 20px; }
+.fav { display: flex; align-items: center; gap: 12px; background: var(--surface); border-radius: 16px; padding: 10px; border: 0; width: 100%; text-align: right; box-shadow: 0 2px 8px rgba(30, 42, 56, .06); }
+.fav .thumb { position: relative; flex: none; width: 88px; height: 72px; border-radius: 12px; overflow: hidden; }
+.fav .main { flex: 1; min-width: 0; }
+.fav .main b { display: block; font-size: 15.5px; line-height: 1.3; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.fav .main .p { color: var(--primary-ink); font-weight: 800; font-size: 15px; }
+.fav .main small { display: block; color: var(--ink-2); font-size: 13px; }
+.fav .side { flex: none; display: grid; justify-items: center; gap: 6px; }
+.fav .side svg { width: 20px; height: 20px; color: var(--nope); }
+.state { font-size: 11.5px; font-weight: 700; border-radius: 999px; padding: 3px 9px; background: var(--surface-2); color: var(--ink-2); white-space: nowrap; }
+.state.wait { background: #FFF4DB; color: #93650A; }
+.state.ok { background: var(--like-soft); color: var(--like); }
+.state.star { background: #E3EDFD; color: var(--star); }
+
+/* ——— קטגוריות ——— */
+.cat-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; padding: 6px 14px 20px; }
+.cat { position: relative; height: 150px; border-radius: 18px; overflow: hidden; border: 0; padding: 0; background: #C8D3DD; box-shadow: 0 4px 12px rgba(30, 42, 56, .1); }
+.cat::after { content: ""; position: absolute; inset: 0; background: linear-gradient(to top, rgba(18, 26, 36, .75), rgba(18, 26, 36, 0) 60%); }
+.cat .label { position: absolute; right: 12px; bottom: 10px; z-index: 2; color: #fff; font-weight: 800; font-size: 17px; text-align: right; }
+.cat .label small { display: block; font-weight: 600; font-size: 12px; opacity: .85; }
+.cat .badge2 { position: absolute; left: 10px; top: 10px; z-index: 2; width: 34px; height: 34px; border-radius: 10px; background: rgba(255, 255, 255, .9); display: grid; place-items: center; font-size: 18px; }
+
+/* ——— עוזר AI ——— */
+.msgs { flex: 1; overflow-y: auto; padding: 14px 12px; display: flex; flex-direction: column; gap: 8px; }
+.msg { max-width: 84%; padding: 9px 13px; border-radius: 16px; font-size: 15.5px; line-height: 1.45; }
+.msg.me { align-self: flex-start; background: var(--primary); color: #fff; border-bottom-right-radius: 4px; }
+.msg.them, .msg.bot { align-self: flex-end; background: var(--surface); border-bottom-left-radius: 4px; box-shadow: 0 1px 2px rgba(30, 42, 56, .08); }
+.msg.sys { align-self: center; max-width: 92%; background: transparent; color: var(--ink-2); font-size: 12.5px; text-align: center; padding: 2px 8px; }
+.ai-results { align-self: stretch; display: grid; gap: 10px; }
+.ai-results .head { display: flex; align-items: center; gap: 6px; font-weight: 700; font-size: 14px; color: var(--ink-2); }
+.ai-card { background: var(--surface); border-radius: 16px; overflow: hidden; box-shadow: 0 2px 8px rgba(30, 42, 56, .08); }
+.ai-card .pic { position: relative; height: 130px; }
+.ai-card .body { padding: 10px 12px 12px; }
+.ai-card b { display: block; font-size: 15.5px; }
+.ai-card .meta { display: flex; justify-content: space-between; color: var(--ink-2); font-size: 13.5px; margin: 2px 0 8px; }
+.ai-card .meta .p { color: var(--ink); font-weight: 800; }
+.ai-card .two-btn .btn-primary, .ai-card .two-btn .btn-ghost { padding: 9px 10px; font-size: 14.5px; border-radius: 10px; }
+.typing { align-self: flex-end; display: flex; gap: 4px; padding: 12px 14px; background: var(--surface); border-radius: 16px; }
+.typing i { width: 6px; height: 6px; border-radius: 50%; background: var(--ink-2); animation: blink 1s infinite; }
+.typing i:nth-child(2) { animation-delay: .15s; }
+.typing i:nth-child(3) { animation-delay: .3s; }
+@keyframes blink { 0%, 80%, 100% { opacity: .25; } 40% { opacity: 1; } }
+.composer { display: flex; gap: 8px; padding: 10px 12px; background: var(--surface); border-top: 1px solid var(--line); }
+.composer input { flex: 1; min-width: 0; border: 1.5px solid var(--line); border-radius: 999px; padding: 11px 16px; font-size: 16px; background: var(--surface-2); }
+.composer button { flex: none; width: 46px; height: 46px; border-radius: 50%; border: 0; background: var(--primary); color: #fff; display: grid; place-items: center; }
+.composer button svg { width: 20px; height: 20px; transform: scaleX(-1); }
+.chat-top { display: flex; align-items: center; gap: 12px; padding: 10px 12px; background: var(--surface); border-bottom: 1px solid var(--line); }
+.chat-top .icon-btn { flex: none; }
+.avatar { flex: none; width: 42px; height: 42px; border-radius: 50%; background: var(--primary); color: #fff; display: grid; place-items: center; font-weight: 700; }
+.chat-top b { display: block; font-size: 16px; }
+.chat-top span { font-size: 13px; color: var(--ink-2); }
+.after-chat { align-self: stretch; margin-top: 10px; display: grid; gap: 8px; }
+
+/* ——— התאמה ——— */
+.match { background: linear-gradient(170deg, #5B7FA6 0%, #3F5F82 55%, #2D4561 100%); color: #fff; padding: 26px 22px 24px; }
+.match-center { text-align: center; }
+.match .hello { display: inline-flex; align-items: center; gap: 8px; background: rgba(255, 255, 255, .16); border-radius: 999px; padding: 6px 14px; font-weight: 800; font-size: 15px; }
+.match .hello svg { width: 18px; height: 18px; color: #7EE0A0; }
+.match h1 { font-size: 34px; margin: 14px 0 0; font-weight: 800; }
+.match-art { position: relative; width: 168px; height: 168px; margin: 20px auto 0; border-radius: 50%; overflow: hidden; border: 6px solid #fff; box-shadow: 0 16px 40px rgba(0, 0, 0, .3); }
+.match h2 { font-size: 20px; margin: 16px 0 2px; font-weight: 700; text-wrap: balance; }
+.match .sub { color: rgba(255, 255, 255, .8); margin: 0; }
+.reveal { list-style: none; margin: 18px 0; padding: 14px 16px; background: rgba(255, 255, 255, .1); border-radius: 16px; display: grid; gap: 8px; font-size: 15px; }
+.reveal li { display: flex; gap: 10px; }
+.reveal li b { flex: none; min-width: 96px; color: #BFE3FF; font-weight: 700; }
+.match .btn-primary { background: #fff; color: var(--primary-ink); }
+.match .btn-ghost { background: transparent; color: #fff; border-color: rgba(255, 255, 255, .35); }
+
+/* ——— פרטים אחרי התאמה ——— */
+.form { padding: 4px 18px 24px; display: grid; gap: 14px; }
+.form h2 { margin: 4px 0 0; font-size: 22px; }
+.form .sub { margin: 0; color: var(--ink-2); font-size: 14.5px; }
+
+/* ——— פרסום דירה ——— */
+.stepper { padding: 6px 16px 24px; }
+.step { position: relative; padding-right: 40px; }
+.step::before { content: ""; position: absolute; right: 13px; top: 30px; bottom: 0; width: 2px; background: var(--line); }
+.step:last-child::before { display: none; }
+.step-head { display: flex; align-items: center; gap: 10px; min-height: 44px; border: 0; background: none; width: 100%; padding: 0; text-align: right; font-weight: 700; font-size: 16px; color: var(--ink); }
+.step-num { position: absolute; right: 0; top: 8px; width: 28px; height: 28px; border-radius: 50%; background: #AEBBCA; color: #fff; display: grid; place-items: center; font-size: 13.5px; font-weight: 800; }
+.step.on .step-num, .step.done .step-num { background: var(--primary); }
+.step.done .step-num svg { width: 15px; height: 15px; }
+.step-body { display: grid; gap: 14px; padding: 4px 0 18px; }
+.sub-h { display: flex; align-items: center; justify-content: space-between; font-weight: 800; font-size: 14px; color: var(--ink); margin-top: 4px; }
+.with-ai { position: relative; }
+.with-ai input, .with-ai textarea { padding-left: 38px; }
+.ai-btn { position: absolute; left: 0; top: 24px; width: 34px; height: 34px; border: 0; border-radius: 50%; background: var(--primary-soft); color: var(--primary-ink); display: grid; place-items: center; }
+.ai-btn svg { width: 18px; height: 18px; }
+.ai-btn.busy svg { animation: spin 1s linear infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
+.yn-row { display: flex; align-items: center; justify-content: space-between; gap: 10px; font-size: 15px; }
+.yn { display: flex; gap: 6px; direction: ltr; }
+.yn button { min-width: 48px; border: 1.5px solid var(--line); background: var(--surface); border-radius: 10px; padding: 6px 10px; font-weight: 700; }
+.yn button[aria-pressed="true"] { background: var(--primary); border-color: var(--primary); color: #fff; }
+.step-actions { display: grid; grid-template-columns: 1.4fr 1fr; gap: 10px; }
+.media-add { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+.media-add .btn-primary { width: auto; padding: 9px 14px; font-size: 14.5px; }
+.thumbs { display: flex; gap: 8px; flex-wrap: wrap; }
+.thumbs img { width: 76px; height: 76px; object-fit: cover; border-radius: 12px; }
+.thumbs .count { font-size: 12.5px; color: var(--ink-2); }
+
+/* ——— צד בעל הדירה ——— */
+.list { display: grid; gap: 1px; background: var(--line); border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); }
+.li { display: flex; align-items: center; gap: 12px; padding: 12px 16px; background: var(--surface); border: 0; width: 100%; text-align: right; }
+.li-thumb { position: relative; flex: none; width: 56px; height: 56px; border-radius: 12px; overflow: hidden; }
+.li-main { flex: 1; min-width: 0; }
+.li-main b { display: block; font-size: 15.5px; }
+.li-main span { font-size: 13.5px; color: var(--ink-2); }
+.sect-h { display: flex; justify-content: space-between; align-items: baseline; padding: 16px 16px 6px; }
+.sect-h h2 { margin: 0; font-size: 18px; }
+.sect-h span { font-size: 13px; color: var(--ink-2); }
+.owner-apt { display: flex; gap: 12px; align-items: center; margin: 6px 16px 0; padding: 12px; background: var(--surface); border-radius: 18px; }
+.owner-apt .li-thumb { width: 72px; height: 72px; }
+.owner-apt b { display: block; font-size: 16px; }
+.owner-apt span { font-size: 13.5px; color: var(--ink-2); }
+.rule { margin: 8px 16px 0; font-size: 13px; color: var(--ink-2); }
+.req { display: grid; grid-template-columns: 1fr auto; gap: 4px 12px; align-items: center; padding: 14px 16px; background: var(--surface); border: 0; width: 100%; text-align: right; }
+.req-name { font-weight: 700; font-size: 16px; }
+.req-name small { font-weight: 400; color: var(--ink-2); font-size: 12.5px; margin-right: 6px; }
+.req-meta { grid-column: 1 / -1; display: flex; flex-wrap: wrap; gap: 4px 14px; font-size: 13.5px; color: var(--ink-2); font-variant-numeric: tabular-nums; }
+.req-meta .yes { color: var(--like); font-weight: 700; }
+.req-meta .no { color: var(--nope); font-weight: 700; }
+.fit-tag { font-size: 12.5px; font-weight: 700; border-radius: 999px; padding: 4px 10px; }
+.fit { background: var(--like-soft); color: var(--like); }
+.unfit { background: var(--surface-2); color: var(--ink-2); }
+.req.decided { opacity: .55; }
+.anon { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin: 12px 0; }
+.anon div { background: var(--surface-2); border-radius: 14px; padding: 12px 8px; text-align: center; }
+.anon b { display: block; font-size: 22px; font-weight: 800; font-variant-numeric: tabular-nums; }
+.anon span { font-size: 12.5px; color: var(--ink-2); }
+.hidden-list { font-size: 13.5px; color: var(--ink-2); margin: 0 0 14px; }
+.pill-demo { font-size: 11px; font-weight: 700; color: var(--ink-2); background: var(--surface-2); border-radius: 999px; padding: 3px 8px; }
+
+/* ——— סיור ויומן ——— */
+.tour { position: absolute; inset: 0; z-index: 60; background: #000; color: #fff; display: flex; flex-direction: column; }
+.tour-stage { position: relative; flex: 1; overflow: hidden; }
+.tour-stage .photo { animation: kb 3.2s ease-in-out both; }
+@keyframes kb { from { transform: scale(1.02); } to { transform: scale(1.14) translateX(-12px); } }
+.tour .bars { top: 14px; }
+.tour-top { position: absolute; top: 26px; left: 14px; right: 14px; display: flex; justify-content: space-between; align-items: center; z-index: 3; }
+.tour-top span { font-size: 13px; background: rgba(0, 0, 0, .45); border-radius: 999px; padding: 4px 10px; }
+.tour-top button { border: 0; background: rgba(0, 0, 0, .45); color: #fff; width: 40px; height: 40px; border-radius: 50%; display: grid; place-items: center; }
+.log { padding: 16px; font-size: 14px; }
+.log table { width: 100%; border-collapse: collapse; font-variant-numeric: tabular-nums; }
+.log td, .log th { text-align: right; padding: 6px 4px; border-bottom: 1px solid var(--line); }
+.stat-row { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; margin: 12px 0; }
+.stat-row div { background: var(--surface); border-radius: 14px; padding: 12px; }
+.stat-row b { display: block; font-size: 28px; font-weight: 800; }
+.top { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 12px 16px 4px; }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation: none !important; transition: none !important; }
+}
+
+</style>
+</head>
+<body>
+<aside class="aside">
+  <b>דמו · נפתח הכי טוב בטלפון</b>
+  כל הדירות והמחפשים כאן לדוגמה. שום דבר לא נשלח לאף אחד.
+</aside>
+<div id="app" aria-live="polite"></div>
+<noscript>הדמו צריך JavaScript כדי לעבוד.</noscript>
+<script>
+/*
+ * נתוני הדמו.
+ * כל הדירות והמחפשים כאן הם דוגמאות.
+ *
+ * כדי להחליף דירה לדוגמה בדירה אמיתית:
+ * 1. משנים את השדות שלה (רחוב, מחיר, חדרים...).
+ * 2. ממלאים photos בכתובות של תמונות שיש רשות להשתמש בהן. כשיש photos, האיור לא מוצג.
+ * 3. משנים example ל-false, והתווית «דירה לדוגמה» נעלמת מהכרטיס.
+ */
+window.DEMO = {
+  today: '2026-09-10',
+
+  areas: [
+    { id: 'haifa', label: 'חיפה' },
+    { id: 'krayot', label: 'הקריות' },
+    { id: 'all', label: 'כל האזור' }
+  ],
+
+  entryChoices: [
+    { id: 'now', label: 'מיידי', days: 14 },
+    { id: 'month', label: 'תוך חודש', days: 35 },
+    { id: 'quarter', label: '1–3 חודשים', days: 95 },
+    { id: 'flex', label: 'גמיש', days: 365 }
+  ],
+
+  apartments: [
+    { id: 'a1', example: true, area: 'haifa', city: 'חיפה', hood: 'כרמל מרכזי', street: 'שדרות מוריה', houseNo: 12,
+      rooms: 3.5, sqm: 85, floor: 3, floors: 5, rent: 5200, entry: '2026-10-15',
+      features: ['מרפסת', 'מעלית', 'ממ"ד', 'מזגנים'],
+      desc: 'מרפסת שמש עם נוף למפרץ. חמש דקות הליכה ממרכז הכרמל.',
+      by: { name: 'רונית', g: 'f', role: 'בעלת הדירה' },
+      pal: 'sea', scenes: ['balcony', 'living', 'kitchen', 'bedroom'], tour: true, photos: [] },
+
+    { id: 'a2', example: true, area: 'haifa', city: 'חיפה', hood: 'נווה שאנן', street: 'רחוב טרומפלדור', houseNo: 41,
+      rooms: 3, sqm: 70, floor: 2, floors: 4, rent: 4300, entry: '2026-10-01',
+      features: ['מרפסת', 'מזגנים', 'חיות מחמד'],
+      desc: 'בניין קטן ושקט, קרוב לטכניון ולתחבורה ציבורית.',
+      by: { name: 'אבי', g: 'm', role: 'בעל הדירה' },
+      pal: 'sand', scenes: ['living', 'bedroom', 'kitchen'], photos: [] },
+
+    { id: 'a3', example: true, area: 'haifa', city: 'חיפה', hood: 'הדר', street: 'רחוב מסדה', houseNo: 18,
+      rooms: 2.5, sqm: 60, floor: 1, floors: 3, rent: 3600, entry: '2026-09-20',
+      features: ['משופצת', 'מזגנים'],
+      desc: 'בניין באוהאוס משופץ, תקרות גבוהות וחלונות גדולים.',
+      by: { name: 'ליאור', g: 'm', role: 'מתווך' },
+      pal: 'bauhaus', scenes: ['living', 'kitchen', 'bedroom'], photos: [] },
+
+    { id: 'a4', example: true, area: 'haifa', city: 'חיפה', hood: 'אחוזה', street: 'רחוב חורב', houseNo: 7,
+      rooms: 4, sqm: 100, floor: 4, floors: 6, rent: 6400, entry: '2026-11-01',
+      features: ['מרפסת', 'חניה', 'מעלית', 'ממ"ד', 'מחסן'],
+      desc: 'דירה מרווחת עם מרפסת סוכה, חניה צמודה ומחסן.',
+      by: { name: 'ליאור', g: 'm', role: 'מתווך' },
+      pal: 'pine', scenes: ['living', 'balcony', 'kitchen', 'bedroom'], photos: [] },
+
+    { id: 'a5', example: true, area: 'krayot', city: 'קריית מוצקין', hood: 'מרכז', street: 'שדרות בן גוריון', houseNo: 60,
+      rooms: 4, sqm: 95, floor: 2, floors: 4, rent: 5400, entry: '2026-10-20',
+      features: ['מרפסת', 'חניה', 'ממ"ד', 'מזגנים'],
+      desc: 'ליד הקניון ובתי הספר. מרפסת גדולה שפונה מערבה.',
+      by: { name: 'מירב', g: 'f', role: 'בעלת הדירה' },
+      pal: 'rose', scenes: ['living', 'kitchen', 'bedroom', 'balcony'], photos: [] },
+
+    { id: 'a6', example: true, area: 'haifa', city: 'חיפה', hood: 'כרמל צרפתי', street: 'רחוב יפה נוף', houseNo: 33,
+      rooms: 3, sqm: 75, floor: 5, floors: 8, rent: 5900, entry: '2026-10-01',
+      features: ['נוף לים', 'מעלית', 'מרפסת', 'מזגנים'],
+      desc: 'נוף פתוח לים מכל חלונות הסלון.',
+      by: { name: 'ליאור', g: 'm', role: 'מתווך' },
+      pal: 'sea', scenes: ['balcony', 'living', 'bedroom'], photos: [] },
+
+    { id: 'a7', example: true, area: 'krayot', city: 'קריית ביאליק', hood: 'מרכז', street: "רחוב ז'בוטינסקי", houseNo: 22,
+      rooms: 3.5, sqm: 82, floor: 1, floors: 3, rent: 4700, entry: '2026-11-15',
+      features: ['חניה', 'ממ"ד', 'חיות מחמד', 'מזגנים'],
+      desc: 'קומה ראשונה בלי מדרגות רבות, מתאימה גם עם כלב.',
+      by: { name: 'יוסי', g: 'm', role: 'בעל הדירה' },
+      pal: 'sand', scenes: ['living', 'kitchen', 'bedroom'], photos: [] },
+
+    { id: 'a8', example: true, area: 'haifa', city: 'חיפה', hood: 'רמת אלמוגי', street: 'רחוב אינשטיין', houseNo: 90,
+      rooms: 3, sqm: 72, floor: 3, floors: 4, rent: 4900, entry: '2026-10-10',
+      features: ['מרפסת', 'משופצת', 'מרוהטת'],
+      desc: 'משופצת מהיסוד ומרוהטת, אפשר להיכנס עם מזוודה.',
+      by: { name: 'דנה', g: 'f', role: 'בעלת הדירה' },
+      pal: 'slate', scenes: ['living', 'bedroom', 'kitchen'], photos: [] },
+
+    { id: 'a9', example: true, area: 'haifa', city: 'חיפה', hood: 'הדר', street: 'רחוב הרצל', houseNo: 55,
+      rooms: 2, sqm: 50, floor: 2, floors: 3, rent: 3300, entry: '2026-09-25',
+      features: ['מרוהטת', 'מזגנים'],
+      desc: 'קרוב לרכבת התחתית ולשוק תלפיות.',
+      by: { name: 'ליאור', g: 'm', role: 'מתווך' },
+      pal: 'bauhaus', scenes: ['bedroom', 'living', 'kitchen'], photos: [] },
+
+    { id: 'a10', example: true, area: 'krayot', city: 'קריית אתא', hood: 'מרכז', street: 'רחוב העצמאות', houseNo: 14,
+      rooms: 4, sqm: 98, floor: 3, floors: 5, rent: 4800, entry: '2026-12-01',
+      features: ['חניה', 'מעלית', 'ממ"ד', 'מחסן'],
+      desc: 'בניין חדש יחסית, חניה בטאבו ומחסן בקומת הכניסה.',
+      by: { name: 'חיים', g: 'm', role: 'בעל הדירה' },
+      pal: 'pine', scenes: ['living', 'kitchen', 'bedroom'], photos: [] },
+
+    { id: 'a11', example: true, area: 'haifa', city: 'חיפה', hood: 'כרמל מרכזי', street: 'שדרות הנשיא', houseNo: 101,
+      rooms: 2.5, sqm: 58, floor: 4, floors: 4, rent: 4600, entry: '2026-10-05',
+      features: ['נוף לים', 'מרפסת', 'מרוהטת'],
+      desc: 'קומה אחרונה, מרפסת קטנה עם שקיעה מעל המפרץ.',
+      by: { name: 'שירה', g: 'f', role: 'בעלת הדירה' },
+      pal: 'rose', scenes: ['balcony', 'living', 'bedroom'], photos: [] },
+
+    { id: 'a12', example: true, area: 'haifa', city: 'חיפה', hood: 'הדר עליון', street: 'רחוב פבזנר', houseNo: 28,
+      rooms: 3, sqm: 78, floor: 2, floors: 4, rent: 4200, entry: '2026-10-15',
+      features: ['מרפסת', 'מזגנים', 'חיות מחמד'],
+      desc: 'רחוב ירוק ושקט, חמש דקות מגן הזיכרון.',
+      by: { name: 'עומר', g: 'm', role: 'בעל הדירה' },
+      pal: 'sand', scenes: ['living', 'balcony', 'kitchen'], photos: [] },
+
+    { id: 'a13', example: true, area: 'krayot', city: 'קריית מוצקין', hood: 'מרכז', street: 'רחוב ויצמן', houseNo: 35,
+      rooms: 3.5, sqm: 88, floor: 0, floors: 3, rent: 5000, entry: '2026-11-01',
+      features: ['גינה', 'חניה', 'ממ"ד'],
+      desc: 'דירת גן עם חצר פרטית. מתאימה למי שיש לו ילדים או כלב.',
+      by: { name: 'מירב', g: 'f', role: 'בעלת הדירה' },
+      pal: 'pine', scenes: ['living', 'kitchen', 'bedroom', 'balcony'], photos: [] },
+
+    { id: 'a14', example: true, area: 'haifa', city: 'חיפה', hood: 'אחוזה', street: 'שדרות אבא חושי', houseNo: 150,
+      rooms: 5, sqm: 120, floor: 6, floors: 9, rent: 7200, entry: '2026-11-10',
+      features: ['נוף לים', 'חניה', 'מעלית', 'ממ"ד', 'מרפסת', 'מחסן'],
+      desc: 'חמישה חדרים, שתי חניות ומרפסת לכל אורך הדירה.',
+      by: { name: 'ליאור', g: 'm', role: 'מתווך' },
+      pal: 'slate', scenes: ['living', 'balcony', 'kitchen', 'bedroom'], photos: [] },
+
+    { id: 'a15', example: true, area: 'haifa', city: 'חיפה', hood: 'נווה שאנן', street: 'רחוב טרומפלדור', houseNo: 12,
+      rooms: 4, sqm: 92, floor: 1, floors: 4, rent: 6000, entry: '2026-10-20',
+      features: ['מרפסת', 'חניה', 'ממ"ד', 'חיות מחמד'],
+      desc: 'ארבעה חדרים ליד פארק, מתאימה למשפחה.',
+      by: { name: 'אבי', g: 'm', role: 'בעל הדירה' },
+      pal: 'rose', scenes: ['living', 'bedroom', 'kitchen'], photos: [] }
+  ],
+
+  /* הדירה שמוצגת בקישור של בעלי הדירות */
+  ownerApt: {
+    id: 'mine', example: true, area: 'haifa', city: 'חיפה', hood: 'כרמל מרכזי', street: 'שדרות מוריה', houseNo: 38,
+    rooms: 4, sqm: 95, floor: 2, floors: 5, rent: 5200, entry: '2026-11-01',
+    features: ['מרפסת', 'מעלית', 'ממ"ד'], pal: 'pine', scenes: ['living'], photos: []
+  },
+
+  /* מחפשים מזויפים בלבד. לעולם לא אנשים אמיתיים — אחרי התאמה נחשף מקור ההכנסה שלהם */
+  seekers: [
+    { id: 's1', first: 'נועה', last: 'ברק', g: 'f', occupants: 2, payMin: 5000, payMax: 5600, entry: '2026-11-01', arrived: '08:12',
+      income: 'שכירה · מעצבת UX', extra: 'אין', about: 'זוג צעיר בלי חיות. עובדים מהבית יומיים בשבוע.' },
+    { id: 's2', first: 'אורי', last: 'לוי', g: 'm', occupants: 1, payMin: 4200, payMax: 4800, entry: '2026-11-15', arrived: '08:47',
+      income: 'סטודנט לתואר שני', extra: 'מלגה, 2,000 ₪ בחודש', about: 'לומד בטכניון, מחפש שקט לכתיבת תזה.' },
+    { id: 's3', first: 'מאיה', last: 'שחר', g: 'f', occupants: 4, payMin: 5200, payMax: 6000, entry: '2026-11-20', arrived: '09:30',
+      income: 'שכירה · אחות', extra: 'קצבת ילדים', about: 'משפחה עם שני ילדים. מחפשים שכונה שקטה ליד בית ספר.' },
+    { id: 's4', first: 'איתי', last: 'מזרחי', g: 'm', occupants: 2, payMin: 5500, payMax: 6500, entry: '2027-01-01', arrived: '10:05',
+      income: 'עצמאי · הנדסאי חשמל', extra: 'אין', about: 'עוברים מתל אביב בעקבות עבודה חדשה.' },
+    { id: 's5', first: 'דניאל', last: 'אברהם', g: 'm', occupants: 3, payMin: 4900, payMax: 5300, entry: '2026-10-10', arrived: '11:20',
+      income: 'שכיר · מנהל מחסן', extra: 'עבודה בסופי שבוע, 1,200 ₪', about: 'זוג ותינוקת. גרים באזור שש שנים.' },
+    { id: 's6', first: 'שירן', last: 'כהן', g: 'f', occupants: 1, payMin: 4500, payMax: 5000, entry: '2026-11-05', arrived: '12:02',
+      income: 'עבודה חלקית', extra: 'קצבה', about: 'גרה לבד, בלי חיות, לא מעשנת.' }
+  ]
+};
+
+/* ——— פרטים שנוספו בעקבות האב-טיפוס של ניר ——— */
+(function (D) {
+  const X = {
+    a1:  { title: 'דירת 3.5 חדרים עם מרפסת שמש ונוף למפרץ', beds: 2, baths: 1, type: 'דירה', cond: 'שמורה מאוד', vaad: 180, arnona: 780, contract: 12, guarantee: 10400, guarantors: false, partners: false, smoking: false },
+    a2:  { title: 'דירת 3 חדרים שקטה ליד הטכניון', beds: 2, baths: 1, type: 'דירה', cond: 'במצב טוב', vaad: 120, arnona: 620, contract: 12, guarantee: 0, guarantors: true, partners: true, smoking: false },
+    a3:  { title: '2.5 חדרים משופצת בבניין באוהאוס', beds: 1, baths: 1, type: 'דירה', cond: 'משופצת', vaad: 90, arnona: 480, contract: 12, guarantee: 0, guarantors: true, partners: false, smoking: true },
+    a4:  { title: '4 חדרים מרווחת עם מרפסת סוכה וחניה', beds: 3, baths: 2, type: 'דירה', cond: 'שמורה מאוד', vaad: 250, arnona: 980, contract: 24, guarantee: 12800, guarantors: false, partners: false, smoking: false },
+    a5:  { title: '4 חדרים עם מרפסת גדולה ליד הקניון', beds: 3, baths: 2, type: 'דירה', cond: 'במצב טוב', vaad: 150, arnona: 820, contract: 12, guarantee: 10800, guarantors: false, partners: false, smoking: false },
+    a6:  { title: '3 חדרים עם נוף פתוח לים', beds: 2, baths: 1, type: 'דירה', cond: 'משופצת', vaad: 220, arnona: 760, contract: 12, guarantee: 11800, guarantors: false, partners: false, smoking: false },
+    a7:  { title: '3.5 חדרים בקומה ראשונה, מתאימה גם עם כלב', beds: 2, baths: 1, type: 'דירה', cond: 'במצב טוב', vaad: 110, arnona: 700, contract: 12, guarantee: 0, guarantors: true, partners: false, smoking: false },
+    a8:  { title: '3 חדרים משופצת ומרוהטת, נכנסים עם מזוודה', beds: 2, baths: 1, type: 'דירה', cond: 'משופצת', vaad: 130, arnona: 690, contract: 12, guarantee: 9800, guarantors: false, partners: true, smoking: false },
+    a9:  { title: '2 חדרים מרוהטת ליד הכרמלית', beds: 1, baths: 1, type: 'דירה', cond: 'במצב טוב', vaad: 70, arnona: 420, contract: 6, guarantee: 0, guarantors: true, partners: false, smoking: true },
+    a10: { title: '4 חדרים בבניין חדש עם חניה ומחסן', beds: 3, baths: 2, type: 'דירה', cond: 'חדשה מהקבלן', vaad: 200, arnona: 840, contract: 24, guarantee: 9600, guarantors: false, partners: false, smoking: false },
+    a11: { title: 'דירת גג קטנה עם שקיעה מעל המפרץ', beds: 1, baths: 1, type: 'דירת גג', cond: 'שמורה מאוד', vaad: 160, arnona: 560, contract: 12, guarantee: 0, guarantors: true, partners: false, smoking: false },
+    a12: { title: '3 חדרים ברחוב ירוק ושקט', beds: 2, baths: 1, type: 'דירה', cond: 'במצב טוב', vaad: 100, arnona: 640, contract: 12, guarantee: 0, guarantors: true, partners: true, smoking: false },
+    a13: { title: 'דירת גן 3.5 חדרים עם חצר פרטית', beds: 2, baths: 1, type: 'דירת גן', cond: 'שמורה מאוד', vaad: 90, arnona: 760, contract: 12, guarantee: 10000, guarantors: false, partners: false, smoking: false },
+    a14: { title: 'פנטהאוז 5 חדרים עם נוף לים ושתי חניות', beds: 4, baths: 2, type: 'פנטהאוז', cond: 'חדשה מהקבלן', vaad: 350, arnona: 1400, contract: 24, guarantee: 21600, guarantors: false, partners: false, smoking: false },
+    a15: { title: '4 חדרים למשפחה ליד הפארק', beds: 3, baths: 2, type: 'דירה', cond: 'במצב טוב', vaad: 140, arnona: 900, contract: 12, guarantee: 12000, guarantors: false, partners: false, smoking: false }
+  };
+  D.apartments.forEach((a) => Object.assign(a, X[a.id] || {}));
+
+  const has = (f) => (a) => a.features.includes(f);
+  D.categories = [
+    { id: 'foryou', label: 'מותאם לך', badge: '✨', note: 'לפי הכוכבים שסימנת' },
+    { id: 'luxury', label: 'יוקרה', badge: '💎', test: (a) => a.rent >= 6000 || a.type === 'פנטהאוז' },
+    { id: 'balcony', label: 'מרפסת', badge: '🌤️', test: has('מרפסת') },
+    { id: 'sea', label: 'נוף לים', badge: '🌊', test: has('נוף לים') },
+    { id: 'small', label: 'עד 2.5 חדרים', badge: '🛋️', test: (a) => a.rooms <= 2.5 },
+    { id: 'family', label: '4 חדרים ומעלה', badge: '🏡', test: (a) => a.rooms >= 4 },
+    { id: 'mamad', label: 'ממ"ד', badge: '🛡️', test: has('ממ"ד') },
+    { id: 'parking', label: 'חניה', badge: '🅿️', test: has('חניה') },
+    { id: 'pets', label: 'חיות מחמד', badge: '🐾', test: has('חיות מחמד') },
+    { id: 'furnished', label: 'מרוהטת', badge: '🪑', test: has('מרוהטת') },
+    { id: 'garden', label: 'דירת גן', badge: '🌿', test: (a) => a.type === 'דירת גן' || a.features.includes('גינה') },
+    { id: 'renovated', label: 'משופצת', badge: '🔨', test: (a) => a.cond === 'משופצת' || a.cond === 'חדשה מהקבלן' }
+  ];
+
+  D.cities = ['חיפה', 'קריית ביאליק', 'קריית מוצקין', 'קריית אתא', 'קריית ים', 'נשר', 'טירת כרמל'];
+  D.streets = Array.from(new Set(D.apartments.map((a) => a.street).concat(['רחוב הנביאים', 'רחוב חסן שוקרי', 'שדרות הציונות', 'רחוב אלנבי', 'דרך הים'])));
+  D.types = ['דירה', 'דירת גן', 'דירת גג', 'פנטהאוז', 'דופלקס', 'לופט', 'קוטג׳/טאון-האוס', 'בית פרטי', 'סטודיו'];
+  D.conds = ['חדשה מהקבלן', 'משופצת', 'שמורה מאוד', 'במצב טוב', 'זקוקה לשיפוץ'];
+  D.featureList = ['מיזוג', 'מרפסת', 'ממ"ד', 'מחסן', 'נגישות', 'דוד שמש', 'חניה', 'מרוהטת', 'מעלית', 'חיות מחמד'];
+  D.acTypes = ['מזגן מרכזי', 'מזגן בכל החדרים', 'לא בכל החדרים', 'מזגן בסלון בלבד'];
+})(window.DEMO);
+
+</script>
+<script>
+/* איורי דירות לדוגמה. בלי תמונות מהרשת, בלי זכויות של אחרים. */
+(function () {
+  const PAL = {
+    sea:     { wall: '#DCE8EC', wall2: '#C5D8E0', floor: '#B48A67', accent: '#2F6F8F', accent2: '#F2C14E', soft: '#F7F4EE' },
+    sand:    { wall: '#EFE3D0', wall2: '#E1CFB4', floor: '#9C7A5B', accent: '#C8553D', accent2: '#3E7C6B', soft: '#FBF7F0' },
+    pine:    { wall: '#DDE7DF', wall2: '#C8D8CC', floor: '#8C6B52', accent: '#2F5D50', accent2: '#E9B44C', soft: '#F6F7F2' },
+    bauhaus: { wall: '#F1EEE8', wall2: '#DFD9CE', floor: '#77716B', accent: '#1F4E9C', accent2: '#E4572E', soft: '#FFFFFF' },
+    rose:    { wall: '#F2E1DE', wall2: '#E6CBC6', floor: '#A47B62', accent: '#8C3B4A', accent2: '#5B8C85', soft: '#FFF8F5' },
+    slate:   { wall: '#E3E6EA', wall2: '#CDD3DB', floor: '#7D6553', accent: '#36465A', accent2: '#D9A441', soft: '#F8F9FA' }
+  };
+  const SKY = [['#8FC3E4', '#E4F1F8'], ['#F0A97F', '#FBE3C6'], ['#7F70AE', '#F2A67C']];
+  let uid = 0;
+
+  function rng(seed) {
+    let a = 0;
+    for (const c of String(seed)) a = (a * 31 + c.charCodeAt(0)) | 0;
+    return function () {
+      a = (a + 0x6D2B79F5) | 0;
+      let t = Math.imul(a ^ (a >>> 15), 1 | a);
+      t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+      return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+    };
+  }
+
+  function wallFloor(p, k, H) {
+    let planks = '';
+    for (let i = 0; i < 9; i++) {
+      const x = i * 38;
+      planks += `<line x1="${x}" y1="${H}" x2="${x * 1.35 - 52}" y2="400" stroke="#000" stroke-opacity=".09" stroke-width="1.5"/>`;
+    }
+    return {
+      defs: `<linearGradient id="${k}w" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${p.wall}"/><stop offset="1" stop-color="${p.wall2}"/></linearGradient>
+             <linearGradient id="${k}f" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${p.floor}" stop-opacity=".82"/><stop offset="1" stop-color="${p.floor}"/></linearGradient>
+             <radialGradient id="${k}g"><stop offset="0" stop-color="#FFE7A8" stop-opacity=".75"/><stop offset="1" stop-color="#FFE7A8" stop-opacity="0"/></radialGradient>`,
+      svg: `<rect width="300" height="${H}" fill="url(#${k}w)"/><rect y="${H}" width="300" height="${400 - H}" fill="url(#${k}f)"/>${planks}
+            <rect y="${H - 5}" width="300" height="5" fill="${p.soft}" opacity=".85"/>`
+    };
+  }
+
+  function view(x, y, w, h, p, k, sky, R) {
+    const sx = x + w * (0.25 + R() * 0.5);
+    return {
+      defs: `<linearGradient id="${k}s" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${sky[0]}"/><stop offset="1" stop-color="${sky[1]}"/></linearGradient>
+             <clipPath id="${k}c"><rect x="${x}" y="${y}" width="${w}" height="${h}"/></clipPath>`,
+      svg: `<rect x="${x - 7}" y="${y - 7}" width="${w + 14}" height="${h + 14}" rx="3" fill="${p.soft}"/>
+            <g clip-path="url(#${k}c)">
+              <rect x="${x}" y="${y}" width="${w}" height="${h}" fill="url(#${k}s)"/>
+              <circle cx="${sx}" cy="${y + h * 0.32}" r="9" fill="#FFF3D6"/>
+              <path d="M${x} ${y + h * 0.62} C${x + w * 0.3} ${y + h * 0.5} ${x + w * 0.6} ${y + h * 0.6} ${x + w} ${y + h * 0.52} L${x + w} ${y + h} L${x} ${y + h}Z" fill="#7C9A8B"/>
+              <rect x="${x}" y="${y + h * 0.7}" width="${w}" height="${h * 0.3}" fill="#3E7FA6"/>
+              <line x1="${x + w * 0.78}" y1="${y + h * 0.7}" x2="${x + w * 0.78}" y2="${y + h * 0.5}" stroke="#34404C" stroke-width="1.5"/>
+              <line x1="${x + w * 0.7}" y1="${y + h * 0.52}" x2="${x + w * 0.9}" y2="${y + h * 0.52}" stroke="#34404C" stroke-width="1.5"/>
+            </g>
+            <rect x="${x + w / 2 - 2}" y="${y}" width="4" height="${h}" fill="${p.soft}"/>
+            <rect x="${x - 12}" y="${y + h + 5}" width="${w + 24}" height="6" rx="2" fill="${p.soft}"/>`
+    };
+  }
+
+  function plant(x, base) {
+    let leaves = '';
+    [-44, -22, 0, 22, 44].forEach((a, i) => {
+      leaves += `<ellipse cx="${x}" cy="${base - 48}" rx="7" ry="22" fill="${i % 2 ? '#3F6E50' : '#56866A'}" transform="rotate(${a} ${x} ${base - 30})"/>`;
+    });
+    return `${leaves}<path d="M${x - 15} ${base - 28} L${x + 15} ${base - 28} L${x + 11} ${base} L${x - 11} ${base}Z" fill="#C98B5E"/>`;
+  }
+
+  function lamp(x, top, bottom, k) {
+    return `<circle cx="${x}" cy="${top + 10}" r="62" fill="url(#${k}g)"/>
+            <line x1="${x}" y1="${top + 14}" x2="${x}" y2="${bottom}" stroke="#2B2B2B" stroke-width="2"/>
+            <path d="M${x - 16} ${top + 18} L${x + 16} ${top + 18} L${x + 10} ${top} L${x - 10} ${top}Z" fill="#F4E3C1"/>`;
+  }
+
+  function art(x, y, w, h, p) {
+    return `<rect x="${x}" y="${y}" width="${w}" height="${h}" fill="${p.soft}" stroke="${p.wall2}" stroke-width="3"/>
+            <circle cx="${x + w * 0.36}" cy="${y + h * 0.45}" r="${h * 0.24}" fill="${p.accent2}"/>
+            <rect x="${x + w * 0.5}" y="${y + h * 0.3}" width="${w * 0.3}" height="${h * 0.45}" fill="${p.accent}"/>`;
+  }
+
+  function living(p, k, R, sky) {
+    const H = 272, left = R() < 0.5;
+    const wf = wallFloor(p, k, H), win = view(left ? 26 : 164, 56, 110, 126, p, k, sky, R);
+    const lx = left ? 268 : 32, px = left ? 30 : 270;
+    return {
+      defs: wf.defs + win.defs,
+      svg: wf.svg + win.svg + art(left ? 186 : 44, 86, 70, 50, p) + lamp(lx, 142, H + 8, k) +
+        `<ellipse cx="150" cy="334" rx="130" ry="28" fill="${p.accent2}" opacity=".3"/>
+         <rect x="52" y="190" width="196" height="50" rx="15" fill="${p.accent}"/>
+         <rect x="44" y="226" width="212" height="42" rx="11" fill="${p.accent}"/>
+         <rect x="44" y="226" width="212" height="42" rx="11" fill="#fff" opacity=".1"/>
+         <rect x="34" y="212" width="24" height="56" rx="11" fill="${p.accent}"/>
+         <rect x="242" y="212" width="24" height="56" rx="11" fill="${p.accent}"/>
+         <rect x="72" y="198" width="54" height="36" rx="10" fill="${p.accent2}"/>
+         <rect x="174" y="198" width="54" height="36" rx="10" fill="${p.soft}" opacity=".92"/>
+         <rect x="60" y="267" width="6" height="11" fill="#2B2B2B"/><rect x="234" y="267" width="6" height="11" fill="#2B2B2B"/>
+         <ellipse cx="150" cy="306" rx="48" ry="11" fill="${p.soft}"/>
+         <line x1="126" y1="310" x2="122" y2="334" stroke="#2B2B2B" stroke-width="2"/><line x1="174" y1="310" x2="178" y2="334" stroke="#2B2B2B" stroke-width="2"/>
+         <rect x="140" y="294" width="10" height="10" rx="2" fill="${p.accent2}"/>` + plant(px, H + 20)
+    };
+  }
+
+  function kitchen(p, k, R, sky) {
+    const H = 280, wf = wallFloor(p, k, H), win = view(118, 42, 64, 80, p, k, sky, R);
+    let tiles = '';
+    for (let x = 0; x <= 300; x += 18) tiles += `<line x1="${x}" y1="130" x2="${x}" y2="196" stroke="#000" stroke-opacity=".06"/>`;
+    for (let y = 130; y <= 196; y += 18) tiles += `<line x1="0" y1="${y}" x2="300" y2="${y}" stroke="#000" stroke-opacity=".06"/>`;
+    const cab = (x) => `<rect x="${x}" y="38" width="46" height="78" rx="3" fill="${p.soft}" stroke="${p.wall2}" stroke-width="2"/><rect x="${x + 19}" y="102" width="8" height="3" rx="1.5" fill="${p.accent}"/>`;
+    return {
+      defs: wf.defs + win.defs,
+      svg: wf.svg + `<rect y="126" width="300" height="72" fill="${p.soft}" opacity=".6"/>` + tiles + win.svg +
+        cab(14) + cab(62) + cab(192) + cab(240) +
+        `<rect y="196" width="300" height="10" fill="#ECE6DC"/>
+         <rect y="206" width="300" height="74" fill="${p.accent}"/>
+         <line x1="60" y1="210" x2="60" y2="276" stroke="#000" stroke-opacity=".14"/><line x1="120" y1="210" x2="120" y2="276" stroke="#000" stroke-opacity=".14"/>
+         <line x1="180" y1="210" x2="180" y2="276" stroke="#000" stroke-opacity=".14"/><line x1="240" y1="210" x2="240" y2="276" stroke="#000" stroke-opacity=".14"/>
+         <rect x="120" y="196" width="60" height="4" fill="#9AA3A8"/>
+         <ellipse cx="58" cy="190" rx="22" ry="8" fill="${p.soft}"/>
+         <circle cx="50" cy="183" r="6" fill="${p.accent2}"/><circle cx="62" cy="182" r="6" fill="${p.accent2}"/><circle cx="56" cy="176" r="6" fill="${p.accent2}"/>
+         <rect x="216" y="168" width="32" height="28" rx="4" fill="#C7A27C"/>
+         <ellipse cx="108" cy="318" rx="23" ry="7" fill="${p.accent2}"/><line x1="96" y1="322" x2="92" y2="392" stroke="#2B2B2B" stroke-width="2.5"/><line x1="120" y1="322" x2="124" y2="392" stroke="#2B2B2B" stroke-width="2.5"/>
+         <ellipse cx="192" cy="318" rx="23" ry="7" fill="${p.accent2}"/><line x1="180" y1="322" x2="176" y2="392" stroke="#2B2B2B" stroke-width="2.5"/><line x1="204" y1="322" x2="208" y2="392" stroke="#2B2B2B" stroke-width="2.5"/>`
+    };
+  }
+
+  function bedroom(p, k, R, sky) {
+    const H = 270, wf = wallFloor(p, k, H), win = view(192, 58, 82, 104, p, k, sky, R);
+    return {
+      defs: wf.defs + win.defs,
+      svg: wf.svg + win.svg +
+        `<rect x="178" y="48" width="12" height="128" fill="${p.accent2}" opacity=".85"/><rect x="276" y="48" width="12" height="128" fill="${p.accent2}" opacity=".85"/>` +
+        art(104, 76, 64, 46, p) + lamp(32, 196, 238, k) +
+        `<rect x="10" y="236" width="46" height="54" rx="4" fill="${p.soft}" stroke="${p.wall2}" stroke-width="2"/>
+         <ellipse cx="160" cy="352" rx="128" ry="26" fill="${p.accent}" opacity=".18"/>
+         <rect x="70" y="148" width="180" height="100" rx="16" fill="${p.accent}"/>
+         <rect x="62" y="226" width="196" height="28" rx="7" fill="${p.soft}"/>
+         <rect x="92" y="208" width="60" height="26" rx="10" fill="#fff"/><rect x="168" y="208" width="60" height="26" rx="10" fill="#fff"/>
+         <rect x="62" y="246" width="196" height="64" rx="11" fill="${p.accent2}"/>
+         <path d="M62 270 Q160 258 258 270" stroke="#000" stroke-opacity=".1" stroke-width="2" fill="none"/>`
+    };
+  }
+
+  function balcony(p, k, R, sky) {
+    const sx = 60 + R() * 180;
+    let bal = '', sparks = '', city = '';
+    for (let x = 6; x < 300; x += 16) bal += `<rect x="${x}" y="270" width="4" height="60" fill="#2C3A46"/>`;
+    for (let i = 0; i < 7; i++) sparks += `<line x1="${20 + i * 42}" y1="${214 + (i % 3) * 14}" x2="${36 + i * 42}" y2="${214 + (i % 3) * 14}" stroke="#fff" stroke-opacity=".35" stroke-width="2"/>`;
+    for (let i = 0; i < 12; i++) city += `<rect x="${14 + i * 23}" y="${170 - (i % 4) * 3}" width="7" height="${6 + (i % 3) * 2}" fill="#F3EDE2" opacity=".75"/>`;
+    return {
+      defs: `<linearGradient id="${k}s" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${sky[0]}"/><stop offset="1" stop-color="${sky[1]}"/></linearGradient>
+             <linearGradient id="${k}m" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#4A8DB3"/><stop offset="1" stop-color="#2D6A90"/></linearGradient>`,
+      svg: `<rect width="300" height="270" fill="url(#${k}s)"/>
+            <circle cx="${sx}" cy="92" r="48" fill="#FFF1CF" opacity=".28"/><circle cx="${sx}" cy="92" r="22" fill="#FFF1CF"/>
+            <path d="M0 178 C60 160 120 172 180 158 S270 150 300 164 L300 204 L0 204Z" fill="#8FA79B"/>${city}
+            <rect y="198" width="300" height="72" fill="url(#${k}m)"/>${sparks}
+            <line x1="222" y1="198" x2="222" y2="150" stroke="#3B4652" stroke-width="2"/><line x1="206" y1="154" x2="250" y2="154" stroke="#3B4652" stroke-width="2"/>
+            <line x1="252" y1="198" x2="252" y2="160" stroke="#3B4652" stroke-width="2"/><line x1="240" y1="164" x2="276" y2="164" stroke="#3B4652" stroke-width="2"/>
+            <rect y="262" width="300" height="9" fill="#2C3A46"/>${bal}<rect y="326" width="300" height="5" fill="#2C3A46"/>
+            <rect y="330" width="300" height="70" fill="${p.soft}"/>
+            <line x1="0" y1="360" x2="300" y2="360" stroke="#000" stroke-opacity=".08"/><line x1="100" y1="330" x2="80" y2="400" stroke="#000" stroke-opacity=".08"/><line x1="200" y1="330" x2="220" y2="400" stroke="#000" stroke-opacity=".08"/>
+            <rect x="44" y="300" width="50" height="10" rx="4" fill="${p.accent}"/><rect x="44" y="258" width="10" height="52" rx="4" fill="${p.accent}"/>
+            <line x1="50" y1="310" x2="46" y2="376" stroke="${p.accent}" stroke-width="4"/><line x1="90" y1="310" x2="94" y2="376" stroke="${p.accent}" stroke-width="4"/>
+            <ellipse cx="150" cy="316" rx="30" ry="8" fill="${p.accent2}"/><line x1="150" y1="320" x2="150" y2="378" stroke="#2B2B2B" stroke-width="3"/>
+            <rect x="140" y="298" width="8" height="14" rx="2" fill="#fff" opacity=".85"/>` + plant(252, 386)
+    };
+  }
+
+  const SCENE = { living, kitchen, bedroom, balcony };
+
+  function render(type, palName, seed) {
+    const k = 'sc' + (++uid);
+    const R = rng(seed);
+    const p = PAL[palName] || PAL.sea;
+    const sky = SKY[Math.floor(R() * SKY.length)];
+    const out = (SCENE[type] || living)(p, k, R, sky);
+    return `<svg viewBox="0 0 300 400" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false"><defs>${out.defs}</defs>${out.svg}</svg>`;
+  }
+
+  /* תמונה מספר i של דירה: תמונה אמיתית אם יש, אחרת איור */
+  function photo(apt, i) {
+    if (apt.photos && apt.photos.length) {
+      const src = apt.photos[i % apt.photos.length];
+      return `<img src="${src}" alt="" draggable="false">`;
+    }
+    const list = apt.scenes && apt.scenes.length ? apt.scenes : ['living'];
+    return render(list[i % list.length], apt.pal, apt.id + ':' + i);
+  }
+
+  function count(apt) {
+    return apt.photos && apt.photos.length ? apt.photos.length : (apt.scenes || ['living']).length;
+  }
+
+  window.SCENES = { render, photo, count };
+})();
+
+</script>
+<script>
+/* ליבה: מצב, שמירה, ניווט, הודעות, גיליון, שיחה ויומן */
+(function () {
+  const D = window.DEMO;
+  const KEY = 'swipe-demo-v2';
+  const app = document.getElementById('app');
+
+  const fresh = () => ({
+    prefs: null,              // { area, max, entry }
+    saved: {},                // id → { star, t } · «אהבתי»
+    filter: null,             // הסינון החכם
+    tune: {},                 // מה שהכוכבים לימדו
+    aiChat: [],
+    swiped: {},               // id → 'L' | 'R'
+    pen: {},                  // מה הוחלק שמאלה, לסידור הערימה
+    likes: [],                // { id, t, status: 'wait' | 'match' }
+    chats: {},                // key → [{ who, text }]
+    profile: null,
+    added: [],
+    owner: { decisions: {} },
+    log: [],
+    seenOwnerBanner: false
+  });
+
+  let state;
+  try { state = Object.assign(fresh(), JSON.parse(localStorage.getItem(KEY) || '{}')); } catch (e) { state = fresh(); }
+
+  function save() {
+    try { localStorage.setItem(KEY, JSON.stringify(state)); } catch (e) { /* גלישה פרטית: הדמו עובד בלי שמירה */ }
+  }
+  function reset() { state = fresh(); A.state = state; save(); }
+
+  const esc = (s) => String(s == null ? '' : s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+  const nis = (n) => Number(n).toLocaleString('en-US') + ' ₪';
+  const toDate = (iso) => { const [y, m, d] = iso.split('-').map(Number); return new Date(Date.UTC(y, m - 1, d)); };
+  const days = (a, b) => Math.round((toDate(a) - toDate(b)) / 86400000);
+  function fmtDate(iso, withYear) {
+    const d = toDate(iso);
+    const s = d.getUTCDate() + '.' + (d.getUTCMonth() + 1);
+    return withYear || d.getUTCFullYear() !== 2026 ? s + '.' + d.getUTCFullYear() : s;
+  }
+  const g = (gender, m, f) => (gender === 'f' ? f : m);
+  const roomsTxt = (r) => (r % 1 ? r : r) + ' חד׳';
+  const floorTxt = (f, n) => (f === 0 ? 'קומת קרקע' : 'קומה ' + f + ' מתוך ' + n);
+
+  function el(html) {
+    const t = document.createElement('template');
+    t.innerHTML = html.trim();
+    return t.content.firstElementChild;
+  }
+
+  const ICON = {
+    heart: '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 21s-7.5-4.6-9.6-9.2C.9 8.4 3 4.5 6.8 4.5c2.1 0 3.6 1.1 4.4 2.5.8-1.4 2.4-2.5 4.5-2.5 3.8 0 5.9 3.9 4.4 7.3C19.5 16.4 12 21 12 21z"/></svg>',
+    x: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>',
+    info: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 11v6M12 7.5v.5"/></svg>',
+    back: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5l7 7-7 7"/></svg>',
+    chat: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M4 5h16v11H9l-5 4z"/></svg>',
+    menu: '<svg viewBox="0 0 24 24" fill="currentColor"><circle cx="5" cy="12" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="19" cy="12" r="2"/></svg>',
+    filter: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M4 7h16M7 12h10M10 17h4"/></svg>',
+    send: '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M3 20l18-8L3 4v6l12 2-12 2z"/></svg>',
+    close: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>',
+    play: '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>'
+  };
+
+  /* ——— שכבות קבועות: הודעה קצרה והתראה עליונה ——— */
+  let toastEl, bannerEl, toastTimer, bannerTimer;
+  function overlays() {
+    toastEl = el('<div class="toast" role="status"></div>');
+    bannerEl = el('<button class="banner" type="button"></button>');
+    app.append(toastEl, bannerEl);
+  }
+  function toast(text, ms, kind) {
+    toastEl.textContent = text;
+    toastEl.className = 'toast' + (kind ? ' ' + kind : '');
+    void toastEl.offsetWidth;
+    toastEl.classList.add('show');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => toastEl.classList.remove('show'), ms || 2400);
+  }
+  function banner(title, text, onTap) {
+    bannerEl.innerHTML = `<span class="mini-sign">✓</span><div><b>${esc(title)}</b><span>${esc(text)}</span></div>`;
+    bannerEl.onclick = () => { bannerEl.classList.remove('show'); onTap && onTap(); };
+    bannerEl.classList.add('show');
+    clearTimeout(bannerTimer);
+    bannerTimer = setTimeout(() => bannerEl.classList.remove('show'), 6500);
+  }
+
+  function mount(screen) {
+    app.innerHTML = '';
+    app.append(screen);
+    overlays();
+    return screen;
+  }
+
+  function sheet(html, onMount) {
+    const s = el(`<div class="sheet" role="dialog" aria-modal="true"><button class="sheet-back" type="button" aria-label="סגירה"></button><div class="sheet-body"><div class="sheet-grip"></div>${html}</div></div>`);
+    const close = () => s.remove();
+    s.querySelector('.sheet-back').onclick = close;
+    app.append(s);
+    onMount && onMount(s, close);
+    return { el: s, close };
+  }
+
+  /* ——— יומן: מה קרה בדמו, בלי פרטים אישיים ——— */
+  function log(type, data) {
+    state.log.push(Object.assign({ t: Date.now(), type }, data || {}));
+    if (state.log.length > 800) state.log.splice(0, state.log.length - 800);
+    save();
+  }
+
+  /* ——— ניווט ——— */
+  const routes = {};
+  let current = { name: null, arg: null };
+  function go(name, arg) {
+    current = { name, arg };
+    (routes[name] || routes.deck)(arg);
+  }
+  function startRoute() {
+    const h = (location.hash || '').replace('#', '');
+    if (h === 'owner') return go('owner');
+    if (h === 'log') return go('log');
+    return go('deck');
+  }
+  window.addEventListener('hashchange', startRoute);
+
+  /* ——— שיחה משותפת לשני הצדדים ——— */
+  function chat(opt) {
+    const msgs = state.chats[opt.key] || (state.chats[opt.key] = []);
+    const scr = mount(el(`
+      <section class="screen">
+        <div class="chat-top">
+          <button class="icon-btn" type="button" aria-label="חזרה">${ICON.back}</button>
+          <div class="avatar">${esc(opt.initials)}</div>
+          <div><b>${esc(opt.title)}</b><span>${esc(opt.subtitle)}</span></div>
+        </div>
+        <div class="msgs"></div>
+        <form class="composer">
+          <input type="text" aria-label="הודעה" autocomplete="off" enterkeyhint="send">
+          <button type="submit" aria-label="שליחה">${ICON.send}</button>
+        </form>
+      </section>`));
+    const list = scr.querySelector('.msgs');
+    const input = scr.querySelector('input');
+    scr.querySelector('.chat-top .icon-btn').onclick = opt.onBack;
+
+    const add = (m) => {
+      list.append(el(`<div class="msg ${m.who}">${esc(m.text)}</div>`));
+      list.scrollTop = list.scrollHeight;
+    };
+    const showAfter = () => {
+      if (!opt.after || list.querySelector('.after-chat')) return;
+      list.append(el(`<div class="after-chat">${opt.after}</div>`));
+      opt.afterMount && opt.afterMount(list.querySelector('.after-chat'));
+      list.scrollTop = list.scrollHeight;
+    };
+
+    add({ who: 'sys', text: 'השיחה בדמו מדומה · ההודעות לא נשלחות לאף אחד' });
+    msgs.forEach(add);
+    if (msgs.some((m) => m.who === 'them')) showAfter();
+    if (!msgs.length) input.value = opt.prefill || '';
+
+    scr.querySelector('form').onsubmit = (e) => {
+      e.preventDefault();
+      const text = input.value.trim();
+      if (!text) return;
+      const m = { who: 'me', text };
+      msgs.push(m); add(m); input.value = ''; save();
+      const mine = msgs.filter((x) => x.who === 'me').length;
+      const reply = opt.replies[Math.min(mine - 1, opt.replies.length - 1)];
+      const dots = el('<div class="typing" aria-label="מקליד"><i></i><i></i><i></i></div>');
+      setTimeout(() => { list.append(dots); list.scrollTop = list.scrollHeight; }, 500);
+      setTimeout(() => {
+        dots.remove();
+        const r = { who: 'them', text: reply };
+        msgs.push(r); add(r); save(); showAfter();
+      }, 1900);
+    };
+  }
+
+  /* ——— יומן: #log ——— */
+  routes.log = function () {
+    const L = state.log;
+    const swipes = L.filter((e) => e.type === 'swipe');
+    const right = swipes.filter((e) => e.dir === 'R').length;
+    const avg = swipes.length ? Math.round(swipes.reduce((s, e) => s + (e.ms || 0), 0) / swipes.length / 100) / 10 : 0;
+    const ok = L.filter((e) => e.type === 'approve').length;
+    const no = L.filter((e) => e.type === 'reject').length;
+    const quick = L.filter((e) => e.type === 'exit' && e.ms < 10000).length;
+    const summary = `סיכום דמו · החלקות: ${swipes.length} · ימינה: ${right} (${swipes.length ? Math.round(right / swipes.length * 100) : 0}%) · שניות לכרטיס: ${avg} · אישורים: ${ok} · דחיות: ${no} · יציאות תוך 10 שניות: ${quick}`;
+    const rows = L.slice(-40).reverse().map((e) => `<tr><td>${new Date(e.t).toLocaleTimeString('he-IL')}</td><td>${esc(e.type)}</td><td>${esc(e.id || e.sid || e.mode || '')} ${esc(e.dir || '')}</td><td>${e.ms ? Math.round(e.ms / 100) / 10 + ' ש׳' : ''}</td></tr>`).join('');
+    const scr = mount(el(`
+      <section class="screen scroll">
+        <div class="top"><div class="brand">יומן הדמו</div><a class="chip" href="#">חזרה לדמו</a></div>
+        <div class="log">
+          <div class="stat-row">
+            <div><b>${swipes.length}</b>החלקות</div>
+            <div><b>${swipes.length ? Math.round(right / swipes.length * 100) : 0}%</b>ימינה</div>
+            <div><b>${avg}</b>שניות לכרטיס</div>
+            <div><b>${ok}/${ok + no}</b>אישורים של בעלי דירות</div>
+          </div>
+          <p class="note">היומן נשמר רק בדפדפן הזה. אין בו שמות ואין בו פרטים אישיים.</p>
+          <div class="btn-row">
+            <a class="btn-primary" target="_blank" rel="noopener" href="https://wa.me/?text=${encodeURIComponent(summary)}">שליחת הסיכום בוואטסאפ</a>
+            <button class="btn-ghost" type="button" data-clear>ניקוי היומן</button>
+          </div>
+          <table><thead><tr><th>שעה</th><th>אירוע</th><th>על מה</th><th>זמן</th></tr></thead><tbody>${rows}</tbody></table>
+        </div>
+      </section>`));
+    scr.querySelector('[data-clear]').onclick = () => { state.log = []; save(); routes.log(); };
+  };
+
+  const A = {
+    D, state, save, reset, esc, nis, days, fmtDate, g, roomsTxt, floorTxt, el, ICON,
+    toast, banner, mount, sheet, log, routes, go, chat,
+    get current() { return current; }
+  };
+  window.App = A;
+
+  let openedAt = Date.now();
+  document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'hidden') log('exit', { ms: Date.now() - openedAt });
+    else openedAt = Date.now();
+  });
+
+  window.addEventListener('DOMContentLoaded', () => {
+    log('open', { mode: (location.hash || '#seeker').slice(1) });
+    startRoute();
+  });
+})();
+
+</script>
+<script>
+/* לשונית «דירות»: ערימה, החלקה, כוכב, סינון חכם, פרטי דירה, פנייה לבעל הדירה */
+(function () {
+  const A = window.App;
+  const { D, esc, nis, fmtDate, g, el } = A;
+  const S = window.SCENES;
+  const reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const photoMem = {};
+  const scheduled = new Set();
+
+  const I = Object.assign(A.ICON, {
+    home: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M3 11l9-7 9 7v9a1 1 0 0 1-1 1h-5v-6h-6v6H4a1 1 0 0 1-1-1z"/></svg>',
+    grid: '<svg viewBox="0 0 24 24" fill="currentColor"><circle cx="7" cy="7" r="3.2"/><circle cx="17" cy="7" r="3.2"/><circle cx="7" cy="17" r="3.2"/><path d="M17 13.5l3.5 6h-7z"/></svg>',
+    spark: '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M11 2l1.9 5.6L18.5 9.5l-5.6 1.9L11 17l-1.9-5.6L3.5 9.5l5.6-1.9z"/><path d="M19 14l.9 2.6 2.6.9-2.6.9L19 21l-.9-2.6-2.6-.9 2.6-.9z"/></svg>',
+    star: '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2.8l2.8 5.9 6.4.8-4.7 4.4 1.2 6.4L12 17.2l-5.7 3.1 1.2-6.4L2.8 9.5l6.4-.8z"/></svg>',
+    sliders: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 6h9M17 6h3M4 12h3M11 12h9M4 18h11M19 18h1"/><circle cx="15" cy="6" r="2"/><circle cx="9" cy="12" r="2"/><circle cx="17" cy="18" r="2"/></svg>',
+    addHome: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"><path d="M3 11l9-7 9 7"/><path d="M5 10v10h6M19 13v-3"/><path d="M17 16v6M14 19h6"/></svg>',
+    pin: '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2a7 7 0 0 0-7 7c0 5 7 13 7 13s7-8 7-13a7 7 0 0 0-7-7zm0 9.5A2.5 2.5 0 1 1 12 6.5a2.5 2.5 0 0 1 0 5z"/></svg>',
+    bed: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 18V7M3 13h18v5M21 18v-3a3 3 0 0 0-3-3h-7v1"/><circle cx="7" cy="10.5" r="1.6"/></svg>',
+    bath: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 12h16v3a4 4 0 0 1-4 4H8a4 4 0 0 1-4-4z"/><path d="M6 12V6a2 2 0 0 1 4 0"/></svg>',
+    ruler: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M4 20V4l16 16z"/><path d="M8 16h3v-3"/></svg>',
+    search: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>',
+    check: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>'
+  });
+
+  /* ——— נתונים ——— */
+  function norm(a) {
+    const beds = a.beds || Math.max(1, Math.floor(a.rooms) - 1);
+    return Object.assign({ beds, baths: a.rooms >= 4 ? 2 : 1, type: 'דירה', cond: 'במצב טוב', title: `דירת ${a.rooms} חדרים ב${a.street}` }, a);
+  }
+  const apts = () => A.state.added.map((a) => norm(Object.assign({}, a, { photos: photoMem[a.id] || a.photos || [] }))).concat(D.apartments.map(norm));
+  const byId = (id) => apts().find((a) => a.id === id);
+  const catById = (id) => D.categories.find((c) => c.id === id);
+  const specs = (a) => `<span>${I.bed}${a.beds}</span><span>${I.bath}${a.baths}</span><span>${I.ruler}${a.sqm} מ״ר</span>`;
+  const place = (a) => `${a.street}${a.hood ? ', ' + a.hood : ''}`;
+
+  /* ——— כותרת וניווט תחתון ——— */
+  A.topbar = function () {
+    const f = A.state.filter;
+    return `
+      <div class="app-top">
+        <div class="top-icons">
+          <button class="icon-btn" type="button" data-filter aria-label="סינון חכם">${I.sliders}${f ? '<i class="dot"></i>' : ''}</button>
+          <button class="icon-btn" type="button" data-publish aria-label="פרסום דירה">${I.addHome}</button>
+        </div>
+        <div class="brand">דירה בהחלקה ${I.home}</div>
+        <div></div>
+      </div>`;
+  };
+  A.bindTop = function (scr) {
+    const f = scr.querySelector('[data-filter]');
+    if (f) f.onclick = filterSheet;
+    const p = scr.querySelector('[data-publish]');
+    if (p) p.onclick = () => A.go('publish');
+  };
+  A.tabbar = function (on) {
+    const n = A.state.likes.filter((l) => l.status === 'match' && !l.seen).length;
+    const t = (id, icon, label, extra) => `<button class="tab ${on === id ? 'on' : ''}" type="button" data-tab="${id}">${icon}<span>${label}</span>${extra || ''}</button>`;
+    return `<nav class="tabbar">${t('deck', I.home, 'דירות')}${t('categories', I.grid, 'קטגוריות')}${t('ai', I.spark, 'עוזר AI')}${t('favs', I.heart, 'אהבתי', n ? `<span class="badge">${n}</span>` : '')}</nav>`;
+  };
+  A.bindTabbar = function (scr) {
+    scr.querySelectorAll('[data-tab]').forEach((b) => { b.onclick = () => A.go(b.dataset.tab); });
+  };
+  function refreshTabbar() {
+    const nav = document.querySelector('.tabbar');
+    if (!nav) return;
+    const on = (nav.querySelector('.tab.on') || {}).dataset;
+    const fresh = el(A.tabbar(on && on.tab));
+    nav.replaceWith(fresh);
+    A.bindTabbar(fresh.parentElement);
+  }
+
+  /* ——— סינון ——— */
+  const loose = (hay, w) => hay.includes(w) || (w.length > 3 && /^[בלהו]/.test(w) && hay.includes(w.slice(1)));
+  function passes(a, f) {
+    if (!f) return true;
+    if (f.max && a.rent > f.max) return false;
+    if (f.min && a.rent < f.min) return false;
+    if (f.beds && a.beds < f.beds) return false;
+    if (f.baths && a.baths < f.baths) return false;
+    if (f.sqm && a.sqm < f.sqm) return false;
+    if (f.rooms && a.rooms < f.rooms) return false;
+    if (f.cats && f.cats.length && !f.cats.every((id) => { const c = catById(id); return !c || !c.test || c.test(a); })) return false;
+    if (f.feats && f.feats.length && !f.feats.every((x) => a.features.includes(x))) return false;
+    if (f.places && f.places.length && !f.places.some((p) => (p === 'הקריות' ? a.area === 'krayot' : `${a.city} ${a.hood} ${a.street}`.includes(p)))) return false;
+    if (f.q) {
+      const hay = [a.title, a.street, a.hood, a.city, a.type, a.cond, a.desc].concat(a.features).join(' ');
+      if (!f.q.split(/[\s,]+/).filter(Boolean).every((w) => loose(hay, w))) return false;
+    }
+    return true;
+  }
+  A.passes = passes;
+
+  function similarity(a) {
+    const t = A.state.tune;
+    if (!t.n) return 0;
+    let s = 0;
+    a.features.forEach((x) => { s += (t.f[x] || 0) / t.n; });
+    s += ((t.h[a.hood] || 0) / t.n) * 1.5;
+    s += Math.max(0, 1.5 - Math.abs(a.rooms - t.rooms / t.n));
+    s += Math.max(0, 1.5 - Math.abs(a.rent - t.rent / t.n) / 900);
+    return s;
+  }
+  A.similarity = similarity;
+
+  function eligible() {
+    const f = A.state.filter, pen = A.state.pen;
+    const penalty = (a) => (pen['hood:' + a.hood] || 0) * 1.2 + (!a.features.includes('מרפסת') ? (pen.noBalcony || 0) * 1.2 : 0) + (a.rent > 5600 ? (pen.high || 0) * 1.2 : 0);
+    return apts()
+      .filter((a) => !A.state.swiped[a.id] && passes(a, f))
+      .map((a, i) => ({ a, s: a.mine ? -100 : penalty(a) - similarity(a) * 1.4, i }))
+      .sort((x, y) => x.s - y.s || x.i - y.i)
+      .map((x) => x.a);
+  }
+
+  function learnNope(a) {
+    const pen = A.state.pen;
+    if (a.rent > 5600) { pen.high = (pen.high || 0) + 1; return 'נראה פחות דירות במחיר הזה'; }
+    if (!a.features.includes('מרפסת')) { pen.noBalcony = (pen.noBalcony || 0) + 1; return 'נראה פחות דירות בלי מרפסת'; }
+    pen['hood:' + a.hood] = (pen['hood:' + a.hood] || 0) + 1;
+    return 'נראה פחות דירות ב' + a.hood;
+  }
+  function learnStar(a) {
+    const t = A.state.tune;
+    t.n = (t.n || 0) + 1; t.f = t.f || {}; t.h = t.h || {};
+    a.features.forEach((x) => { t.f[x] = (t.f[x] || 0) + 1; });
+    t.h[a.hood] = (t.h[a.hood] || 0) + 1;
+    t.rooms = (t.rooms || 0) + a.rooms; t.rent = (t.rent || 0) + a.rent;
+  }
+
+  /* ——— כרטיס ——— */
+  function cardHTML(a, under) {
+    const n = S.count(a);
+    const saved = A.state.saved[a.id];
+    return `
+      <article class="card ${under ? 'under' : ''}" data-id="${a.id}" aria-label="${esc(a.title)}, ${nis(a.rent)}">
+        <div class="photo">${S.photo(a, 0)}</div>
+        <div class="bars">${Array.from({ length: n }, (_, i) => `<i class="bar ${i === 0 ? 'on' : ''}"></i>`).join('')}</div>
+        <div class="card-tags">
+          ${a.mine ? '<span class="mine-tag">הדירה שפרסמת</span>' : ''}
+          ${a.example ? '<span class="ex-tag">דירה לדוגמה</span>' : ''}
+          ${saved && saved.star ? '<span class="star-tag">★ סימנת כוכב</span>' : ''}
+        </div>
+        <div class="stamp stamp-like">שמרתי ♥</div>
+        <div class="stamp stamp-nope">דילוג</div>
+        <div class="stamp stamp-star">★ אהבתי במיוחד</div>
+        <div class="info">
+          <div class="title">${esc(a.title)}</div>
+          <div class="loc">${I.pin}${esc(place(a))}</div>
+          <div class="specs-row"><span class="price">${nis(a.rent)}</span><span class="specs">${specs(a)}</span></div>
+          <div class="desc">${esc(a.desc || '')}</div>
+        </div>
+      </article>`;
+  }
+
+  function bind(card, a) {
+    let sx = 0, sy = 0, dx = 0, dy = 0, down = false, photoI = 0;
+    const t0 = performance.now();
+    const like = card.querySelector('.stamp-like'), nope = card.querySelector('.stamp-nope'), star = card.querySelector('.stamp-star');
+    card.addEventListener('pointerdown', (e) => {
+      if (e.button) return;
+      down = true; sx = e.clientX; sy = e.clientY; dx = dy = 0;
+      card.classList.remove('snap');
+      try { card.setPointerCapture(e.pointerId); } catch (_) { /* */ }
+    });
+    card.addEventListener('pointermove', (e) => {
+      if (!down) return;
+      dx = e.clientX - sx; dy = e.clientY - sy;
+      card.style.transform = `translate(${dx}px, ${dy * 0.4}px) rotate(${dx / 20}deg)`;
+      like.style.opacity = Math.max(0, Math.min(1, dx / 90));
+      nope.style.opacity = Math.max(0, Math.min(1, -dx / 90));
+      star.style.opacity = Math.abs(dx) < 50 ? Math.max(0, Math.min(1, -dy / 110)) : 0;
+    });
+    const end = (e) => {
+      if (!down) return;
+      down = false;
+      if (Math.abs(dx) > card.offsetWidth * 0.26) return fly(dx > 0 ? 'R' : 'L');
+      if (dy < -card.offsetHeight * 0.22 && Math.abs(dx) < 60) return fly('U');
+      if (Math.abs(dx) < 8 && Math.abs(dy) < 8 && e.type === 'pointerup') return tap(e);
+      card.classList.add('snap'); card.style.transform = '';
+      like.style.opacity = nope.style.opacity = star.style.opacity = 0;
+    };
+    card.addEventListener('pointerup', end);
+    card.addEventListener('pointercancel', end);
+
+    function tap(e) {
+      if (e.target.closest('.info')) return A.details(a);
+      const r = card.getBoundingClientRect();
+      const n = S.count(a);
+      photoI = e.clientX - r.left > r.width / 2 ? Math.min(n - 1, photoI + 1) : Math.max(0, photoI - 1);
+      card.querySelector('.photo').innerHTML = S.photo(a, photoI);
+      card.querySelectorAll('.bar').forEach((b, i) => b.classList.toggle('on', i <= photoI));
+    }
+    function fly(dir) {
+      if (card.dataset.gone) return;
+      card.dataset.gone = '1';
+      card.classList.add('fly');
+      ({ R: like, L: nope, U: star })[dir].style.opacity = 1;
+      const w = card.offsetWidth;
+      card.style.transform = dir === 'U' ? 'translate(0, -120%) scale(.9)' : `translate(${(dir === 'R' ? 1 : -1) * w * 1.6}px, ${dy * 0.4}px) rotate(${dir === 'R' ? 24 : -24}deg)`;
+      card.style.opacity = '0';
+      decide(a, dir, performance.now() - t0);
+      setTimeout(renderDeck, reduce ? 0 : 240);
+    }
+    card._fly = fly;
+  }
+
+  function decide(a, dir, ms) {
+    const st = A.state;
+    st.swiped[a.id] = dir;
+    A.log('swipe', { id: a.id, dir, ms: Math.round(ms) });
+    if (dir === 'L') {
+      A.toast('הבנו · ' + learnNope(a));
+    } else if (dir === 'R') {
+      st.saved[a.id] = { star: false, t: Date.now() };
+      A.toast(`נשמר ב«אהבתי» · ${a.title}`, 2600, 'ok');
+    } else {
+      st.saved[a.id] = { star: true, t: Date.now() };
+      learnStar(a);
+      A.toast('סימנת כוכב · נציג יותר דירות כמו זו', 2800, 'ok');
+    }
+    A.save();
+  }
+
+  /* ——— המסך ——— */
+  A.routes.deck = function () {
+    const scr = A.mount(el(`
+      <section class="screen" data-screen="deck">
+        ${A.topbar()}
+        <div class="chips filter-row"></div>
+        <div class="deck"></div>
+        <div class="actions">
+          <button class="rb rb-nope" type="button" aria-label="דילוג">${I.x}</button>
+          <button class="rb rb-star" type="button" aria-label="כוכב · אהבתי במיוחד">${I.star}</button>
+          <button class="rb rb-like" type="button" aria-label="שמירה באהבתי">${I.heart}</button>
+        </div>
+        ${A.tabbar('deck')}
+      </section>`));
+    A.bindTop(scr); A.bindTabbar(scr);
+    const top = () => scr.querySelector('.card:not(.under)');
+    scr.querySelector('.rb-nope').onclick = () => { const c = top(); c && c._fly('L'); };
+    scr.querySelector('.rb-like').onclick = () => { const c = top(); c && c._fly('R'); };
+    scr.querySelector('.rb-star').onclick = () => { const c = top(); c && c._fly('U'); };
+    renderChips();
+    renderDeck();
+    A.state.likes.forEach((l) => { if (l.status === 'wait') schedule(l.id, 2600); });
+    if (!A.state.seenHint) {
+      A.state.seenHint = true; A.save();
+      setTimeout(() => A.toast('ימינה שומר · שמאלה מדלג · למעלה כוכב'), 600);
+    }
+  };
+
+  function renderChips() {
+    const row = document.querySelector('[data-screen="deck"] .filter-row');
+    if (!row) return;
+    const f = A.state.filter;
+    if (!f) { row.hidden = true; return; }
+    const parts = [];
+    if (f.label) parts.push(f.label);
+    if (f.q) parts.push('«' + f.q + '»');
+    if (f.max) parts.push('עד ' + nis(f.max));
+    if (f.min) parts.push('מ-' + nis(f.min));
+    if (f.rooms) parts.push(f.rooms + '+ חדרים');
+    if (f.beds) parts.push(f.beds + '+ חדרי שינה');
+    if (f.baths) parts.push(f.baths + '+ רחצה');
+    if (f.sqm) parts.push(f.sqm + '+ מ״ר');
+    (f.cats || []).forEach((id) => { const c = catById(id); c && parts.push(c.label); });
+    (f.feats || []).forEach((x) => parts.push(x));
+    (f.places || []).forEach((x) => parts.push(x));
+    row.hidden = false;
+    row.innerHTML = parts.map((p) => `<button class="chip on" type="button" data-open>${esc(p)}</button>`).join('') + `<button class="chip" type="button" data-clear>${I.x} ניקוי</button>`;
+    row.querySelectorAll('[data-open]').forEach((b) => { b.onclick = filterSheet; });
+    row.querySelector('[data-clear]').onclick = () => A.applyFilter(null, 'הסינון נוקה');
+  }
+
+  function renderDeck() {
+    const scr = document.querySelector('[data-screen="deck"]');
+    if (!scr) return;
+    const deck = scr.querySelector('.deck'), acts = scr.querySelector('.actions');
+    const list = eligible();
+    deck.innerHTML = '';
+    if (!list.length) { acts.hidden = true; deck.append(emptyEl()); return; }
+    acts.hidden = false;
+    if (list[1]) deck.append(el(cardHTML(list[1], true)));
+    const t = el(cardHTML(list[0], false));
+    deck.append(t);
+    bind(t, list[0]);
+  }
+  A.renderDeck = renderDeck;
+
+  A.applyFilter = function (f, msg) {
+    A.state.filter = f; A.save();
+    A.log('filter', { on: !!f });
+    if (A.current.name !== 'deck') A.go('deck');
+    else { const s = document.querySelector('[data-screen="deck"]'); const b = s.querySelector('[data-filter]'); b.innerHTML = I.sliders + (f ? '<i class="dot"></i>' : ''); renderChips(); renderDeck(); }
+    msg && A.toast(msg);
+  };
+
+  function emptyEl() {
+    const f = A.state.filter;
+    const all = apts();
+    const skipped = all.filter((a) => A.state.swiped[a.id]);
+    let title, text, label, action;
+    if (f) {
+      const hits = all.filter((a) => passes(a, f)).length;
+      title = 'אין עוד דירות שמתאימות לסינון';
+      text = hits ? `עברת על כל ${hits} הדירות שמתאימות.` : 'אף דירה לא עונה על כל התנאים יחד.';
+      if (f.max && all.some((a) => !A.state.swiped[a.id] && a.rent > f.max)) {
+        const next = Math.ceil(f.max * 1.1 / 100) * 100;
+        label = `הרחבת המחיר עד ${nis(next)}`;
+        action = () => A.applyFilter(Object.assign({}, f, { max: next }), 'המחיר הורחב עד ' + nis(next));
+      } else {
+        label = 'ניקוי הסינון';
+        action = () => A.applyFilter(null, 'הסינון נוקה');
+      }
+    } else {
+      title = 'ראית את כל הדירות';
+      text = 'דירות חדשות מופיעות כאן ברגע שהן מתפרסמות.';
+      if (skipped.length) {
+        label = `להציג שוב ${skipped.length} דירות`;
+        action = () => { skipped.forEach((a) => delete A.state.swiped[a.id]); A.state.pen = {}; A.save(); renderDeck(); A.toast('הדירות חזרו לערימה'); };
+      }
+    }
+    const node = el(`
+      <div class="empty">
+        <div class="big">${I.home}</div>
+        <h2>${title}</h2><p>${text}</p>
+        <div class="btn-row">
+          ${label ? `<button class="btn-primary" type="button" data-act>${label}</button>` : ''}
+          <button class="btn-ghost" type="button" data-pub>${I.addHome} פרסום דירה</button>
+        </div>
+      </div>`);
+    const b = node.querySelector('[data-act]');
+    if (b) b.onclick = action;
+    node.querySelector('[data-pub]').onclick = () => A.go('publish');
+    return node;
+  }
+
+  /* ——— סינון חכם ——— */
+  function filterSheet() {
+    const f = Object.assign({ q: '', min: 0, max: 0, beds: 0, baths: 0, sqm: 0, cats: [] }, A.state.filter || {});
+    const seg = (key, vals) => vals.map(([v, l]) => `<button class="opt" type="button" data-k="${key}" data-v="${v}" aria-pressed="${Number(f[key]) === v}">${l}</button>`).join('');
+    A.sheet(`
+      <div class="sheet-head"><h3>${I.sliders} סינון חכם</h3><button class="linkish" type="button" data-reset>איפוס</button></div>
+      <div class="q"><span class="q-label">חיפוש חופשי</span>
+        <label class="search">${I.search}<input type="text" data-q value="${esc(f.q)}" placeholder="לדוגמה: כרמל, מרפסת, נוף לים"></label></div>
+      <div class="q"><span class="q-label">מחיר חודשי עד <span class="range-out" data-maxout>${f.max ? nis(f.max) : 'ללא הגבלה'}</span></span>
+        <input class="range" type="range" min="3000" max="8000" step="100" value="${f.max || 8000}" data-max aria-label="מחיר מקסימלי"></div>
+      <div class="q"><span class="q-label">חדרי שינה לפחות</span><div class="opts">${seg('beds', [[0, 'ללא סינון'], [1, '1'], [2, '2'], [3, '3'], [4, '4+']])}</div></div>
+      <div class="q"><span class="q-label">חדרי רחצה לפחות</span><div class="opts">${seg('baths', [[0, 'ללא סינון'], [1, '1'], [2, '2+']])}</div></div>
+      <div class="q"><span class="q-label">מ״ר מינימלי <span class="range-out" data-sqmout>${f.sqm ? f.sqm + ' מ״ר' : 'ללא'}</span></span>
+        <input class="range" type="range" min="0" max="120" step="5" value="${f.sqm || 0}" data-sqm aria-label="מטר מרובע מינימלי"></div>
+      <div class="q"><span class="q-label">קטגוריות</span><div class="opts">${D.categories.filter((c) => c.test).map((c) => `<button class="chip" type="button" data-cat="${c.id}" aria-pressed="${f.cats.includes(c.id)}">${esc(c.label)}</button>`).join('')}</div></div>
+      <div class="two-btn" style="margin-top:20px">
+        <button class="btn-ghost" type="button" data-clear>ניקוי הכול</button>
+        <button class="btn-primary" type="button" data-apply>${I.check} החלת הסינון</button>
+      </div>`, (sh, close) => {
+      sh.querySelectorAll('[data-k]').forEach((b) => {
+        b.onclick = () => { f[b.dataset.k] = Number(b.dataset.v); sh.querySelectorAll(`[data-k="${b.dataset.k}"]`).forEach((x) => x.setAttribute('aria-pressed', x === b)); };
+      });
+      sh.querySelectorAll('[data-cat]').forEach((b) => {
+        b.onclick = () => { const on = !f.cats.includes(b.dataset.cat); f.cats = on ? f.cats.concat(b.dataset.cat) : f.cats.filter((x) => x !== b.dataset.cat); b.setAttribute('aria-pressed', on); };
+      });
+      const mx = sh.querySelector('[data-max]'), sq = sh.querySelector('[data-sqm]');
+      mx.oninput = () => { f.max = Number(mx.value) >= 8000 ? 0 : Number(mx.value); sh.querySelector('[data-maxout]').textContent = f.max ? nis(f.max) : 'ללא הגבלה'; };
+      sq.oninput = () => { f.sqm = Number(sq.value); sh.querySelector('[data-sqmout]').textContent = f.sqm ? f.sqm + ' מ״ר' : 'ללא'; };
+      const clear = () => { close(); A.applyFilter(null, 'הסינון נוקה'); };
+      sh.querySelector('[data-reset]').onclick = clear;
+      sh.querySelector('[data-clear]').onclick = clear;
+      sh.querySelector('[data-apply]').onclick = () => {
+        f.q = sh.querySelector('[data-q]').value.trim();
+        const active = f.q || f.max || f.beds || f.baths || f.sqm || f.cats.length;
+        close();
+        const out = active ? { q: f.q, max: f.max, beds: f.beds, baths: f.baths, sqm: f.sqm, cats: f.cats } : null;
+        const n = apts().filter((a) => passes(a, out)).length;
+        A.applyFilter(out, active ? `${n} דירות מתאימות לסינון` : 'הסינון נוקה');
+      };
+    });
+  }
+
+  /* ——— פרטי דירה ——— */
+  const yes = (v) => (v ? 'כן' : 'לא');
+  A.details = function (a, opts) {
+    if (!a) return;
+    opts = opts || {};
+    const req = A.state.likes.find((l) => l.id === a.id);
+    const saved = A.state.saved[a.id];
+    A.sheet(`
+      <div class="sheet-photo"><div class="photo">${S.photo(a, 1)}</div></div>
+      <h3>${esc(a.title)}</h3>
+      <p class="sub">${esc(place(a))} · ${esc(a.city)}${a.example ? ' · דירה לדוגמה' : ''}</p>
+      <div class="detail-price"><span class="price">${nis(a.rent)}</span><span class="specs">${specs(a)}</span></div>
+      <div class="feat-list">${[a.type, a.cond].concat(a.features).filter(Boolean).map((x) => `<span>${esc(x)}</span>`).join('')}</div>
+      ${a.desc ? `<p>${esc(a.desc)}</p>` : ''}
+      <div class="sec-title">תשלומים ודרישות</div>
+      <dl class="kv">
+        <dt>ועד בית</dt><dd>${a.vaad != null ? nis(a.vaad) : '—'}</dd>
+        <dt>ארנונה דו-חודשית</dt><dd>${a.arnona != null ? nis(a.arnona) : '—'}</dd>
+        <dt>חוזה מינימלי</dt><dd>${a.contract ? a.contract + ' חודשים' : '—'}</dd>
+        <dt>ערבות בנקאית</dt><dd>${a.guarantee ? nis(a.guarantee) : 'לא נדרשת'}</dd>
+        <dt>ערבים</dt><dd>${a.guarantors ? 'נדרשים' : 'לא נדרשים'}</dd>
+        <dt>שותפים</dt><dd>${yes(a.partners)}</dd>
+        <dt>עישון</dt><dd>${yes(a.smoking)}</dd>
+        <dt>כניסה</dt><dd>${fmtDate(a.entry, true)}</dd>
+        <dt>מפרסם</dt><dd>${esc(a.by.name)} · ${esc(a.by.role)}</dd>
+      </dl>
+      <p class="note">מספר הבית והטלפון של ${esc(a.by.name)} נחשפים רק אחרי התאמה.</p>
+      <div class="btn-row" style="margin-top:12px">
+        ${req ? `<div class="sent">${req.status === 'match' ? 'יש התאמה · השיחה פתוחה' : 'הפנייה נשלחה · מחכים לאישור'}</div>`
+              : `<button class="btn-primary" type="button" data-req>שליחת פנייה ל${esc(a.by.name)}</button>`}
+        ${opts.fromDeck === false ? '' : `<div class="two-btn">
+          <button class="btn-ghost" type="button" data-star>${I.star} ${saved && saved.star ? 'יש כוכב' : 'כוכב'}</button>
+          <button class="btn-ghost" type="button" data-save>${I.heart} ${saved ? 'שמור' : 'שמירה'}</button>
+        </div>`}
+      </div>`, (sh, close) => {
+      const fire = (dir) => {
+        const c = document.querySelector(`.card[data-id="${a.id}"]:not(.under)`);
+        close();
+        if (c) return c._fly(dir);
+        A.state.saved[a.id] = { star: dir === 'U' || !!(saved && saved.star), t: Date.now() };
+        if (dir === 'U') learnStar(a);
+        A.save();
+        A.toast(dir === 'U' ? 'סימנת כוכב · נציג יותר דירות כמו זו' : 'נשמר ב«אהבתי»', 2400, 'ok');
+      };
+      const st = sh.querySelector('[data-star]'), sv = sh.querySelector('[data-save]'), rq = sh.querySelector('[data-req]');
+      if (st) st.onclick = () => fire('U');
+      if (sv) sv.onclick = () => fire('R');
+      if (rq) rq.onclick = () => { close(); A.sendRequest(a); };
+    });
+  };
+
+  /* ——— פנייה לבעל הדירה ——— */
+  A.sendRequest = function (a) {
+    const st = A.state;
+    if (st.likes.find((l) => l.id === a.id)) return A.toast('כבר שלחת פנייה על הדירה הזאת');
+    st.likes.push({ id: a.id, t: Date.now(), status: 'wait', seen: false });
+    if (!st.saved[a.id]) st.saved[a.id] = { star: false, t: Date.now() };
+    A.save();
+    A.log('request', { id: a.id });
+    A.toast(`הפנייה נשלחה ל${a.by.name} · ${g(a.by.g, 'הוא יראה', 'היא תראה')} שיש מתעניין, בלי פרטים`, 3000);
+    schedule(a.id, 3400);
+    if (A.current.name === 'favs') A.go('favs');
+  };
+  function schedule(id, ms) {
+    if (scheduled.has(id)) return;
+    scheduled.add(id);
+    setTimeout(() => approve(id), ms);
+  }
+  function approve(id) {
+    const l = A.state.likes.find((x) => x.id === id);
+    if (!l || l.status === 'match') return;
+    l.status = 'match'; A.save();
+    A.log('match', { id, side: 'seeker' });
+    const a = byId(id);
+    refreshTabbar();
+    if (A.current.name === 'favs') A.go('favs');
+    if (a) A.banner(`${a.by.name} ${g(a.by.g, 'אישר', 'אישרה')} · יש התאמה`, `${a.street} · לחצו לפרטים`, () => A.go('match', id));
+  }
+
+  A.apts = apts;
+  A.byId = byId;
+  A.place = place;
+  A.specs = specs;
+  A.photoMem = photoMem;
+  A.filterSheet = filterSheet;
+  A.clearScheduled = () => scheduled.clear();
+})();
+
+</script>
+<script>
+/* לשוניות: אהבתי, קטגוריות, עוזר AI · ומסכי ההתאמה, הפרטים והשיחה */
+(function () {
+  const A = window.App;
+  const { D, esc, nis, g, el } = A;
+  const S = window.SCENES;
+  const I = A.ICON;
+
+  const page = (title, body, tab, extra) => `
+    <section class="screen">
+      <div class="page-top">${title}${extra || ''}</div>
+      ${body}
+      ${A.tabbar(tab)}
+    </section>`;
+
+  /* ——— אהבתי ——— */
+  A.routes.favs = function () {
+    const st = A.state;
+    const ids = Object.keys(st.saved).filter((id) => A.byId(id)).sort((x, y) => st.saved[y].t - st.saved[x].t);
+    const rows = ids.map((id) => {
+      const a = A.byId(id), s = st.saved[id], r = st.likes.find((l) => l.id === id);
+      const pill = r ? (r.status === 'match' ? '<span class="state ok">יש התאמה</span>' : '<span class="state wait">ממתין לאישור</span>')
+        : (s.star ? '<span class="state star">★ כוכב</span>' : '');
+      return `
+        <div class="fav" data-id="${id}" role="button" tabindex="0">
+          <div class="thumb"><div class="photo">${S.photo(a, 0)}</div></div>
+          <div class="main"><b>${esc(a.title)}</b><span class="p">${nis(a.rent)}</span><small>${esc(A.place(a))}</small></div>
+          <div class="side">${pill}<button class="icon-btn" type="button" data-unsave aria-label="הסרה מאהבתי">${I.heart}</button></div>
+        </div>`;
+    }).join('');
+    const body = ids.length
+      ? `<div class="scroll grow"><div class="fav-list">${rows}</div>
+           <p class="fine" style="padding:0 20px 16px">פנייה לבעל הדירה נשלחת מתוך פרטי הדירה.<br><a class="linkish" href="#owner">איך זה נראה אצל בעל הדירה</a></p></div>`
+      : `<div class="empty"><div class="big">${I.heart}</div><h2>עוד לא שמרת דירות</h2><p>החלקה ימינה או ♥ שומרת דירה כאן.</p>
+           <div class="btn-row"><button class="btn-primary" type="button" data-go>לדירות</button></div></div>`;
+    const scr = A.mount(el(page('דירות שאהבתי', body, 'favs')));
+    A.bindTabbar(scr);
+    const go = scr.querySelector('[data-go]');
+    if (go) go.onclick = () => A.go('deck');
+    scr.querySelectorAll('.fav').forEach((row) => {
+      const id = row.dataset.id;
+      const open = () => {
+        const a = A.byId(id), r = st.likes.find((l) => l.id === id);
+        if (r && r.status === 'match') return st.chats['a-' + id] ? openChat(a) : A.go('match', id);
+        A.details(a, { fromDeck: false });
+      };
+      row.onclick = (e) => { if (!e.target.closest('[data-unsave]')) open(); };
+      row.onkeydown = (e) => { if (e.key === 'Enter') open(); };
+      row.querySelector('[data-unsave]').onclick = () => {
+        if (st.likes.find((l) => l.id === id)) return A.toast('יש פנייה פתוחה על הדירה הזאת');
+        delete st.saved[id]; A.save(); A.routes.favs(); A.toast('הוסר מ«אהבתי»');
+      };
+    });
+  };
+
+  /* ——— קטגוריות ——— */
+  A.routes.categories = function () {
+    const all = A.apts();
+    const tiles = D.categories.map((c) => {
+      const list = c.test ? all.filter(c.test) : all.slice().sort((x, y) => A.similarity(y) - A.similarity(x));
+      const pic = list[0] || all[0];
+      const small = c.test ? `${list.length} דירות` : (A.state.tune.n ? 'לפי הכוכבים שסימנת' : 'סמנו כוכבים והיא תלמד');
+      return `<button class="cat" type="button" data-cat="${c.id}"><div class="photo">${S.photo(pic, 0)}</div>
+        <span class="badge2" aria-hidden="true">${c.badge}</span><span class="label">${esc(c.label)}<small>${small}</small></span></button>`;
+    }).join('');
+    const scr = A.mount(el(page('חיפוש לפי קטגוריות', `<div class="scroll grow"><div class="cat-grid">${tiles}</div></div>`, 'categories')));
+    A.bindTabbar(scr);
+    scr.querySelectorAll('[data-cat]').forEach((b) => {
+      b.onclick = () => {
+        const c = D.categories.find((x) => x.id === b.dataset.cat);
+        if (!c.test) {
+          A.log('category', { id: c.id });
+          return A.applyFilter({ label: 'מותאם לך' }, A.state.tune.n ? 'הערימה מסודרת לפי הכוכבים שסימנת' : 'עוד אין כוכבים · סמנו כוכב על דירות שאהבתם במיוחד');
+        }
+        const n = all.filter(c.test).length;
+        A.log('category', { id: c.id });
+        A.applyFilter({ cats: [c.id] }, `${n} דירות · ${c.label}`);
+      };
+    });
+  };
+
+  /* ——— עוזר AI · מדומה: מחפש לפי המילים בבקשה ——— */
+  const FEAT = [[/מרפסת/, 'מרפסת'], [/חני/, 'חניה'], [/ממ["״']?ד/, 'ממ"ד'], [/מעלית/, 'מעלית'], [/מזגן|מיזוג|ממוזג/, 'מזגנים'],
+    [/חיות|כלב|חתול/, 'חיות מחמד'], [/מרוהט|ריהוט/, 'מרוהטת'], [/נוף|לים|הים/, 'נוף לים'], [/גינה|חצר|דירת גן/, 'גינה'], [/מחסן/, 'מחסן']];
+  const PLACES = ['נווה שאנן', 'רמת אלמוגי', 'כרמל', 'הדר', 'אחוזה', 'קריית ביאליק', 'קריית מוצקין', 'קריית אתא', 'הקריות', 'חיפה'];
+
+  function parse(t) {
+    const f = {}, found = [];
+    const rm = t.match(/(\d(?:\.\d)?)\s*\+?\s*(?:חדרים|חדר|חד׳|חד')/);
+    if (rm) { f.rooms = Number(rm[1]); found.push(f.rooms + ' חדרים ומעלה'); }
+    const pm = t.match(/עד\s*([\d.,]+)\s*(אלף)?/);
+    if (pm) { let v = Number(pm[1].replace(/,/g, '')); if (pm[2] || v < 100) v *= 1000; f.max = v; found.push('עד ' + nis(v)); }
+    f.feats = FEAT.filter(([re]) => re.test(t)).map(([, v]) => v);
+    f.feats.forEach((x) => found.push(x));
+    f.places = PLACES.filter((p) => t.includes(p));
+    if (f.places.includes('חיפה') && f.places.length > 1) f.places = f.places.filter((p) => p !== 'חיפה');
+    f.places.forEach((p) => found.push(p));
+    return { f, found };
+  }
+
+  function search(t) {
+    const { f, found } = parse(t);
+    if (!found.length) return { text: 'לא הבנתי מה לחפש. אפשר לכתוב מספר חדרים, מחיר, אזור, או משהו שחשוב לך, כמו מרפסת או חניה.' };
+    const all = A.apts();
+    let q = JSON.parse(JSON.stringify(f));
+    let res = all.filter((a) => A.passes(a, q));
+    const dropped = [];
+    while (!res.length && (q.feats.length || q.places.length || q.rooms || q.max)) {
+      if (q.feats.length) dropped.push(q.feats.pop());
+      else if (q.places.length) dropped.push(q.places.pop());
+      else if (q.rooms) { dropped.push(q.rooms + ' חדרים'); delete q.rooms; }
+      else { dropped.push('המחיר'); delete q.max; }
+      res = all.filter((a) => A.passes(a, q));
+    }
+    const text = dropped.length
+      ? `לא מצאתי דירה עם הכול יחד. הנה ${res.length} הכי קרובות, בלי: ${dropped.join(', ')}.`
+      : `מצאתי ${res.length} ${res.length === 1 ? 'דירה' : 'דירות'} · ${found.join(' · ')}`;
+    return { text, ids: res.slice(0, 5).map((a) => a.id), filter: Object.assign(q, { label: 'לפי העוזר' }), total: res.length };
+  }
+
+  A.routes.ai = function () {
+    const st = A.state;
+    const scr = A.mount(el(`
+      <section class="screen">
+        <div class="page-top">עוזר AI אישי</div>
+        <div class="msgs"></div>
+        <form class="composer"><input type="text" aria-label="מה חשוב לך בדירה" placeholder="הקלידו את הבקשה שלכם כאן..." autocomplete="off" enterkeyhint="send">
+          <button type="submit" aria-label="שליחה">${I.send}</button></form>
+        ${A.tabbar('ai')}
+      </section>`));
+    A.bindTabbar(scr);
+    const list = scr.querySelector('.msgs'), input = scr.querySelector('input');
+    const scrollDown = () => { list.scrollTop = list.scrollHeight; };
+
+    const addMsg = (m) => {
+      list.append(el(`<div class="msg ${m.who === 'me' ? 'me' : 'bot'}">${esc(m.text)}</div>`));
+      if (m.ids && m.ids.length) {
+        const box = el(`<div class="ai-results"><div class="head">${I.spark} תוצאות שנמצאו עבורך</div></div>`);
+        m.ids.forEach((id) => {
+          const a = A.byId(id);
+          if (!a) return;
+          const card = el(`<div class="ai-card"><div class="pic"><div class="photo">${S.photo(a, 0)}</div></div><div class="body">
+            <b>${esc(a.title)}</b><div class="meta"><span>${esc(A.place(a))}</span><span class="p">${nis(a.rent)}</span></div>
+            <div class="two-btn"><button class="btn-ghost" type="button" data-d>פרטים</button><button class="btn-primary" type="button" data-s>${I.heart} שמירה</button></div></div></div>`);
+          card.querySelector('[data-d]').onclick = () => A.details(a, { fromDeck: false });
+          card.querySelector('[data-s]').onclick = () => { st.saved[a.id] = st.saved[a.id] || { star: false, t: Date.now() }; A.save(); A.toast('נשמר ב«אהבתי»', 2200, 'ok'); };
+          box.append(card);
+        });
+        if (m.total > 0) {
+          const all = el(`<button class="btn-primary" type="button">הצגת ${m.total} התוצאות בערימה</button>`);
+          all.onclick = () => A.applyFilter(m.filter, 'נוצר מסנן מותאם אישית לבקשה שלך');
+          box.append(all);
+        }
+        list.append(box);
+      }
+      scrollDown();
+    };
+
+    addMsg({ who: 'bot', text: 'שלום! אני העוזר האישי שלך למציאת דירה. מה חשוב לך בדירה הבאה? למשל: 3 חדרים בכרמל עם מרפסת, עד 5,500 ₪.' });
+    list.append(el('<div class="msg sys">בדמו העוזר מחפש לפי המילים שכתבת, בלי AI אמיתי</div>'));
+    if (!st.aiChat.length) {
+      const sug = el(`<div class="chips" style="padding:0">${['3 חדרים עם מרפסת', 'עד 4,500 בחיפה', 'דירה עם חניה בקריות'].map((s) => `<button class="chip" type="button">${s}</button>`).join('')}</div>`);
+      sug.querySelectorAll('.chip').forEach((b) => { b.onclick = () => { input.value = b.textContent; scr.querySelector('form').requestSubmit(); sug.remove(); }; });
+      list.append(sug);
+    }
+    st.aiChat.forEach(addMsg);
+
+    scr.querySelector('form').onsubmit = (e) => {
+      e.preventDefault();
+      const text = input.value.trim();
+      if (!text) return;
+      input.value = '';
+      const me = { who: 'me', text };
+      st.aiChat.push(me); addMsg(me);
+      const dots = el('<div class="typing" aria-label="העוזר כותב"><i></i><i></i><i></i></div>');
+      list.append(dots); scrollDown();
+      A.log('ai', { q: text.length });
+      setTimeout(() => {
+        dots.remove();
+        const r = search(text);
+        const bot = Object.assign({ who: 'bot' }, r);
+        st.aiChat.push(bot); A.save(); addMsg(bot);
+      }, 900);
+    };
+  };
+
+  /* ——— התאמה ——— */
+  A.routes.match = function (id) {
+    const a = A.byId(id);
+    if (!a) return A.go('favs');
+    const l = A.state.likes.find((x) => x.id === id);
+    if (l) { l.seen = true; A.save(); }
+    const scr = A.mount(el(`
+      <section class="screen match scroll">
+        <div class="match-center">
+          <span class="hello">${I.check} יש התאמה</span>
+          <div class="match-art"><div class="photo">${S.photo(a, 0)}</div></div>
+          <h2>${esc(a.by.name)} ${g(a.by.g, 'אישר', 'אישרה')} את הפנייה שלך</h2>
+          <p class="sub">${esc(a.title)} · ${nis(a.rent)}</p>
+        </div>
+        <ul class="reveal">
+          <li><b>נחשף לך</b>הכתובת המלאה, ${esc(a.street)} ${esc(a.houseNo)}, והטלפון בשיחה</li>
+          <li><b>נחשף ל${esc(a.by.name)}</b>מקור הכנסה · הכנסות נוספות · נפשות · קצת עליך</li>
+        </ul>
+        <div class="btn-row">
+          <button class="btn-primary" type="button" data-go>${A.state.profile ? 'פתיחת השיחה' : 'השלמת פרטים ופתיחת השיחה'}</button>
+          <button class="btn-ghost" type="button" data-back>חזרה לאהבתי</button>
+        </div>
+      </section>`));
+    scr.querySelector('[data-go]').onclick = () => (A.state.profile ? openChat(a) : A.go('profile', id));
+    scr.querySelector('[data-back]').onclick = () => A.go('favs');
+  };
+
+  /* ——— פרטים · רק אחרי התאמה ——— */
+  A.routes.profile = function (id) {
+    const a = A.byId(id);
+    const pr = A.state.profile || {};
+    const scr = A.mount(el(`
+      <section class="screen scroll">
+        <div class="page-top"><button class="icon-btn" type="button" data-back aria-label="חזרה">${I.back}</button>הפרטים שלך</div>
+        <form class="form" novalidate>
+          <p class="sub">${esc(a.by.name)} ${g(a.by.g, 'יראה', 'תראה')} אותם עכשיו, כי יש ביניכם התאמה. אף אחד אחר לא רואה אותם.</p>
+          <button class="linkish" type="button" data-fill style="justify-self:start">מילוי פרטים לדוגמה</button>
+          <div class="field"><label for="f-name">שם מלא</label><input id="f-name" name="name" autocomplete="name" value="${esc(pr.name || '')}"></div>
+          <div class="field"><label for="f-about">קצת עליך</label><textarea id="f-about" name="about" placeholder="מי גר בדירה, עבודה מהבית, חיות">${esc(pr.about || '')}</textarea></div>
+          <div class="row2">
+            <div class="field"><label for="f-income">מקור הכנסה</label><select id="f-income" name="income">${['שכיר/ה', 'עצמאי/ת', 'סטודנט/ית', 'קצבה', 'אחר'].map((o) => `<option ${pr.income === o ? 'selected' : ''}>${o}</option>`).join('')}</select></div>
+            <div class="field"><label for="f-job">מקום עבודה</label><input id="f-job" name="job" value="${esc(pr.job || '')}"></div>
+          </div>
+          <div class="row2">
+            <div class="field"><label for="f-max">תשלום עד</label><input id="f-max" name="payMax" inputmode="numeric" value="${esc(pr.payMax || a.rent)}"></div>
+            <div class="field"><label for="f-occ">נפשות</label><input id="f-occ" name="occupants" inputmode="numeric" value="${esc(pr.occupants || '')}"></div>
+          </div>
+          <div class="field"><label for="f-extra">הכנסה נוספת</label><input id="f-extra" name="extra" value="${esc(pr.extra || '')}"></div>
+          <button class="btn-primary" type="submit">שמירה ופתיחת השיחה</button>
+        </form>
+      </section>`));
+    const f = scr.querySelector('form');
+    scr.querySelector('[data-back]').onclick = () => A.go('match', id);
+    scr.querySelector('[data-fill]').onclick = () => {
+      const ex = { name: 'דנה לוי', about: 'גרה לבד עם חתולה, עובדת מהבית פעמיים בשבוע.', income: 'שכיר/ה', job: 'בית חולים', payMax: a.rent, occupants: 1, extra: 'אין' };
+      Object.keys(ex).forEach((k) => { if (f.elements[k]) f.elements[k].value = ex[k]; });
+    };
+    f.onsubmit = (e) => {
+      e.preventDefault();
+      if (!f.elements.name.value.trim()) { A.toast('חסר שם מלא · אפשר גם «מילוי פרטים לדוגמה»'); f.elements.name.focus(); return; }
+      const data = {};
+      ['name', 'about', 'income', 'job', 'payMax', 'occupants', 'extra'].forEach((k) => { data[k] = f.elements[k].value.trim(); });
+      A.state.profile = data; A.save(); A.log('profile', {});
+      openChat(a);
+    };
+  };
+
+  function openChat(a) {
+    A.chat({
+      key: 'a-' + a.id,
+      title: `${a.by.name} · ${a.by.role}`,
+      subtitle: `${a.street} ${a.houseNo}${a.hood ? ', ' + a.hood : ''}`,
+      initials: a.by.name[0],
+      prefill: `היי ${a.by.name}, ראיתי את הדירה ב${a.street}. אשמח לתאם ביקור 🙂`,
+      replies: [`היי! ${g(a.by.g, 'שמח', 'שמחה')} שיש התאמה. אפשר לבוא מחר בשש. הטלפון שלי 050-0000000 (מספר לדוגמה)`, 'מעולה, נתראה מחר.', '🙂'],
+      onBack: () => A.go('favs'),
+      after: `<a class="btn-ghost" href="#owner">איך זה נראה אצל בעל הדירה</a><button class="btn-primary" type="button" data-pub>${I.addHome} יש לך דירה? פרסום דירה</button>`,
+      afterMount: (node) => { node.querySelector('[data-pub]').onclick = () => A.go('publish'); }
+    });
+  }
+  A.openAptChat = openChat;
+})();
+
+</script>
+<script>
+/* פרסום דירה בחמישה שלבים, כמו באב-טיפוס של ניר */
+(function () {
+  const A = window.App;
+  const { D, esc, nis, el } = A;
+  const I = A.ICON;
+
+  const STEPS = [
+    { id: 'addr', title: 'כתובת מדויקת' },
+    { id: 'details', title: 'פרטי הדירה' },
+    { id: 'pay', title: 'תשלומים ודרישות' },
+    { id: 'media', title: 'מדיה: תמונות/וידאו' },
+    { id: 'contact', title: 'איש קשר' }
+  ];
+  let d, cur, photos, videoName;
+
+  const fresh = () => ({ city: '', street: '', houseNo: '', entrance: '', floor: '', floors: '', title: '', rent: '', sqm: '', outSqm: '', beds: '2', baths: '1',
+    type: 'דירה', cond: 'שמורה מאוד', features: [], acType: '', parking: '0', desc: '', vaad: '', arnona: '', contract: '12', guarantee: 'no', guaranteeAmt: '',
+    guarantors: 'no', partners: 'no', smoking: 'no', notes: '', name: '', phone: '', showPhone: 'no' });
+
+  /* ——— כתיבה אוטומטית · מדומה ——— */
+  function aiTitle() {
+    const rooms = Number(d.beds || 1) + 1;
+    const cond = { 'חדשה מהקבלן': 'חדשה', 'משופצת': 'משופצת', 'שמורה מאוד': 'שמורה' }[d.cond] || '';
+    const ex = [];
+    if (d.features.includes('מרפסת')) ex.push('מרפסת');
+    if (Number(d.parking) > 0 || d.features.includes('חניה')) ex.push('חניה');
+    if (d.features.includes('ממ"ד')) ex.push('ממ"ד');
+    const withTxt = ex.length ? ' עם ' + (ex.length > 1 ? ex.slice(0, -1).join(', ') + ' ו' + ex[ex.length - 1] : ex[0]) : '';
+    const kind = d.type === 'דירה' ? `דירת ${rooms} חדרים` : `${d.type} ${rooms} חדרים`;
+    return `${kind}${cond ? ' ' + cond : ''}${withTxt}${d.street ? ' ב' + d.street : ''}`;
+  }
+  function aiDesc() {
+    const rooms = Number(d.beds || 1) + 1;
+    const feats = d.features.filter((x) => x !== 'מיזוג');
+    return [
+      `ברוכים הבאים ל${d.type === 'דירה' ? 'דירה' : d.type} ${d.cond === 'משופצת' ? 'המשופצת' : d.cond === 'חדשה מהקבלן' ? 'החדשה' : 'המקסימה'} ב${d.street ? d.street + ', ' : ''}${d.city || 'חיפה'}.`,
+      `${rooms} חדרים${d.sqm ? `, ${d.sqm} מ״ר` : ''}${d.floor ? `, קומה ${d.floor}${d.floors ? ' מתוך ' + d.floors : ''}` : ''}.`,
+      feats.length || d.acType ? `בדירה: ${feats.concat(d.acType ? [d.acType] : []).join(', ')}.` : '',
+      Number(d.parking) > 0 ? `${d.parking === '1' ? 'חניה צמודה' : d.parking + ' חניות צמודות'}.` : '',
+      'צרו קשר לתיאום ביקור.'
+    ].filter(Boolean).join(' ');
+  }
+
+  /* ——— רכיבים ——— */
+  const field = (name, label, attrs, err) => `<div class="field ${err ? 'bad' : ''}"><label for="p-${name}">${label}</label><input id="p-${name}" name="${name}" value="${esc(d[name])}" ${attrs || ''}>${err ? `<span class="err">${err}</span>` : ''}</div>`;
+  const select = (name, label, list, err) => `<div class="field ${err ? 'bad' : ''}"><label for="p-${name}">${label}</label><select id="p-${name}" name="${name}">${list.map((o) => `<option ${String(d[name]) === String(o) ? 'selected' : ''} value="${esc(o)}">${esc(o)}</option>`).join('')}</select>${err ? `<span class="err">${err}</span>` : ''}</div>`;
+  const yn = (name, label) => `<div class="yn-row"><span>${label}</span><div class="yn"><button type="button" data-yn="${name}" data-v="no" aria-pressed="${d[name] === 'no'}">לא</button><button type="button" data-yn="${name}" data-v="yes" aria-pressed="${d[name] === 'yes'}">כן</button></div></div>`;
+  const ai = (name, label, tag) => `<div class="field with-ai"><label for="p-${name}">${label}</label>${tag === 'textarea' ? `<textarea id="p-${name}" name="${name}">${esc(d[name])}</textarea>` : `<input id="p-${name}" name="${name}" value="${esc(d[name])}">`}<button class="ai-btn" type="button" data-ai="${name}" aria-label="כתיבה אוטומטית">${I.spark}</button></div>`;
+
+  function body(id, errs) {
+    const e = errs || {};
+    if (id === 'addr') return `
+      <div class="sub-h">בחירת עיר ורחוב</div>
+      <div class="field ${e.city ? 'bad' : ''}"><label for="p-city">עיר</label><select id="p-city" name="city"><option value="">בחירה מהרשימה</option>${D.cities.map((c) => `<option ${d.city === c ? 'selected' : ''}>${c}</option>`).join('')}</select>${e.city ? `<span class="err">${e.city}</span>` : ''}</div>
+      ${field('street', 'רחוב', 'list="p-streets" autocomplete="off"', e.street)}<datalist id="p-streets">${D.streets.map((s) => `<option value="${esc(s)}">`).join('')}</datalist>
+      ${field('houseNo', 'מספר בית', 'inputmode="numeric"', e.houseNo)}
+      <div class="row3">${field('entrance', 'כניסה')}${field('floor', 'קומה', 'inputmode="numeric"')}${field('floors', 'סה״כ קומות', 'inputmode="numeric"')}</div>`;
+    if (id === 'details') return `
+      ${ai('title', 'כותרת הנכס')}
+      <div class="row2">${field('rent', 'מחיר חודשי (₪)', 'inputmode="numeric"', e.rent)}${field('sqm', 'מ״ר בנוי', 'inputmode="numeric"', e.sqm)}</div>
+      ${field('outSqm', 'מ״ר גינה/מרפסת (לא חובה)', 'inputmode="numeric"')}
+      <div class="row2">${select('beds', 'חדרי שינה', [1, 2, 3, 4, 5])}${select('baths', 'חדרי רחצה', [1, 2, 3])}</div>
+      <div class="row2">${select('type', 'סוג הנכס', D.types)}${select('cond', 'מצב הדירה', D.conds)}</div>
+      <div class="field"><span class="label">מאפייני הדירה</span><div class="opts">${D.featureList.map((x) => `<button class="chip" type="button" data-feat="${esc(x)}" aria-pressed="${d.features.includes(x)}">${esc(x)}</button>`).join('')}</div></div>
+      ${d.features.includes('מיזוג') ? select('acType', 'סוג מיזוג (חובה כשמסומן מיזוג)', [''].concat(D.acTypes), e.acType) : ''}
+      <div class="field"><span class="label">חניה</span><div class="opts">${[['0', 'ללא'], ['1', '1'], ['2', '2'], ['3', '3']].map(([v, l]) => `<button class="opt" type="button" data-park="${v}" aria-pressed="${d.parking === v}">${l}</button>`).join('')}</div></div>
+      ${ai('desc', 'תיאור', 'textarea')}
+      <p class="note">בדמו הכתיבה האוטומטית מדומה: היא מרכיבה טקסט מהשדות שמילאת.</p>`;
+    if (id === 'pay') return `
+      <div class="sub-h">תשלומים</div>
+      <div class="row2">${field('vaad', 'ועד בית (₪)', 'inputmode="numeric"')}${field('arnona', 'ארנונה דו-חודשית (₪)', 'inputmode="numeric"')}</div>
+      <div class="sub-h">דרישות חוזה</div>
+      ${select('contract', 'אורך חוזה מינימלי (חודשים)', [1, 6, 9, 12, 18, 24])}
+      ${yn('guarantee', 'ערבות בנקאית נדרשת')}
+      ${d.guarantee === 'yes' ? field('guaranteeAmt', 'סכום הערבות (₪) · חובה', 'inputmode="numeric"', e.guaranteeAmt) : ''}
+      ${yn('guarantors', 'דורש ערבים')}${yn('partners', 'שותפים מותר')}${yn('smoking', 'עישון מותר')}
+      ${field('notes', 'הערות או דרישות נוספות (לא חובה)')}`;
+    if (id === 'media') return `
+      <div class="media-add"><span class="label" style="font-weight:700">תמונות הדירה (עד 10)</span>
+        <label class="btn-primary">הוספת תמונות<input type="file" accept="image/*" multiple hidden data-photos></label></div>
+      <div class="thumbs">${photos.map((p) => `<img src="${p}" alt="">`).join('')}<span class="count">${photos.length}/10</span></div>
+      <div class="media-add"><span class="label" style="font-weight:700">סרטון (לא חובה)</span>
+        <label class="btn-ghost" style="width:auto">הוספה<input type="file" accept="video/*" hidden data-video></label></div>
+      ${videoName ? `<p class="note">${I.check ? '' : ''}נוסף סרטון: ${esc(videoName)}</p>` : ''}
+      <p class="note">בלי תמונות, הכרטיס יוצג עם איור. בדמו הקבצים נשארים רק במכשיר הזה.</p>`;
+    return `
+      ${field('name', 'שם', 'autocomplete="name"')}
+      ${field('phone', 'טלפון', 'inputmode="tel" autocomplete="tel"', e.phone)}
+      ${yn('showPhone', 'הצגת מספר הטלפון במודעה')}
+      <p class="note">${d.showPhone === 'yes' ? 'כן: המספר יוצג לכל מי שרואה את המודעה.' : 'לא: המספר יוצג רק אחרי התאמה, בשיחה. זו הבחירה המומלצת.'}</p>`;
+  }
+
+  function validate(id) {
+    const e = {};
+    if (id === 'addr') {
+      if (!D.cities.includes(d.city)) e.city = 'חובה לבחור עיר מהרשימה';
+      if (!d.street.trim()) e.street = 'חובה למלא רחוב';
+      if (!String(d.houseNo).trim()) e.houseNo = 'חובה למלא מספר בית';
+    }
+    if (id === 'details') {
+      if (!Number(String(d.rent).replace(/[^\d]/g, ''))) e.rent = 'חובה למלא מחיר';
+      if (!Number(d.sqm)) e.sqm = 'חובה למלא מ״ר';
+      if (d.features.includes('מיזוג') && !d.acType) e.acType = 'חובה לבחור סוג מיזוג';
+    }
+    if (id === 'pay' && d.guarantee === 'yes' && !Number(d.guaranteeAmt)) e.guaranteeAmt = 'חובה למלא סכום';
+    if (id === 'contact' && !String(d.phone).trim()) e.phone = 'חובה למלא טלפון';
+    return e;
+  }
+
+  /* ——— המסך ——— */
+  A.routes.publish = function () {
+    d = fresh(); cur = 0; photos = []; videoName = '';
+    render();
+  };
+
+  function render(errs) {
+    const scr = A.mount(el(`
+      <section class="screen">
+        <div class="page-top"><button class="icon-btn" type="button" data-back aria-label="חזרה">${I.back}</button>פרסום דירה</div>
+        <div class="scroll grow"><div class="stepper">
+          ${STEPS.map((s, i) => `
+            <div class="step ${i === cur ? 'on' : ''} ${i < cur ? 'done' : ''}">
+              <span class="step-num">${i < cur ? I.check : i + 1}</span>
+              <button class="step-head" type="button" data-step="${i}">${s.title}</button>
+              ${i === cur ? `<form class="step-body" novalidate>${body(s.id, errs)}
+                <div class="step-actions"><button class="btn-primary" type="submit">${i === STEPS.length - 1 ? 'פרסום הדירה' : 'המשך'}</button>
+                ${i ? '<button class="btn-ghost" type="button" data-prev>' + I.back + ' הקודם</button>' : ''}</div></form>` : ''}
+            </div>`).join('')}
+        </div></div>
+      </section>`));
+    const form = scr.querySelector('.step-body');
+    scr.querySelector('[data-back]').onclick = () => A.go('deck');
+    scr.querySelectorAll('[data-step]').forEach((b) => { b.onclick = () => { const i = Number(b.dataset.step); if (i < cur) { cur = i; render(); } }; });
+    const prev = scr.querySelector('[data-prev]');
+    if (prev) prev.onclick = () => { cur--; render(); };
+
+    form.addEventListener('input', (e) => { if (e.target.name) d[e.target.name] = e.target.value; });
+    form.addEventListener('change', (e) => {
+      if (e.target.name) d[e.target.name] = e.target.value;
+      if (e.target.name === 'city' || e.target.name === 'acType') return;
+    });
+    form.querySelectorAll('[data-yn]').forEach((b) => { b.onclick = () => { d[b.dataset.yn] = b.dataset.v; render(); }; });
+    form.querySelectorAll('[data-feat]').forEach((b) => {
+      b.onclick = () => { const x = b.dataset.feat; d.features = d.features.includes(x) ? d.features.filter((y) => y !== x) : d.features.concat(x); render(); };
+    });
+    form.querySelectorAll('[data-park]').forEach((b) => { b.onclick = () => { d.parking = b.dataset.park; render(); }; });
+    form.querySelectorAll('[data-ai]').forEach((b) => {
+      b.onclick = () => {
+        b.classList.add('busy');
+        A.toast('כותב עם AI...', 900);
+        setTimeout(() => {
+          d[b.dataset.ai] = b.dataset.ai === 'title' ? aiTitle() : aiDesc();
+          render();
+          A.toast('נכתב אוטומטית · אפשר לערוך', 2200, 'ok');
+        }, 800);
+      };
+    });
+    const ph = form.querySelector('[data-photos]');
+    if (ph) ph.onchange = () => {
+      const files = Array.from(ph.files).slice(0, 10 - photos.length);
+      let left = files.length;
+      files.forEach((fl) => {
+        const rd = new FileReader();
+        rd.onload = () => { photos.push(rd.result); if (--left === 0) render(); };
+        rd.readAsDataURL(fl);
+      });
+    };
+    const vd = form.querySelector('[data-video]');
+    if (vd) vd.onchange = () => { if (vd.files[0]) { videoName = vd.files[0].name; render(); A.toast('נוסף סרטון: ' + videoName); } };
+
+    form.onsubmit = (ev) => {
+      ev.preventDefault();
+      const e = validate(STEPS[cur].id);
+      if (Object.keys(e).length) { render(e); A.toast('יש שדות חובה שלא מולאו'); return; }
+      if (cur < STEPS.length - 1) { cur++; render(); return; }
+      publish();
+    };
+  }
+
+  function publish() {
+    const rent = Number(String(d.rent).replace(/[^\d]/g, ''));
+    const feats = d.features.map((x) => (x === 'מיזוג' ? 'מזגנים' : x));
+    if (Number(d.parking) > 0 && !feats.includes('חניה')) feats.push('חניה');
+    const entry = new Date(Date.UTC(2026, 9, 10)).toISOString().slice(0, 10);
+    const a = {
+      id: 'm' + Date.now(), mine: true, example: false,
+      area: d.city === 'חיפה' ? 'haifa' : 'krayot', city: d.city, hood: '', street: d.street.trim(), houseNo: d.houseNo,
+      rooms: Number(d.beds) + 1, beds: Number(d.beds), baths: Number(d.baths), sqm: Number(d.sqm), floor: Number(d.floor) || 0, floors: Number(d.floors) || 0,
+      rent, entry, features: feats, type: d.type, cond: d.cond,
+      title: d.title.trim() || aiTitle(), desc: d.desc.trim() || aiDesc(),
+      vaad: Number(d.vaad) || null, arnona: Number(d.arnona) || null, contract: Number(d.contract),
+      guarantee: d.guarantee === 'yes' ? Number(d.guaranteeAmt) : 0, guarantors: d.guarantors === 'yes', partners: d.partners === 'yes', smoking: d.smoking === 'yes',
+      by: { name: d.name.trim() || 'בעל הדירה', g: 'm', role: 'בעל הדירה' },
+      pal: ['sea', 'sand', 'pine', 'rose', 'slate', 'bauhaus'][Math.floor(Math.random() * 6)], scenes: ['living', 'kitchen', 'bedroom'], photos: []
+    };
+    A.photoMem[a.id] = photos.slice();
+    A.state.added.unshift(a);
+    A.state.filter = null;
+    A.save();
+    A.log('publish', { photos: photos.length, video: !!videoName });
+    A.go('deck');
+    A.toast('הדירה פורסמה · היא הכרטיס הבא בערימה', 3000, 'ok');
+  }
+})();
+
+</script>
+<script>
+/* הקישור של בעלי הדירות: #owner */
+(function () {
+  const A = window.App;
+  const { D, esc, nis, fmtDate, g, el, ICON } = A;
+  const apt = D.ownerApt;
+
+  /* הכרעה 2: מתאים = טווח התשלום מכסה את שכר הדירה, והכניסה עד 30 יום מהתאריך שביקשת. הנפשות לא נספרות. */
+  function fit(s) {
+    const pay = s.payMax >= apt.rent;
+    const date = Math.abs(A.days(s.entry, apt.entry)) <= 30;
+    return { pay, date, ok: pay && date };
+  }
+
+  A.routes.owner = function () {
+    const st = A.state;
+    const dec = st.owner.decisions;
+    const rows = D.seekers.map((s) => {
+      const f = fit(s);
+      const d = dec[s.id];
+      const tag = d === 'ok' ? '<span class="fit-tag fit">אושר</span>'
+        : d === 'no' ? '<span class="fit-tag unfit">נדחה</span>'
+        : `<span class="fit-tag ${f.ok ? 'fit' : 'unfit'}">${f.ok ? 'מתאים' : 'לא מתאים'}</span>`;
+      return `
+        <button class="req ${d ? 'decided' : ''}" type="button" data-sid="${s.id}">
+          <span class="req-name">${esc(s.first)}<small>הגיע${g(s.g, '', 'ה')} ב-${s.arrived}</small></span>
+          ${tag}
+          <span class="req-meta">
+            <span class="${f.pay ? 'yes' : 'no'}">עד ${nis(s.payMax)}</span>
+            <span class="${f.date ? 'yes' : 'no'}">כניסה ${fmtDate(s.entry)}</span>
+            <span>${s.occupants} נפשות</span>
+          </span>
+        </button>`;
+    }).join('');
+
+    const waiting = D.seekers.filter((s) => !dec[s.id]).length;
+    const scr = A.mount(el(`
+      <section class="screen">
+        <div class="top">
+          <div class="brand">דירה בהחלקה <span class="pill-demo">צד בעל הדירה</span></div>
+          <button class="chip" type="button" data-plan>מנוי · פיילוט</button>
+        </div>
+        <div class="scroll" style="flex:1">
+          <div class="owner-apt">
+            <div class="li-thumb"><div class="photo">${window.SCENES.photo(apt, 0)}</div></div>
+            <div><b>${esc(apt.street)}, ${esc(apt.hood)}</b>
+              <span>${A.roomsTxt(apt.rooms)} · ${nis(apt.rent)} · כניסה ${fmtDate(apt.entry)}</span></div>
+          </div>
+          <div class="sect-h"><h2>פניות · לפי סדר הגעה</h2><span>${waiting} ממתינות</span></div>
+          <p class="rule">«מתאים» נקבע רק לפי שני דברים: אם טווח התשלום מכסה ${nis(apt.rent)}, ואם הכניסה עד 30 יום מ-${fmtDate(apt.entry)}. מספר הנפשות מוצג ולא נספר.</p>
+          <div class="list" style="margin-top:12px">${rows}</div>
+          <div style="padding:20px 16px 28px" class="btn-row">
+            <a class="btn-ghost" href="#">לצד של מי שמחפש דירה</a>
+            <p class="fine">כל המחפשים כאן לדוגמה.</p>
+          </div>
+        </div>
+      </section>`));
+
+    scr.querySelectorAll('.req').forEach((b) => { b.onclick = () => seekerSheet(b.dataset.sid); });
+    scr.querySelector('[data-plan]').onclick = planSheet;
+
+    if (!st.seenOwnerBanner) {
+      st.seenOwnerBanner = true; A.save();
+      setTimeout(() => A.banner(`${waiting} פניות חדשות מאז הבוקר`, 'מסודרות לפי סדר הגעה', null), 700);
+    }
+  };
+
+  function seekerSheet(sid) {
+    const s = D.seekers.find((x) => x.id === sid);
+    const f = fit(s);
+    const d = A.state.owner.decisions[sid];
+    A.sheet(`
+      <h3>${esc(s.first)}</h3>
+      <p class="sub">מחפש${g(s.g, '', 'ת')} לדוגמה · הגיע${g(s.g, '', 'ה')} ב-${s.arrived}</p>
+      <div class="anon">
+        <div><b>${(s.payMin / 1000).toFixed(1)}–${(s.payMax / 1000).toFixed(1)}</b><span>אלפי ₪ בחודש</span></div>
+        <div><b>${s.occupants}</b><span>נפשות</span></div>
+        <div><b>${fmtDate(s.entry)}</b><span>כניסה</span></div>
+      </div>
+      <dl class="kv">
+        <dt>תשלום</dt><dd>${f.pay ? 'מכסה' : 'לא מכסה'} את ${nis(apt.rent)}</dd>
+        <dt>תאריך</dt><dd>${f.date ? 'עד 30 יום' : 'יותר מ-30 יום'} מ-${fmtDate(apt.entry)}</dd>
+      </dl>
+      <p class="hidden-list">נחשף רק אחרי שתאשר: שם משפחה · מקור הכנסה · הכנסות נוספות · קצת על ${g(s.g, 'עצמו', 'עצמה')}.</p>
+      ${d ? `<p class="note">כבר ${d === 'ok' ? 'אישרת' : 'דחית'} את הפנייה הזאת.</p>` : `
+      <div class="two-btn">
+        <button class="btn-ghost" type="button" data-no>דחייה</button>
+        <button class="btn-primary" type="button" data-ok>אישור</button>
+      </div>`}
+      ${d === 'ok' ? '<button class="btn-primary" type="button" data-open style="margin-top:10px">פתיחת השיחה</button>' : ''}
+    `, (sh, close) => {
+      const ok = sh.querySelector('[data-ok]');
+      const no = sh.querySelector('[data-no]');
+      const open = sh.querySelector('[data-open]');
+      ok && (ok.onclick = () => {
+        A.state.owner.decisions[sid] = 'ok';
+        A.log('approve', { sid, fit: f.ok });
+        close();
+        A.go('ownerMatch', sid);
+      });
+      no && (no.onclick = () => {
+        A.state.owner.decisions[sid] = 'no';
+        A.log('reject', { sid, fit: f.ok });
+        close();
+        A.go('owner');
+        A.toast('הפנייה נדחתה');
+      });
+      open && (open.onclick = () => { close(); openChat(s); });
+    });
+  }
+
+  A.routes.ownerMatch = function (sid) {
+    const s = D.seekers.find((x) => x.id === sid);
+    const scr = A.mount(el(`
+      <section class="screen match scroll">
+        <div class="match-center">
+          <span class="hello">✓ יש התאמה</span>
+          <div class="match-art"><div class="photo">${window.SCENES.photo(apt, 0)}</div></div>
+          <h2>${esc(s.first)} ${esc(s.last)} והדירה ב${esc(apt.street)}</h2>
+          <p class="sub">עכשיו נחשפים הפרטים שלא ראית קודם</p>
+        </div>
+        <ul class="reveal">
+          <li><b>שם מלא</b>${esc(s.first)} ${esc(s.last)}</li>
+          <li><b>מקור הכנסה</b>${esc(s.income)}</li>
+          <li><b>הכנסה נוספת</b>${esc(s.extra)}</li>
+          <li><b>נפשות</b>${s.occupants}</li>
+          <li><b>כניסה</b>${fmtDate(s.entry, true)}</li>
+          <li><b>${g(s.g, 'עליו', 'עליה')}</b>${esc(s.about)}</li>
+        </ul>
+        <div class="btn-row">
+          <button class="btn-primary" type="button" data-chat>פתיחת השיחה</button>
+          <button class="btn-ghost" type="button" data-back>חזרה לפניות</button>
+        </div>
+      </section>`));
+    A.log('match', { sid, side: 'owner' });
+    scr.querySelector('[data-chat]').onclick = () => openChat(s);
+    scr.querySelector('[data-back]').onclick = () => A.go('owner');
+  };
+
+  function openChat(s) {
+    A.chat({
+      key: 'o-' + s.id,
+      title: s.first + ' ' + s.last,
+      subtitle: 'על הדירה ב' + apt.street,
+      initials: s.first[0] + s.last[0],
+      prefill: `היי ${s.first}, אישרתי את הפנייה. מתי נוח לך לבוא לראות את הדירה?`,
+      replies: ['היי, תודה שאישרת! מחר אחרי חמש מתאים?', 'מעולה, נתראה מחר.', 'תודה 🙂'],
+      onBack: () => A.go('owner'),
+      after: '<a class="btn-ghost" href="#">לצד של מי שמחפש דירה</a>'
+    });
+  }
+
+  function planSheet() {
+    A.sheet(`
+      <h3>מנוי לבעלי דירות ומתווכים</h3>
+      <p class="sub">תשלום חודשי. בפיילוט אין תשלום, והמחיר ייקבע אחריו.</p>
+      <dl class="kv">
+        <dt>עכשיו</dt><dd>פיילוט · ללא תשלום</dd>
+        <dt>פרסום</dt><dd>הדירה נשארת בערימה, בלי להקפיץ מודעה</dd>
+        <dt>פניות</dt><dd>מסומנות לפי תשלום ותאריך כניסה</dd>
+        <dt>שיחות</dt><dd>רק עם מי שאישרת</dd>
+      </dl>
+      <button class="btn-primary" type="button" data-close>הבנתי</button>
+    `, (sh, close) => { sh.querySelector('[data-close]').onclick = close; });
+  }
+})();
+
+</script>
+</body>
+</html>
