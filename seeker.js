@@ -42,7 +42,7 @@
           <div class="q"><span class="q-label">${t.where}</span>
             <div class="opts">${D.areas.map((a) => opt('area', a.id, t.areas[a.id])).join('')}</div></div>
           <div class="q"><span class="q-label">${t.max}</span>
-            <div class="price-out" dir="rtl"><output>${Number(p.max).toLocaleString('en-US')}</output> ₪<span>${t.per}</span></div>
+            <div class="price-out" dir="rtl"><output>${Number(p.max).toLocaleString('en-US')}</output><span>₪ ${t.per}</span></div>
             <input class="range" type="range" min="3000" max="8000" step="100" value="${p.max}" aria-label="${t.max}">
             <div class="range-ends"><span>3,000</span><span>8,000</span></div></div>
           <div class="q"><span class="q-label">${t.when}</span>
@@ -116,7 +116,7 @@
         <div class="stamp sign stamp-nope">לא בשבילי</div>
         <div class="info">
           <div class="price">${Number(a.rent).toLocaleString('en-US')}<span class="per">₪ לחודש</span></div>
-          <div class="addr">${esc(a.street)} · ${esc(a.hood)}</div>
+          <div class="addr">${esc(a.street)}${a.hood ? ' · ' + esc(a.hood) : ''}</div>
           <div class="meta">${esc(a.city)} · ${A.roomsTxt(a.rooms)} · ${a.sqm} מ״ר · כניסה ${fmtDate(a.entry)}</div>
           <div class="feat">${a.tour ? '<span class="tour-chip">▶ סיור בדירה</span>' : ''}${a.features.slice(0, 3).map((f) => `<span>${esc(f)}</span>`).join('')}${more}</div>
         </div>
@@ -206,7 +206,7 @@
     updateBadge();
     const a = byId(id);
     if (a && A.current.name === 'deck') {
-      A.banner(`${a.by.name} ${g(a.by.g, 'אישר', 'אישרה')} · יש התאמה`, `${a.street}, ${a.hood} · לחצו לפרטים`, () => A.go('match', id));
+      A.banner(`${a.by.name} ${g(a.by.g, 'אישר', 'אישרה')} · יש התאמה`, `${a.street}${a.hood ? ', ' + a.hood : ''} · לחצו לפרטים`, () => A.go('match', id));
     }
   }
 
@@ -324,7 +324,7 @@
     if (!a) return;
     A.sheet(`
       <div class="sheet-photo"><div class="photo">${S.photo(a, 1)}</div></div>
-      <h3>${esc(a.street)} · ${esc(a.hood)}</h3>
+      <h3>${esc(a.street)}${a.hood ? ' · ' + esc(a.hood) : ''}</h3>
       <p class="sub">${esc(a.city)}${a.example ? ' · דירה לדוגמה' : ''}</p>
       <dl class="kv">
         <dt>מחיר</dt><dd>${nis(a.rent)} לחודש</dd>
@@ -362,7 +362,7 @@
       <h3>סינון</h3>
       <p class="sub">רק המחיר מסנן דירות החוצה. אזור ותאריך קובעים מה מופיע קודם.</p>
       <div class="q" style="margin-top:6px"><span class="q-label">עד כמה בחודש</span>
-        <div class="price-out"><output>${p.max.toLocaleString('en-US')}</output> ₪</div>
+        <div class="price-out"><output>${p.max.toLocaleString('en-US')}</output><span>₪</span></div>
         <input class="range" type="range" min="3000" max="8000" step="100" value="${p.max}" aria-label="מחיר מקסימלי"></div>
       <div class="q"><span class="q-label">אזור</span><div class="opts">${D.areas.map((a) => opt('area', a.id, a.label)).join('')}</div></div>
       <div class="q"><span class="q-label">כניסה</span><div class="opts">${D.entryChoices.map((e) => opt('entry', e.id, e.label)).join('')}</div></div>
@@ -439,7 +439,7 @@
       const ok = l.status === 'match';
       return `<button class="li" type="button" data-id="${a.id}" ${ok ? '' : 'data-wait'}>
         <div class="li-thumb"><div class="photo">${S.photo(a, 0)}</div></div>
-        <div class="li-main"><b>${esc(a.street)} · ${esc(a.hood)}</b><span>${nis(a.rent)} · ${esc(a.by.name)}</span></div>
+        <div class="li-main"><b>${esc(a.street)}${a.hood ? ' · ' + esc(a.hood) : ''}</b><span>${nis(a.rent)} · ${esc(a.by.name)}</span></div>
         <span class="state ${ok ? 'ok' : ''}">${ok ? (A.state.chats['a-' + a.id] ? 'שיחה פתוחה' : 'יש התאמה') : 'ממתין לאישור'}</span>
       </button>`;
     }).join('');
@@ -473,7 +473,7 @@
           <div class="sign">יש התאמה</div>
           <div class="match-art"><div class="photo">${S.photo(a, 0)}</div></div>
           <h2>${esc(a.by.name)} ${g(a.by.g, 'אישר', 'אישרה')} את הפנייה שלך</h2>
-          <p class="sub">${esc(a.street)}, ${esc(a.hood)} · ${nis(a.rent)}</p>
+          <p class="sub">${esc(a.street)}${a.hood ? ', ' + esc(a.hood) : ''} · ${nis(a.rent)}</p>
         </div>
         <ul class="reveal">
           <li><b>נחשף לך</b>הכתובת המלאה: ${esc(a.street)} ${a.houseNo}</li>
@@ -540,7 +540,7 @@
     A.chat({
       key: 'a-' + a.id,
       title: `${a.by.name} · ${a.by.role}`,
-      subtitle: `${a.street} ${a.houseNo}, ${a.hood}`,
+      subtitle: `${a.street} ${a.houseNo}${a.hood ? ', ' + a.hood : ''}`,
       initials: a.by.name[0],
       prefill: `היי ${a.by.name}, ראיתי את הדירה ב${a.street}. אשמח לתאם ביקור 🙂`,
       replies: [`היי! ${g(a.by.g, 'שמח', 'שמחה')} שיש התאמה. אפשר לבוא לראות מחר בשש?`, 'מעולה. אשלח לך את הקוד לכניסה לבניין.', '🙂'],
@@ -614,7 +614,7 @@
       const city = v('city');
       const apt = {
         id: 'm' + Date.now(), mine: true, example: false,
-        area: city === 'חיפה' ? 'haifa' : 'krayot', city, hood: v('hood') || city, street: v('street'),
+        area: city === 'חיפה' ? 'haifa' : 'krayot', city, hood: v('hood'), street: v('street'),
         houseNo: v('houseNo') || '—', rooms: Number(v('rooms')), sqm: Number(v('sqm')) || 70,
         floor: 1, floors: 3, rent, entry: v('entry') || D.today, features: Array.from(chosen), desc: v('desc'),
         by: { name: 'בעל הדירה', g: 'm', role: 'בעל הדירה' },
