@@ -1,0 +1,3458 @@
+<!doctype html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#EEF2F6">
+<title>דירה בהחלקה · דמו</title>
+<meta name="description" content="דמו לחיץ: מחליקים על דירות להשכרה במטרופולין חיפה, שומרים מה שאהבתם ושולחים פנייה לבעל הדירה.">
+<meta property="og:title" content="דירה בהחלקה · דמו">
+<meta property="og:description" content="מחליקים על דירות להשכרה. שומרים, מסמנים כוכב, ושולחים פנייה לבעל הדירה.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://hagay-bot.github.io/dira-swipe-demo/v3/">
+<meta property="og:image" content="https://hagay-bot.github.io/dira-swipe-demo/v3/og.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Assistant:wght@400;500;600;700;800&display=swap">
+<style>
+/* צבעים, גופנים, רווחים ורדיוסים. הערכים מהאב-טיפוס של ניר: נקי, אפור-כחלחל, כרטיסים לבנים */
+:root {
+  --bg: #EEF2F6;
+  --bg-desk: #DCE3EA;
+  --surface: #FFFFFF;
+  --surface-2: #F5F7FA;
+  --ink: #1E2A38;
+  --ink-2: #5C6B7C;
+  --line: #D5DDE6;
+  --primary: #4E7196;
+  --primary-ink: #3F5F82;
+  --primary-soft: #DCE7F2;
+  --like: #237A44;
+  --like-soft: #E3F4E8;
+  --star: #2F6FDB;
+  --star-soft: #E3EDFD;
+  --nope: #C63A34;
+  --wait: #93650A;
+  --wait-soft: #FFF4DB;
+  --night: #1E2A38;
+  --card-bg: #C8D3DD;
+  --scrim: rgba(30, 42, 56, .42);
+  --shade: rgba(30, 42, 56, .18);
+  --shade-soft: rgba(30, 42, 56, .08);
+  --info-grad: linear-gradient(to top, rgba(18, 26, 36, .92), rgba(18, 26, 36, .55) 60%, rgba(18, 26, 36, 0));
+  --match-grad: linear-gradient(170deg, #5B7FA6 0%, #3F5F82 55%, #2D4561 100%);
+
+  --font: "Assistant", "Segoe UI", Arial, sans-serif;
+  --fs-xs: 12px;
+  --fs-s: 13.5px;
+  --fs-m: 15.5px;
+  --fs-l: 18px;
+  --fs-xl: 21px;
+  --fs-price: 24px;
+
+  --sp-1: 4px;
+  --sp-2: 8px;
+  --sp-3: 12px;
+  --sp-4: 16px;
+  --sp-5: 20px;
+  --sp-6: 24px;
+
+  --r-s: 10px;
+  --r-m: 14px;
+  --r-l: 18px;
+  --r-xl: 22px;
+  --r-pill: 999px;
+
+  --tap: 44px;
+  --app-w: 440px;
+  --swipe-ms: 300ms;   /* נדרס מ-config.swipeMs בהפעלה */
+  --snap-ms: 200ms;
+  color-scheme: light;
+}
+
+</style>
+<style>
+/* כל השאר. מאפיינים לוגיים בלבד (inline-start = ימין בעברית), בלי היפוכי כיוון */
+* { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+[hidden] { display: none !important; }
+html, body { height: 100%; margin: 0; }
+body { background: var(--bg); color: var(--ink); font: 400 16px/1.5 var(--font); -webkit-font-smoothing: antialiased; overflow: hidden; }
+button, input, select, textarea { font: inherit; color: inherit; }
+button { cursor: pointer; }
+h1, h2, h3, p, ul, ol, dl, dd, fieldset { margin: 0; }
+ul, ol { padding: 0; list-style: none; }
+fieldset { border: 0; padding: 0; min-inline-size: 0; }
+legend { padding: 0; }
+:focus-visible { outline: 3px solid var(--primary); outline-offset: 2px; }
+h1:focus, h2:focus { outline: none; }
+.sr-only { position: absolute !important; inline-size: 1px; block-size: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0; }
+
+/* ——— מעטפת ——— */
+#app { position: relative; display: flex; flex-direction: column; max-inline-size: var(--app-w); block-size: 100vh; block-size: 100dvh; margin-inline: auto; overflow: hidden; background: var(--bg); }
+.screen-host { position: relative; flex: 1; min-block-size: 0; }
+.screen { position: absolute; inset: 0; display: flex; flex-direction: column; background: var(--bg); }
+.scroll { overflow-y: auto; overscroll-behavior: contain; -webkit-overflow-scrolling: touch; }
+.grow { flex: 1; min-block-size: 0; }
+.aside { display: none; }
+@media (min-width: 760px) {
+  body { background: var(--bg-desk); }
+  #app { block-size: min(880px, calc(100dvh - 40px)); margin-block: 20px; border-radius: 32px; box-shadow: 0 30px 80px var(--shade); border: 8px solid var(--surface-2); }
+  .aside { display: block; position: fixed; inset-block-start: 32px; inset-inline-start: 32px; max-inline-size: 230px; color: var(--ink-2); font-size: 14px; }
+  .aside b { display: block; color: var(--ink); font-size: 15px; margin-block-end: var(--sp-1); }
+}
+
+/* ——— כותרות ——— */
+.app-top { display: flex; align-items: center; justify-content: space-between; gap: var(--sp-2); padding: 10px var(--sp-3) 6px; }
+.brand { display: flex; align-items: center; gap: 6px; font-weight: 800; font-size: var(--fs-xl); color: var(--primary-ink); letter-spacing: -.2px; }
+.brand svg { inline-size: 22px; block-size: 22px; color: var(--primary); }
+.top-icons { display: flex; gap: var(--sp-1); }
+.icon-btn { position: relative; inline-size: var(--tap); block-size: var(--tap); border: 0; border-radius: 50%; background: transparent; color: var(--primary-ink); display: grid; place-items: center; padding: 0; flex: none; }
+.icon-btn:active { background: var(--primary-soft); }
+.icon-btn svg { inline-size: 22px; block-size: 22px; }
+.icon-btn .dot { position: absolute; inset-block-start: 9px; inset-inline-end: 9px; inline-size: 9px; block-size: 9px; border-radius: 50%; background: var(--nope); }
+.page-top { position: relative; display: flex; align-items: center; justify-content: center; min-block-size: 56px; padding: 6px 56px; }
+.page-top h1 { font-size: 19px; font-weight: 700; text-align: center; }
+.page-top .back { position: absolute; inset-inline-start: 6px; inset-block-start: 6px; }
+.owner-top .brand { font-size: var(--fs-l); }
+.pill-demo { font-size: 11.5px; font-weight: 700; color: var(--ink-2); background: var(--surface); border-radius: var(--r-pill); padding: 3px 9px; }
+
+/* ——— ניווט תחתון ——— */
+.tabbar { display: flex; background: var(--surface); border-block-start: 1px solid var(--line); padding: 6px var(--sp-1) calc(6px + env(safe-area-inset-bottom)); }
+.tab { position: relative; flex: 1; border: 0; background: none; display: grid; justify-items: center; gap: 2px; padding: var(--sp-1) 0; min-block-size: var(--tap); color: var(--ink-2); font-size: 12.5px; font-weight: 600; }
+.tab svg { inline-size: 23px; block-size: 23px; }
+.tab[aria-current="page"] { color: var(--primary-ink); font-weight: 800; }
+.tab .badge { position: absolute; inset-block-start: 0; inset-inline-end: calc(50% - 26px); min-inline-size: 18px; block-size: 18px; border-radius: var(--r-pill); background: var(--nope); color: #fff; font-size: 11px; line-height: 18px; padding-inline: 5px; }
+
+/* ——— כפתורים ——— */
+.btn-primary, .btn-ghost { display: flex; align-items: center; justify-content: center; gap: var(--sp-2); inline-size: 100%; min-block-size: 48px; border-radius: var(--r-m); padding: 12px var(--sp-4); font-weight: 700; text-decoration: none; text-align: center; }
+.btn-primary { border: 0; background: var(--primary); color: #fff; font-size: 16.5px; }
+.btn-primary:active { background: var(--primary-ink); }
+.btn-ghost { border: 1.5px solid var(--line); background: var(--surface); color: var(--primary-ink); font-size: var(--fs-m); }
+.btn-primary svg, .btn-ghost svg { inline-size: 19px; block-size: 19px; flex: none; }
+.btn-small { inline-size: auto; min-block-size: 40px; padding: 8px 14px; font-size: 14.5px; }
+.btn-row { display: grid; gap: 10px; }
+.two-btn { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.chips { display: flex; gap: var(--sp-2); overflow-x: auto; padding: var(--sp-1) 14px var(--sp-2); scrollbar-width: none; }
+.chips::-webkit-scrollbar { display: none; }
+.chip { flex: none; display: inline-flex; align-items: center; gap: 6px; min-block-size: 36px; border: 1.5px solid var(--line); background: var(--surface); color: var(--ink); border-radius: var(--r-s); padding: 5px var(--sp-3); font-size: 14px; font-weight: 600; white-space: nowrap; }
+.chip.on, .chip[aria-pressed="true"] { background: var(--primary-soft); border-color: var(--primary); color: var(--primary-ink); }
+.chip svg { inline-size: 15px; block-size: 15px; }
+.opts { display: flex; flex-wrap: wrap; gap: var(--sp-2); }
+.opt { min-inline-size: var(--tap); min-block-size: 40px; border: 1.5px solid var(--line); background: var(--surface); color: var(--ink); border-radius: var(--r-s); padding: 6px 14px; font-weight: 600; font-size: 14.5px; }
+.opt[aria-pressed="true"] { background: var(--primary); border-color: var(--primary); color: #fff; }
+.linkish { border: 0; background: none; color: var(--primary-ink); text-decoration: underline; text-underline-offset: 3px; font-weight: 700; padding: var(--sp-1) 0; min-block-size: 32px; justify-self: start; }
+
+/* ——— טפסים ——— */
+.field { display: grid; gap: 5px; }
+.field > label, .field > .label, .media-add .label { font-size: var(--fs-s); font-weight: 700; color: var(--ink-2); }
+.field input, .field select, .field textarea { inline-size: 100%; border: 0; border-block-end: 1.5px solid var(--line); background: transparent; border-radius: 0; padding: 9px 2px; font-size: 16px; }
+.field input:focus, .field select:focus, .field textarea:focus { outline: none; border-block-end-color: var(--primary); box-shadow: 0 1.5px 0 var(--primary); }
+.field textarea { min-block-size: 76px; resize: vertical; line-height: 1.5; }
+.field .err { color: var(--nope); font-size: 13px; font-weight: 600; }
+.field.bad input, .field.bad select { border-block-end-color: var(--nope); }
+.row2 { display: grid; grid-template-columns: 1fr 1fr; gap: var(--sp-3); }
+.row3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+.note { font-size: 13.5px; color: var(--ink-2); background: var(--surface-2); border-radius: var(--r-s); padding: 10px var(--sp-3); }
+.fine { font-size: 13.5px; color: var(--ink-2); text-align: center; }
+
+/* ——— ערימה ——— */
+.filter-row { padding-block-start: 0; }
+.filter-row .chip { font-size: 13px; min-block-size: 32px; padding: 3px 10px; }
+.deck { position: relative; flex: 1; min-block-size: 0; margin: var(--sp-1) var(--sp-4) 0; }
+.card { position: absolute; inset: 0; border-radius: var(--r-xl); overflow: hidden; background: var(--card-bg); box-shadow: 0 14px 30px var(--shade); touch-action: none; user-select: none; -webkit-user-select: none; will-change: transform; }
+.card.under { transform: scale(.955) translateY(12px); box-shadow: 0 6px 16px var(--shade-soft); }
+.card.fly { transition: transform var(--swipe-ms) cubic-bezier(.3, .6, .4, 1), opacity var(--swipe-ms); }
+.card.snap { transition: transform var(--snap-ms) ease; }
+.card:focus-visible { outline-offset: 3px; }
+.photo, .photo svg, .photo img { position: absolute; inset: 0; inline-size: 100%; block-size: 100%; object-fit: cover; display: block; }
+.bars { position: absolute; inset-block-start: 10px; inset-inline: 12px; display: flex; gap: var(--sp-1); z-index: 2; }
+.bar { flex: 1; block-size: 3px; border-radius: 3px; background: rgba(255, 255, 255, .45); }
+.bar.on { background: #fff; }
+.card-tags { position: absolute; inset-block-start: 22px; inset-inline: 12px; display: flex; gap: 6px; flex-wrap: wrap; z-index: 2; }
+.tag { font-size: var(--fs-xs); font-weight: 700; border-radius: 8px; padding: 3px 8px; color: #fff; background: rgba(30, 42, 56, .66); }
+.tag-mine { background: var(--like); }
+.tag-star { background: var(--star); }
+.tag-similar { background: var(--primary-ink); }
+.info { position: absolute; inset-inline: 0; inset-block-end: 0; z-index: 2; padding: 90px 18px var(--sp-4); color: #fff; background: var(--info-grad); cursor: pointer; }
+.info .title { font-size: 23px; font-weight: 800; line-height: 1.2; text-wrap: balance; }
+.loc { display: flex; align-items: center; gap: var(--sp-1); font-size: 14.5px; opacity: .92; margin-block-start: var(--sp-1); }
+.loc svg { inline-size: 15px; block-size: 15px; flex: none; }
+.specs-row { display: flex; align-items: center; justify-content: space-between; gap: var(--sp-2); margin-block-start: 10px; }
+.price { font-size: var(--fs-price); font-weight: 800; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.specs { display: flex; gap: var(--sp-3); font-size: 14.5px; font-weight: 600; font-variant-numeric: tabular-nums; }
+.specs > span { display: inline-flex; align-items: center; gap: var(--sp-1); white-space: nowrap; }
+.specs svg { inline-size: 17px; block-size: 17px; opacity: .9; }
+.info .desc { font-size: var(--fs-s); opacity: .88; margin-block-start: var(--sp-2); display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.stamp { position: absolute; inset-block-start: 70px; z-index: 3; opacity: 0; pointer-events: none; font-size: 26px; font-weight: 800; padding: var(--sp-1) 14px; border-radius: var(--r-s); border: 3px solid; background: rgba(255, 255, 255, .94); }
+.stamp-like { inset-inline-end: 20px; color: var(--like); transform: rotate(-12deg); }
+.stamp-nope { inset-inline-start: 20px; color: var(--nope); transform: rotate(12deg); }
+.stamp-star { inset-block-start: auto; inset-block-end: 46%; inset-inline: 0; margin-inline: auto; inline-size: max-content; color: var(--star); }
+/* הכרעה 5: סדר ה-DOM ♥ ★ ✕ נקרא מימין לשמאל, ולכן ♥ מימין ו-✕ משמאל בלי שום היפוך */
+.actions { display: flex; justify-content: center; align-items: center; gap: 26px; padding: 14px 0; }
+.rb { display: grid; place-items: center; inline-size: 62px; block-size: 62px; border-radius: 50%; border: 0; background: var(--surface); box-shadow: 0 6px 16px var(--shade); padding: 0; transition: transform .12s; }
+.rb svg { inline-size: 28px; block-size: 28px; }
+.rb-nope { color: var(--nope); }
+.rb-star { color: var(--star); inline-size: 56px; block-size: 56px; }
+.rb-like { color: var(--like); }
+.rb:active { transform: scale(.94); }
+
+/* ——— מסך ריק ——— */
+.empty { flex: 1; block-size: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: var(--sp-5) 28px; gap: 10px; }
+.empty .big { inline-size: 72px; block-size: 72px; border-radius: 50%; background: var(--primary-soft); color: var(--primary); display: grid; place-items: center; }
+.empty .big svg { inline-size: 34px; block-size: 34px; }
+.empty h2 { margin-block-start: 6px; font-size: 20px; }
+.empty p { color: var(--ink-2); max-inline-size: 30ch; }
+.empty .btn-row { inline-size: 100%; max-inline-size: 300px; margin-block-start: 6px; }
+
+/* ——— הודעות ——— */
+.toast { position: absolute; inset-inline: 12px; inset-block-end: 84px; z-index: 70; background: var(--night); color: #fff; border-radius: var(--r-s); padding: 11px 14px; font-size: 14.5px; font-weight: 600; opacity: 0; transform: translateY(12px); pointer-events: none; transition: opacity .2s, transform .2s; }
+.toast.show { opacity: 1; transform: none; }
+.toast.ok { background: var(--like); }
+.banner { position: absolute; inset-block-start: 10px; inset-inline: 12px; z-index: 65; display: flex; align-items: center; gap: var(--sp-3); padding: 10px var(--sp-3); background: var(--surface); border: 0; border-radius: var(--r-l); box-shadow: 0 12px 30px var(--shade); transform: translateY(-140%); transition: transform .3s ease; text-align: start; }
+.banner.show { transform: none; }
+.banner-sign { flex: none; inline-size: 38px; block-size: 38px; border-radius: 50%; background: var(--like-soft); color: var(--like); display: grid; place-items: center; }
+.banner-sign svg { inline-size: 18px; block-size: 18px; }
+.banner-text b { display: block; font-size: 15px; }
+.banner-text span { font-size: var(--fs-s); color: var(--ink-2); }
+
+/* ——— גיליון ——— */
+.sheet { position: absolute; inset: 0; z-index: 60; display: flex; flex-direction: column; justify-content: flex-end; }
+.sheet-scrim { position: absolute; inset: 0; background: var(--scrim); border: 0; inline-size: 100%; padding: 0; }
+.sheet-body { position: relative; max-block-size: 90%; display: flex; flex-direction: column; background: var(--surface); border-radius: 24px 24px 0 0; animation: up .25s ease; }
+@keyframes up { from { transform: translateY(40px); opacity: .6; } to { transform: none; opacity: 1; } }
+.sheet-bar { position: relative; display: flex; justify-content: center; padding-block: 10px 2px; }
+.sheet-grip { inline-size: 40px; block-size: 4px; border-radius: 4px; background: var(--line); }
+.sheet-x { position: absolute; inset-inline-end: 6px; inset-block-start: 2px; color: var(--ink-2); }
+.sheet-content { overflow-y: auto; overscroll-behavior: contain; padding: 4px 18px calc(22px + env(safe-area-inset-bottom)); }
+.sheet-content h2 { font-size: 20px; font-weight: 800; line-height: 1.3; margin-block: 2px; padding-inline-end: 36px; }
+.sheet-content .sub { color: var(--ink-2); font-size: 14px; margin-block-end: var(--sp-3); }
+.sheet-content > p { margin-block: var(--sp-2); }
+.sheet-head { display: flex; align-items: center; justify-content: space-between; gap: var(--sp-2); margin-block-end: var(--sp-2); padding-inline-end: 40px; }
+.sheet-head h2 { display: flex; align-items: center; gap: 6px; padding: 0; }
+.sheet-head svg { inline-size: 20px; block-size: 20px; color: var(--primary); }
+.q { margin-block-start: var(--sp-4); }
+.q-label { display: block; font-weight: 700; font-size: 14.5px; margin-block-end: var(--sp-2); }
+.range { inline-size: 100%; accent-color: var(--primary); block-size: 32px; margin: 0; }
+.range-out { font-weight: 700; font-variant-numeric: tabular-nums; color: var(--primary-ink); }
+.search { display: flex; align-items: center; gap: var(--sp-2); border: 1.5px solid var(--line); border-radius: var(--r-s); padding-inline: var(--sp-3); background: var(--surface); }
+.search:focus-within { border-color: var(--primary); }
+.search input { flex: 1; border: 0; padding: 11px 0; font-size: 16px; background: transparent; min-inline-size: 0; }
+.search input:focus { outline: none; }
+.search svg { inline-size: 18px; block-size: 18px; color: var(--ink-2); flex: none; }
+.sheet-foot { margin-block-start: var(--sp-5); }
+.sheet-photo { position: relative; block-size: 200px; border-radius: var(--r-l); overflow: hidden; margin-block-end: var(--sp-3); }
+.detail-price { display: flex; justify-content: space-between; align-items: center; gap: var(--sp-2); margin-block: var(--sp-2); }
+.detail-price .specs { color: var(--ink-2); }
+.kv { display: grid; grid-template-columns: auto 1fr; gap: 7px 14px; margin-block: 10px; font-size: 15px; }
+.kv dt { color: var(--ink-2); }
+.kv dd { font-weight: 600; font-variant-numeric: tabular-nums; }
+.kv dd.yes { color: var(--like); }
+.kv dd.no { color: var(--nope); }
+.feat-list { display: flex; flex-wrap: wrap; gap: 6px; margin-block: 10px var(--sp-3); }
+.feat-list li { font-size: var(--fs-s); border-radius: 8px; padding: var(--sp-1) 10px; background: var(--primary-soft); color: var(--primary-ink); font-weight: 600; }
+.sec-title { font-weight: 800; font-size: 15px; margin-block: var(--sp-4) var(--sp-1); }
+.sheet-actions { margin-block-start: var(--sp-3); }
+.status { text-align: center; font-weight: 700; padding: 10px; border-radius: var(--r-s); }
+.status.ok { color: var(--like); background: var(--like-soft); }
+.status.wait { color: var(--wait); background: var(--wait-soft); }
+
+/* ——— אהבתי ——— */
+.fav-list { display: grid; gap: 10px; padding: 6px 14px var(--sp-4); }
+.fav { display: flex; align-items: center; gap: var(--sp-2); background: var(--surface); border-radius: var(--r-l); padding: 10px; box-shadow: 0 2px 8px var(--shade-soft); }
+.fav-main { flex: 1; min-inline-size: 0; display: flex; align-items: center; gap: var(--sp-3); border: 0; background: none; padding: 0; text-align: start; }
+.fav .thumb { position: relative; flex: none; inline-size: 88px; block-size: 72px; border-radius: var(--r-s); overflow: hidden; }
+.fav .main { flex: 1; min-inline-size: 0; display: grid; }
+.fav .main b { font-size: var(--fs-m); line-height: 1.3; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.fav .main .p { color: var(--primary-ink); font-weight: 800; font-size: 15px; }
+.fav .main small { color: var(--ink-2); font-size: 13px; }
+.fav .side { flex: none; display: grid; justify-items: center; gap: 2px; }
+.unsave svg { color: var(--nope); inline-size: 20px; block-size: 20px; }
+.state { font-size: var(--fs-xs); font-weight: 700; border-radius: var(--r-pill); padding: 3px 9px; white-space: nowrap; }
+.state.wait { background: var(--wait-soft); color: var(--wait); }
+.state.ok { background: var(--like-soft); color: var(--like); }
+.state.star { background: var(--star-soft); color: var(--star); }
+[data-body] > .fine { padding: 0 var(--sp-5) var(--sp-4); }
+
+/* ——— קטגוריות ——— */
+.cat-grid { display: grid; grid-template-columns: 1fr 1fr; gap: var(--sp-3); padding: 6px 14px var(--sp-5); }
+.cat { position: relative; inline-size: 100%; block-size: 150px; border-radius: var(--r-l); overflow: hidden; border: 0; padding: 0; background: var(--card-bg); box-shadow: 0 4px 12px var(--shade-soft); }
+.cat::after { content: ""; position: absolute; inset: 0; background: linear-gradient(to top, rgba(18, 26, 36, .8), rgba(18, 26, 36, 0) 62%); }
+.cat .label { position: absolute; inset-inline-start: 12px; inset-block-end: 10px; z-index: 2; color: #fff; font-weight: 800; font-size: 17px; text-align: start; }
+.cat .label small { display: block; font-weight: 600; font-size: var(--fs-xs); opacity: .92; }
+.cat .badge2 { position: absolute; inset-inline-end: 10px; inset-block-start: 10px; z-index: 2; inline-size: 34px; block-size: 34px; border-radius: var(--r-s); background: rgba(255, 255, 255, .92); display: grid; place-items: center; font-size: 18px; }
+
+/* ——— עוזר ושיחה ——— */
+.msgs { flex: 1; min-block-size: 0; overflow-y: auto; padding: 14px var(--sp-3); display: flex; flex-direction: column; gap: var(--sp-2); }
+.msg { max-inline-size: 84%; padding: 9px 13px; border-radius: 16px; font-size: var(--fs-m); line-height: 1.45; }
+.msg.me { align-self: flex-start; background: var(--primary); color: #fff; border-end-start-radius: 4px; }
+.msg.them, .msg.bot { align-self: flex-end; background: var(--surface); border-end-end-radius: 4px; box-shadow: 0 1px 2px var(--shade-soft); }
+.msg.sys { align-self: center; max-inline-size: 92%; background: transparent; color: var(--ink-2); font-size: 13px; text-align: center; padding: 2px var(--sp-2); }
+.suggest { padding: 0; flex-wrap: wrap; overflow: visible; }
+.ai-results { align-self: stretch; display: grid; gap: 10px; }
+.ai-results .head { display: flex; align-items: center; gap: 6px; font-weight: 700; font-size: 14px; color: var(--ink-2); }
+.ai-results .head svg { inline-size: 16px; block-size: 16px; }
+.ai-card { background: var(--surface); border-radius: 16px; overflow: hidden; box-shadow: 0 2px 8px var(--shade-soft); }
+.ai-card .pic { position: relative; block-size: 130px; }
+.ai-card .body { padding: 10px var(--sp-3) var(--sp-3); }
+.ai-card h2 { font-size: var(--fs-m); font-weight: 700; }
+.ai-card .meta { display: flex; justify-content: space-between; gap: var(--sp-2); color: var(--ink-2); font-size: var(--fs-s); margin-block: 2px var(--sp-2); }
+.ai-card .meta .p { color: var(--ink); font-weight: 800; white-space: nowrap; }
+.ai-card .two-btn > * { min-block-size: 42px; padding: 8px 10px; font-size: 14.5px; border-radius: var(--r-s); }
+.typing { align-self: flex-end; display: flex; gap: var(--sp-1); padding: var(--sp-3) 14px; background: var(--surface); border-radius: 16px; }
+.typing i { inline-size: 6px; block-size: 6px; border-radius: 50%; background: var(--ink-2); animation: blink 1s infinite; }
+.typing i:nth-child(2) { animation-delay: .15s; }
+.typing i:nth-child(3) { animation-delay: .3s; }
+@keyframes blink { 0%, 80%, 100% { opacity: .25; } 40% { opacity: 1; } }
+.composer { display: flex; gap: var(--sp-2); padding: 10px var(--sp-3) calc(10px + env(safe-area-inset-bottom)); background: var(--surface); border-block-start: 1px solid var(--line); }
+.composer input { flex: 1; min-inline-size: 0; border: 1.5px solid var(--line); border-radius: var(--r-pill); padding: 11px var(--sp-4); font-size: 16px; background: var(--surface-2); }
+.composer button { flex: none; inline-size: 46px; block-size: 46px; border-radius: 50%; border: 0; background: var(--primary); color: #fff; display: grid; place-items: center; }
+.composer button svg { inline-size: 20px; block-size: 20px; }
+.chat-top { display: flex; align-items: center; gap: var(--sp-3); padding: 8px var(--sp-3); background: var(--surface); border-block-end: 1px solid var(--line); }
+.chat-top h1 { font-size: var(--fs-m); font-weight: 700; }
+.chat-top span:not(.avatar) { font-size: 13px; color: var(--ink-2); }
+.avatar { flex: none; inline-size: 42px; block-size: 42px; border-radius: 50%; background: var(--primary); color: #fff; display: grid; place-items: center; font-weight: 700; }
+.after-chat { align-self: stretch; margin-block-start: 10px; }
+
+/* ——— התאמה ——— */
+.match { background: var(--match-grad); color: #fff; padding: 26px 22px 24px; }
+.match-center { text-align: center; }
+.match .hello { display: inline-flex; align-items: center; gap: var(--sp-2); background: rgba(255, 255, 255, .16); border-radius: var(--r-pill); padding: 6px 14px; font-weight: 800; font-size: 15px; }
+.match .hello svg { inline-size: 18px; block-size: 18px; color: #7EE0A0; }
+.match-art { position: relative; inline-size: 168px; block-size: 168px; margin: var(--sp-5) auto 0; border-radius: 50%; overflow: hidden; border: 6px solid #fff; box-shadow: 0 16px 40px rgba(0, 0, 0, .3); }
+.match h1 { font-size: 21px; margin-block: var(--sp-4) 2px; font-weight: 800; text-wrap: balance; }
+.match .sub { color: rgba(255, 255, 255, .86); }
+.reveal { margin-block: 18px; padding: 14px var(--sp-4); background: rgba(255, 255, 255, .1); border-radius: 16px; display: grid; gap: var(--sp-2); font-size: 15px; }
+.reveal > div { display: flex; gap: 10px; }
+.reveal dt { flex: none; min-inline-size: 96px; color: #CFE8FF; font-weight: 700; }
+.match .btn-primary { background: #fff; color: var(--primary-ink); }
+.match .btn-ghost { background: transparent; color: #fff; border-color: rgba(255, 255, 255, .45); }
+
+/* ——— פרטים אחרי התאמה ——— */
+.form { padding: var(--sp-1) 18px var(--sp-6); display: grid; align-content: start; gap: 14px; }
+.form .sub { color: var(--ink-2); font-size: 14.5px; }
+
+/* ——— פרסום דירה ——— */
+.stepper { padding: 6px var(--sp-4) var(--sp-6); }
+.step { position: relative; padding-inline-start: 40px; }
+.step::before { content: ""; position: absolute; inset-inline-start: 13px; inset-block: 36px 0; inline-size: 2px; background: var(--line); }
+.step:last-child::before { display: none; }
+.step h2 { font-size: 16px; }
+.step-head { display: flex; align-items: center; min-block-size: var(--tap); border: 0; background: none; inline-size: 100%; padding: 0; text-align: start; font-weight: 700; font-size: 16px; color: var(--ink); }
+.step-head[aria-disabled="true"] { cursor: default; }
+.step:not(.on):not(.done) .step-head { color: var(--ink-2); }
+.step-num { position: absolute; inset-inline-start: 0; inset-block-start: 8px; inline-size: 28px; block-size: 28px; border-radius: 50%; background: #9AA9BA; color: #fff; display: grid; place-items: center; font-size: var(--fs-s); font-weight: 800; }
+.step.on .step-num, .step.done .step-num { background: var(--primary); }
+.step.done .step-num svg { inline-size: 15px; block-size: 15px; }
+.step-body { display: grid; gap: 14px; padding: var(--sp-1) 0 18px; }
+.sub-h { font-weight: 800; font-size: 14px; margin-block-start: var(--sp-1); }
+.with-ai { position: relative; }
+.with-ai input, .with-ai textarea { padding-inline-end: 44px; }
+.ai-btn { position: absolute; inset-inline-end: 0; inset-block-start: 24px; inline-size: 38px; block-size: 38px; border: 0; border-radius: 50%; background: var(--primary-soft); color: var(--primary-ink); display: grid; place-items: center; }
+.ai-btn svg { inline-size: 18px; block-size: 18px; }
+.ai-btn.busy svg { animation: spin 1s linear infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
+.yn-row { display: flex; align-items: center; justify-content: space-between; gap: 10px; font-size: 15px; }
+.yn { display: flex; gap: 6px; }
+.yn button { min-inline-size: 52px; min-block-size: 40px; border: 1.5px solid var(--line); background: var(--surface); border-radius: var(--r-s); padding: 6px 10px; font-weight: 700; }
+.yn button[aria-pressed="true"] { background: var(--primary); border-color: var(--primary); color: #fff; }
+.step-actions { display: grid; grid-template-columns: 1.4fr 1fr; gap: 10px; }
+.step-actions > :only-child { grid-column: 1 / -1; }
+.media-add { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+.media-add label { position: relative; cursor: pointer; }
+.media-add label:focus-within { outline: 3px solid var(--primary); outline-offset: 2px; }
+.thumbs { display: flex; gap: var(--sp-2); flex-wrap: wrap; align-items: center; }
+.thumbs img { inline-size: 76px; block-size: 76px; object-fit: cover; border-radius: var(--r-s); }
+.thumbs .count { font-size: 13px; color: var(--ink-2); }
+
+/* ——— צד בעל הדירה ——— */
+.owner-apt { display: flex; gap: var(--sp-3); align-items: center; margin: 6px var(--sp-4) 0; padding: var(--sp-3); background: var(--surface); border-radius: var(--r-l); }
+.li-thumb { position: relative; flex: none; inline-size: 72px; block-size: 72px; border-radius: var(--r-s); overflow: hidden; }
+.owner-apt b { display: block; font-size: 16px; }
+.owner-apt span { font-size: var(--fs-s); color: var(--ink-2); }
+.sect-h { display: flex; justify-content: space-between; align-items: baseline; padding: var(--sp-4) var(--sp-4) 6px; }
+.sect-h h2 { font-size: var(--fs-l); }
+.sect-h span { font-size: 13px; color: var(--ink-2); }
+.rule { margin-inline: var(--sp-4); font-size: 13.5px; color: var(--ink-2); }
+.list { display: grid; gap: 1px; background: var(--line); border-block: 1px solid var(--line); margin-block-start: var(--sp-3); }
+.req { display: grid; grid-template-columns: 1fr auto; gap: var(--sp-1) var(--sp-3); align-items: center; padding: 14px var(--sp-4); background: var(--surface); border: 0; inline-size: 100%; text-align: start; }
+.req-name { font-weight: 700; font-size: 16px; }
+.req-name small { font-weight: 400; color: var(--ink-2); font-size: 13px; margin-inline-start: 6px; }
+.req-meta { grid-column: 1 / -1; display: flex; flex-wrap: wrap; gap: var(--sp-1) 14px; font-size: var(--fs-s); color: var(--ink-2); font-variant-numeric: tabular-nums; }
+.req-meta .yes { color: var(--like); font-weight: 700; }
+.req-meta .no { color: var(--nope); font-weight: 700; }
+.fit-tag { font-size: 13px; font-weight: 700; border-radius: var(--r-pill); padding: var(--sp-1) 10px; }
+.fit { background: var(--like-soft); color: var(--like); }
+.unfit { background: var(--surface-2); color: var(--ink-2); }
+.req.decided .req-name, .req.decided .req-meta { opacity: .7; }
+.anon { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--sp-2); margin-block: var(--sp-3); }
+.anon > div { background: var(--surface-2); border-radius: var(--r-m); padding: var(--sp-3) var(--sp-2); text-align: center; display: flex; flex-direction: column-reverse; }
+.anon dd { font-size: 17px; font-weight: 800; font-variant-numeric: tabular-nums; }
+.anon dt { font-size: var(--fs-xs); color: var(--ink-2); }
+.hidden-list { font-size: var(--fs-s); color: var(--ink-2); margin-block: 0 14px; }
+.owner-foot { padding: var(--sp-5) var(--sp-4) 28px; }
+
+/* ——— יומן ——— */
+.log { padding: var(--sp-4); font-size: 14px; display: grid; gap: var(--sp-3); align-content: start; }
+.log table { inline-size: 100%; border-collapse: collapse; font-variant-numeric: tabular-nums; }
+.log td, .log th { text-align: start; padding: 6px var(--sp-1); border-block-end: 1px solid var(--line); }
+.stat-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--sp-2); }
+.stat-row div { background: var(--surface); border-radius: var(--r-m); padding: 10px; font-size: 13px; color: var(--ink-2); }
+.stat-row b { display: block; font-size: 24px; font-weight: 800; color: var(--ink); }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation: none !important; transition: none !important; }
+}
+
+</style>
+</head>
+<body>
+<aside class="aside">
+  <b>דמו. נפתח הכי טוב בטלפון</b>
+  כל הדירות והמחפשים כאן לדוגמה. שום דבר לא נשלח לאף אחד.
+</aside>
+<div id="app"></div>
+<noscript>הדמו צריך JavaScript כדי לעבוד.</noscript>
+<script>
+/* כל המספרים והספים של הדמו, בשם. שום מספר קסם לא יושב בקוד. */
+(function (Dira) {
+  'use strict';
+
+  Dira.config = {
+    storageKey: 'dira-v3',
+    schema: 3,
+
+    /* החלקה */
+    swipeMs: 300,               // משך מעוף הכרטיס. עובר ל-CSS דרך --swipe-ms
+    snapMs: 200,                // חזרת כרטיס למקום
+    swipeRatio: 0.26,           // חלק מרוחב הכרטיס שמעבר לו ההחלקה נחשבת
+    starRatio: 0.22,            // חלק מגובה הכרטיס שמעבר לו החלקה למעלה נחשבת
+    starMaxDx: 60,              // סטייה אופקית מרבית בהחלקה למעלה
+    tapSlop: 8,                 // תזוזה שעדיין נחשבת הקשה
+    stampFullDx: 90,            // בכמה פיקסלים החותמת נראית במלואה
+    stampFullDy: 110,
+    tiltDivisor: 20,            // כמה הכרטיס נוטה בזמן גרירה
+    dragYFactor: 0.4,           // כמה מהתזוזה האנכית עוברת לכרטיס
+    flyOutFactor: 1.6,          // כמה רחוק הכרטיס עף, ביחס לרוחבו
+    flyTiltDeg: 24,
+
+    /* למידה ודמיון */
+    expensiveFrom: 5600,        // מעל זה, ✕ מלמד «פחות דירות במחיר הזה»
+    penaltyWeight: 1.2,
+    similarityWeight: 1.4,
+    hoodWeight: 1.5,
+    roomsWeight: 1.5,
+    rentWeight: 1.5,
+    rentScale: 900,             // הפרש מחיר שמוחק את כל משקל המחיר
+    similarTagMin: 3,           // מעל זה הכרטיס מסומן «דומה למה שסימנת»
+    forYouMin: 2,               // «מותאם לך» מציג דירות מעל הסף הזה
+    mineFirst: -100,            // דירה שפרסמת עולה ראשונה
+
+    /* התאמה, הכרעה 11 */
+    entryWindowDays: 30,
+
+    /* סינון חכם */
+    priceFloor: 3000,
+    priceCeil: 8000,            // ערך המחוון העליון = ללא הגבלה
+    priceStep: 100,
+    sqmCeil: 120,
+    sqmStep: 5,
+    widenRound: 100,            // הרחבת מחיר מתעגלת למאה הקרובה
+
+    /* זמנים מדומים */
+    approveDelayMs: 3000,       // בעל הדירה מאשר פנייה של מחפש
+    typingDelayMs: 500,
+    replyDelayMs: 1900,
+    aiReplyMs: 900,
+    autowriteMs: 800,
+    toastMs: 2400,
+    toastLongMs: 3200,
+    bannerMs: 6500,
+    hintDelayMs: 600,
+    ownerBannerDelayMs: 700,
+
+    /* שונות */
+    quickExitMs: 10000,         // «יציאה תוך 10 שניות»
+    logMax: 800,
+    logRowsShown: 40,
+    aiResultsShown: 5,
+    photosMax: 10,
+    pals: ['sea', 'sand', 'pine', 'rose', 'slate', 'bauhaus'],
+    publishedScenes: ['living', 'kitchen', 'bedroom']
+  };
+})(globalThis.Dira = globalThis.Dira || {});
+
+</script>
+<script>
+/*
+ * נתוני הדמו. כל הדירות והמחפשים כאן הם דוגמאות.
+ *
+ * כדי להחליף דירה לדוגמה בדירה אמיתית, בלי לגעת בקוד:
+ * 1. משנים את השדות שלה (רחוב, מחיר, חדרים...).
+ * 2. ממלאים photos בכתובות של תמונות שיש רשות להשתמש בהן. כשיש photos, האיור לא מוצג.
+ * 3. משנים example ל-false, והתווית «דירה לדוגמה» נעלמת מהכרטיס.
+ *
+ * שדות: rooms = חדרים, beds = חדרי שינה, baths = חדרי רחצה, sqm = מ״ר,
+ * vaad = ועד בית, arnona = ארנונה דו-חודשית, contract = חוזה מינימלי בחודשים,
+ * guarantee = ערבות בנקאית בשקלים (0 = לא נדרשת), by.g = 'm' או 'f' לניסוח.
+ */
+(function (Dira) {
+  'use strict';
+
+  const apartments = [
+    { id: 'a1', example: true, area: 'haifa', city: 'חיפה', hood: 'כרמל מרכזי', street: 'שדרות מוריה', houseNo: 12,
+      title: 'דירת 3.5 חדרים עם מרפסת שמש ונוף למפרץ', type: 'דירה', cond: 'שמורה מאוד',
+      rooms: 3.5, beds: 2, baths: 1, sqm: 85, floor: 3, floors: 5, rent: 5200, entry: '2026-10-15',
+      features: ['מרפסת', 'מעלית', 'ממ"ד', 'מזגנים'],
+      desc: 'מרפסת שמש עם נוף למפרץ. חמש דקות הליכה ממרכז הכרמל.',
+      vaad: 180, arnona: 780, contract: 12, guarantee: 10400, guarantors: false, partners: false, smoking: false,
+      by: { name: 'רונית', g: 'f', role: 'בעלת הדירה' },
+      pal: 'sea', scenes: ['balcony', 'living', 'kitchen', 'bedroom'], photos: [] },
+
+    { id: 'a2', example: true, area: 'haifa', city: 'חיפה', hood: 'נווה שאנן', street: 'רחוב טרומפלדור', houseNo: 41,
+      title: 'דירת 3 חדרים שקטה ליד הטכניון', type: 'דירה', cond: 'במצב טוב',
+      rooms: 3, beds: 2, baths: 1, sqm: 70, floor: 2, floors: 4, rent: 4300, entry: '2026-10-01',
+      features: ['מרפסת', 'מזגנים', 'חיות מחמד'],
+      desc: 'בניין קטן ושקט, קרוב לטכניון ולתחבורה ציבורית.',
+      vaad: 120, arnona: 620, contract: 12, guarantee: 0, guarantors: true, partners: true, smoking: false,
+      by: { name: 'אבי', g: 'm', role: 'בעל הדירה' },
+      pal: 'sand', scenes: ['living', 'bedroom', 'kitchen'], photos: [] },
+
+    { id: 'a3', example: true, area: 'haifa', city: 'חיפה', hood: 'הדר', street: 'רחוב מסדה', houseNo: 18,
+      title: '2.5 חדרים משופצת בבניין באוהאוס', type: 'דירה', cond: 'משופצת',
+      rooms: 2.5, beds: 1, baths: 1, sqm: 60, floor: 1, floors: 3, rent: 3600, entry: '2026-09-20',
+      features: ['משופצת', 'מזגנים'],
+      desc: 'בניין באוהאוס משופץ, תקרות גבוהות וחלונות גדולים.',
+      vaad: 90, arnona: 480, contract: 12, guarantee: 0, guarantors: true, partners: false, smoking: true,
+      by: { name: 'ליאור', g: 'm', role: 'מתווך' },
+      pal: 'bauhaus', scenes: ['living', 'kitchen', 'bedroom'], photos: [] },
+
+    { id: 'a4', example: true, area: 'haifa', city: 'חיפה', hood: 'אחוזה', street: 'רחוב חורב', houseNo: 7,
+      title: '4 חדרים מרווחת עם מרפסת סוכה וחניה', type: 'דירה', cond: 'שמורה מאוד',
+      rooms: 4, beds: 3, baths: 2, sqm: 100, floor: 4, floors: 6, rent: 6400, entry: '2026-11-01',
+      features: ['מרפסת', 'חניה', 'מעלית', 'ממ"ד', 'מחסן'],
+      desc: 'דירה מרווחת עם מרפסת סוכה, חניה צמודה ומחסן.',
+      vaad: 250, arnona: 980, contract: 24, guarantee: 12800, guarantors: false, partners: false, smoking: false,
+      by: { name: 'ליאור', g: 'm', role: 'מתווך' },
+      pal: 'pine', scenes: ['living', 'balcony', 'kitchen', 'bedroom'], photos: [] },
+
+    { id: 'a5', example: true, area: 'krayot', city: 'קריית מוצקין', hood: 'מרכז', street: 'שדרות בן גוריון', houseNo: 60,
+      title: '4 חדרים עם מרפסת גדולה ליד הקניון', type: 'דירה', cond: 'במצב טוב',
+      rooms: 4, beds: 3, baths: 2, sqm: 95, floor: 2, floors: 4, rent: 5400, entry: '2026-10-20',
+      features: ['מרפסת', 'חניה', 'ממ"ד', 'מזגנים'],
+      desc: 'ליד הקניון ובתי הספר. מרפסת גדולה שפונה מערבה.',
+      vaad: 150, arnona: 820, contract: 12, guarantee: 10800, guarantors: false, partners: false, smoking: false,
+      by: { name: 'מירב', g: 'f', role: 'בעלת הדירה' },
+      pal: 'rose', scenes: ['living', 'kitchen', 'bedroom', 'balcony'], photos: [] },
+
+    { id: 'a6', example: true, area: 'haifa', city: 'חיפה', hood: 'כרמל צרפתי', street: 'רחוב יפה נוף', houseNo: 33,
+      title: '3 חדרים עם נוף פתוח לים', type: 'דירה', cond: 'משופצת',
+      rooms: 3, beds: 2, baths: 1, sqm: 75, floor: 5, floors: 8, rent: 5900, entry: '2026-10-01',
+      features: ['נוף לים', 'מעלית', 'מרפסת', 'מזגנים'],
+      desc: 'נוף פתוח לים מכל חלונות הסלון.',
+      vaad: 220, arnona: 760, contract: 12, guarantee: 11800, guarantors: false, partners: false, smoking: false,
+      by: { name: 'ליאור', g: 'm', role: 'מתווך' },
+      pal: 'sea', scenes: ['balcony', 'living', 'bedroom'], photos: [] },
+
+    { id: 'a7', example: true, area: 'krayot', city: 'קריית ביאליק', hood: 'מרכז', street: "רחוב ז'בוטינסקי", houseNo: 22,
+      title: '3.5 חדרים בקומה ראשונה, מתאימה גם עם כלב', type: 'דירה', cond: 'במצב טוב',
+      rooms: 3.5, beds: 2, baths: 1, sqm: 82, floor: 1, floors: 3, rent: 4700, entry: '2026-11-15',
+      features: ['חניה', 'ממ"ד', 'חיות מחמד', 'מזגנים'],
+      desc: 'קומה ראשונה בלי מדרגות רבות, מתאימה גם עם כלב.',
+      vaad: 110, arnona: 700, contract: 12, guarantee: 0, guarantors: true, partners: false, smoking: false,
+      by: { name: 'יוסי', g: 'm', role: 'בעל הדירה' },
+      pal: 'sand', scenes: ['living', 'kitchen', 'bedroom'], photos: [] },
+
+    { id: 'a8', example: true, area: 'haifa', city: 'חיפה', hood: 'רמת אלמוגי', street: 'רחוב אינשטיין', houseNo: 90,
+      title: '3 חדרים משופצת ומרוהטת, נכנסים עם מזוודה', type: 'דירה', cond: 'משופצת',
+      rooms: 3, beds: 2, baths: 1, sqm: 72, floor: 3, floors: 4, rent: 4900, entry: '2026-10-10',
+      features: ['מרפסת', 'משופצת', 'מרוהטת'],
+      desc: 'משופצת מהיסוד ומרוהטת, אפשר להיכנס עם מזוודה.',
+      vaad: 130, arnona: 690, contract: 12, guarantee: 9800, guarantors: false, partners: true, smoking: false,
+      by: { name: 'דנה', g: 'f', role: 'בעלת הדירה' },
+      pal: 'slate', scenes: ['living', 'bedroom', 'kitchen'], photos: [] },
+
+    { id: 'a9', example: true, area: 'haifa', city: 'חיפה', hood: 'הדר', street: 'רחוב הרצל', houseNo: 55,
+      title: '2 חדרים מרוהטת ליד הכרמלית', type: 'דירה', cond: 'במצב טוב',
+      rooms: 2, beds: 1, baths: 1, sqm: 50, floor: 2, floors: 3, rent: 3300, entry: '2026-09-25',
+      features: ['מרוהטת', 'מזגנים'],
+      desc: 'קרוב לכרמלית ולשוק תלפיות.',
+      vaad: 70, arnona: 420, contract: 6, guarantee: 0, guarantors: true, partners: false, smoking: true,
+      by: { name: 'ליאור', g: 'm', role: 'מתווך' },
+      pal: 'bauhaus', scenes: ['bedroom', 'living', 'kitchen'], photos: [] },
+
+    { id: 'a10', example: true, area: 'krayot', city: 'קריית אתא', hood: 'מרכז', street: 'רחוב העצמאות', houseNo: 14,
+      title: '4 חדרים בבניין חדש עם חניה ומחסן', type: 'דירה', cond: 'חדשה מהקבלן',
+      rooms: 4, beds: 3, baths: 2, sqm: 98, floor: 3, floors: 5, rent: 4800, entry: '2026-12-01',
+      features: ['חניה', 'מעלית', 'ממ"ד', 'מחסן'],
+      desc: 'בניין חדש יחסית, חניה בטאבו ומחסן בקומת הכניסה.',
+      vaad: 200, arnona: 840, contract: 24, guarantee: 9600, guarantors: false, partners: false, smoking: false,
+      by: { name: 'חיים', g: 'm', role: 'בעל הדירה' },
+      pal: 'pine', scenes: ['living', 'kitchen', 'bedroom'], photos: [] },
+
+    { id: 'a11', example: true, area: 'haifa', city: 'חיפה', hood: 'כרמל מרכזי', street: 'שדרות הנשיא', houseNo: 101,
+      title: 'דירת גג קטנה עם שקיעה מעל המפרץ', type: 'דירת גג', cond: 'שמורה מאוד',
+      rooms: 2.5, beds: 1, baths: 1, sqm: 58, floor: 4, floors: 4, rent: 4600, entry: '2026-10-05',
+      features: ['נוף לים', 'מרפסת', 'מרוהטת'],
+      desc: 'קומה אחרונה, מרפסת קטנה עם שקיעה מעל המפרץ.',
+      vaad: 160, arnona: 560, contract: 12, guarantee: 0, guarantors: true, partners: false, smoking: false,
+      by: { name: 'שירה', g: 'f', role: 'בעלת הדירה' },
+      pal: 'rose', scenes: ['balcony', 'living', 'bedroom'], photos: [] },
+
+    { id: 'a12', example: true, area: 'haifa', city: 'חיפה', hood: 'הדר עליון', street: 'רחוב פבזנר', houseNo: 28,
+      title: '3 חדרים ברחוב ירוק ושקט', type: 'דירה', cond: 'במצב טוב',
+      rooms: 3, beds: 2, baths: 1, sqm: 78, floor: 2, floors: 4, rent: 4200, entry: '2026-10-15',
+      features: ['מרפסת', 'מזגנים', 'חיות מחמד'],
+      desc: 'רחוב ירוק ושקט, חמש דקות מגן הזיכרון.',
+      vaad: 100, arnona: 640, contract: 12, guarantee: 0, guarantors: true, partners: true, smoking: false,
+      by: { name: 'עומר', g: 'm', role: 'בעל הדירה' },
+      pal: 'sand', scenes: ['living', 'balcony', 'kitchen'], photos: [] },
+
+    { id: 'a13', example: true, area: 'krayot', city: 'קריית מוצקין', hood: 'מרכז', street: 'רחוב ויצמן', houseNo: 35,
+      title: 'דירת גן 3.5 חדרים עם חצר פרטית', type: 'דירת גן', cond: 'שמורה מאוד',
+      rooms: 3.5, beds: 2, baths: 1, sqm: 88, floor: 0, floors: 3, rent: 5000, entry: '2026-11-01',
+      features: ['גינה', 'חניה', 'ממ"ד'],
+      desc: 'דירת גן עם חצר פרטית. מתאימה למי שיש ילדים או כלב.',
+      vaad: 90, arnona: 760, contract: 12, guarantee: 10000, guarantors: false, partners: false, smoking: false,
+      by: { name: 'מירב', g: 'f', role: 'בעלת הדירה' },
+      pal: 'pine', scenes: ['living', 'kitchen', 'bedroom', 'balcony'], photos: [] },
+
+    { id: 'a14', example: true, area: 'haifa', city: 'חיפה', hood: 'אחוזה', street: 'שדרות אבא חושי', houseNo: 150,
+      title: 'פנטהאוז 5 חדרים עם נוף לים ושתי חניות', type: 'פנטהאוז', cond: 'חדשה מהקבלן',
+      rooms: 5, beds: 4, baths: 2, sqm: 120, floor: 6, floors: 9, rent: 7200, entry: '2026-11-10',
+      features: ['נוף לים', 'חניה', 'מעלית', 'ממ"ד', 'מרפסת', 'מחסן'],
+      desc: 'חמישה חדרים, שתי חניות ומרפסת לכל אורך הדירה.',
+      vaad: 350, arnona: 1400, contract: 24, guarantee: 21600, guarantors: false, partners: false, smoking: false,
+      by: { name: 'ליאור', g: 'm', role: 'מתווך' },
+      pal: 'slate', scenes: ['living', 'balcony', 'kitchen', 'bedroom'], photos: [] },
+
+    { id: 'a15', example: true, area: 'haifa', city: 'חיפה', hood: 'נווה שאנן', street: 'רחוב טרומפלדור', houseNo: 12,
+      title: '4 חדרים למשפחה ליד הפארק', type: 'דירה', cond: 'במצב טוב',
+      rooms: 4, beds: 3, baths: 2, sqm: 92, floor: 1, floors: 4, rent: 6000, entry: '2026-10-20',
+      features: ['מרפסת', 'חניה', 'ממ"ד', 'חיות מחמד'],
+      desc: 'ארבעה חדרים ליד פארק, מתאימה למשפחה.',
+      vaad: 140, arnona: 900, contract: 12, guarantee: 12000, guarantors: false, partners: false, smoking: false,
+      by: { name: 'אבי', g: 'm', role: 'בעל הדירה' },
+      pal: 'rose', scenes: ['living', 'bedroom', 'kitchen'], photos: [] }
+  ];
+
+  /* הדירה שמוצגת בקישור של בעלי הדירות */
+  const ownerApt = {
+    id: 'mine', example: true, area: 'haifa', city: 'חיפה', hood: 'כרמל מרכזי', street: 'שדרות מוריה', houseNo: 38,
+    title: 'דירת 4 חדרים עם מרפסת בכרמל', type: 'דירה', cond: 'שמורה מאוד',
+    rooms: 4, beds: 3, baths: 1, sqm: 95, floor: 2, floors: 5, rent: 5200, entry: '2026-11-01',
+    features: ['מרפסת', 'מעלית', 'ממ"ד'], pal: 'pine', scenes: ['living'], photos: []
+  };
+
+  /* מחפשים מזויפים בלבד. לעולם לא אנשים אמיתיים: אחרי התאמה נחשף מקור ההכנסה שלהם. arrived = שעת הגעה, לפי הסדר */
+  const seekers = [
+    { id: 's1', first: 'נועה', last: 'ברק', g: 'f', occupants: 2, payMin: 5000, payMax: 5600, entry: '2026-11-01', arrived: '08:12',
+      income: 'שכירה, מעצבת UX', extra: 'אין', about: 'זוג צעיר בלי חיות. עובדים מהבית יומיים בשבוע.' },
+    { id: 's2', first: 'אורי', last: 'לוי', g: 'm', occupants: 1, payMin: 4200, payMax: 4800, entry: '2026-11-15', arrived: '08:47',
+      income: 'סטודנט לתואר שני', extra: 'מלגה, 2,000 ₪ בחודש', about: 'לומד בטכניון, מחפש שקט לכתיבת תזה.' },
+    { id: 's3', first: 'מאיה', last: 'שחר', g: 'f', occupants: 4, payMin: 5200, payMax: 6000, entry: '2026-11-20', arrived: '09:30',
+      income: 'שכירה, אחות', extra: 'קצבת ילדים', about: 'משפחה עם שני ילדים. מחפשים שכונה שקטה ליד בית ספר.' },
+    { id: 's4', first: 'איתי', last: 'מזרחי', g: 'm', occupants: 2, payMin: 5500, payMax: 6500, entry: '2027-01-01', arrived: '10:05',
+      income: 'עצמאי, הנדסאי חשמל', extra: 'אין', about: 'עוברים מתל אביב בעקבות עבודה חדשה.' },
+    { id: 's5', first: 'דניאל', last: 'אברהם', g: 'm', occupants: 3, payMin: 4900, payMax: 5300, entry: '2026-10-10', arrived: '11:20',
+      income: 'שכיר, מנהל מחסן', extra: 'עבודה בסופי שבוע, 1,200 ₪', about: 'זוג ותינוקת. גרים באזור שש שנים.' },
+    { id: 's6', first: 'שירן', last: 'כהן', g: 'f', occupants: 1, payMin: 4500, payMax: 5000, entry: '2026-11-05', arrived: '12:02',
+      income: 'עבודה חלקית', extra: 'קצבה', about: 'גרה לבד, בלי חיות, לא מעשנת.' }
+  ];
+
+  const has = (f) => (a) => a.features.includes(f);
+  /* קטגוריות. בלי test = «מותאם לך», שמחושבת מהכוכבים */
+  const categories = [
+    { id: 'foryou', label: 'מותאם לך', badge: '✨' },
+    { id: 'luxury', label: 'יוקרה', badge: '💎', test: (a) => a.rent >= 6000 || a.type === 'פנטהאוז' },
+    { id: 'balcony', label: 'מרפסת', badge: '🌤️', test: has('מרפסת') },
+    { id: 'sea', label: 'נוף לים', badge: '🌊', test: has('נוף לים') },
+    { id: 'small', label: 'עד 2.5 חדרים', badge: '🛋️', test: (a) => a.rooms <= 2.5 },
+    { id: 'family', label: '4 חדרים ומעלה', badge: '🏡', test: (a) => a.rooms >= 4 },
+    { id: 'mamad', label: 'ממ"ד', badge: '🛡️', test: has('ממ"ד') },
+    { id: 'parking', label: 'חניה', badge: '🅿️', test: has('חניה') },
+    { id: 'pets', label: 'חיות מחמד', badge: '🐾', test: has('חיות מחמד') },
+    { id: 'furnished', label: 'מרוהטת', badge: '🪑', test: has('מרוהטת') },
+    { id: 'garden', label: 'דירת גן', badge: '🌿', test: (a) => a.type === 'דירת גן' || a.features.includes('גינה') },
+    { id: 'renovated', label: 'משופצת', badge: '🔨', test: (a) => a.cond === 'משופצת' || a.cond === 'חדשה מהקבלן' }
+  ];
+
+  const cities = ['חיפה', 'קריית ביאליק', 'קריית מוצקין', 'קריית אתא', 'קריית ים', 'נשר', 'טירת כרמל'];
+  const streets = Array.from(new Set(apartments.map((a) => a.street).concat(['רחוב הנביאים', 'רחוב חסן שוקרי', 'שדרות הציונות', 'רחוב אלנבי', 'דרך הים'])));
+  /* סוגי נכס. m = שם זכר, לניסוח «משופץ / משופצת» בכתיבה האוטומטית */
+  const types = [
+    { label: 'דירה' }, { label: 'דירת גן' }, { label: 'דירת גג' }, { label: 'פנטהאוז', m: true }, { label: 'דופלקס', m: true },
+    { label: 'לופט', m: true }, { label: 'קוטג׳', m: true }, { label: 'בית פרטי', m: true }, { label: 'סטודיו', m: true }
+  ];
+  const conds = ['חדשה מהקבלן', 'משופצת', 'שמורה מאוד', 'במצב טוב', 'זקוקה לשיפוץ'];
+  const featureList = ['מיזוג', 'מרפסת', 'ממ"ד', 'מחסן', 'נגישות', 'דוד שמש', 'חניה', 'מרוהטת', 'מעלית', 'חיות מחמד'];
+  const acTypes = ['מזגן מרכזי', 'מזגן בכל החדרים', 'לא בכל החדרים', 'מזגן בסלון בלבד'];
+  const incomes = ['שכיר/ה', 'עצמאי/ת', 'סטודנט/ית', 'קצבה', 'אחר'];
+
+  Dira.data = { apartments, ownerApt, seekers, categories, cities, streets, types, conds, featureList, acTypes, incomes };
+})(globalThis.Dira = globalThis.Dira || {});
+
+</script>
+<script>
+/*
+ * כל טקסט ממשק. קובץ אחד, מקום אחד לבדיקת /HEB.
+ * טקסט פשוט בלבד: הממשק מסנן כל ערך לפני שהוא נכנס ל-HTML.
+ * «·» רק בין תוויות קצרות, לא בתוך משפט. בלי מקף ארוך.
+ */
+(function (Dira) {
+  'use strict';
+
+  /* ——— עזרי ניסוח ——— */
+  const g = (gender, m, f) => (gender === 'f' ? f : m);
+  const nis = (n) => Number(n).toLocaleString('en-US') + ' ₪';
+  const num = (n) => Number(n).toLocaleString('en-US');
+  function date(iso, withYear) {
+    const [y, m, d] = iso.split('-').map(Number);
+    const s = d + '.' + m;
+    return withYear || y !== new Date().getFullYear() ? s + '.' + y : s;
+  }
+  const count = (n, one, many) => (n === 1 ? one : `${num(n)} ${many}`);
+  const apts = (n) => count(n, 'דירה אחת', 'דירות');
+  const place = (a) => [a.street, a.hood].filter(Boolean).join(', ');
+  const fullAddress = (a) => `${a.street} ${a.houseNo}${a.hood ? ', ' + a.hood : ''}, ${a.city}`;
+
+  const S = {
+    fmt: { g, nis, num, date, apts, place, fullAddress },
+
+    app: {
+      brand: 'דירה בהחלקה',
+      title: 'דירה בהחלקה · דמו',
+      asideTitle: 'דמו. נפתח הכי טוב בטלפון',
+      asideText: 'כל הדירות והמחפשים כאן לדוגמה. שום דבר לא נשלח לאף אחד.',
+      close: 'סגירה',
+      back: 'חזרה'
+    },
+
+    tabs: { nav: 'ניווט ראשי', deck: 'דירות', categories: 'קטגוריות', ai: 'עוזר AI', favs: 'אהבתי', newMatches: (n) => count(n, 'התאמה חדשה', 'התאמות חדשות') },
+
+    top: { filter: 'סינון חכם', filterOn: 'סינון חכם, יש סינון פעיל', publish: 'פרסום דירה' },
+
+    card: {
+      example: 'דירה לדוגמה',
+      mine: 'הדירה שפרסמת',
+      starred: '★ סימנת כוכב',
+      similar: 'דומה למה שסימנת',
+      stampLike: 'שמרתי ♥',
+      stampNope: 'דילוג',
+      stampStar: '★ אהבתי במיוחד',
+      beds: 'חדרי שינה',
+      baths: 'חדרי רחצה',
+      sqm: 'מ״ר',
+      role: 'כרטיס דירה',
+      aria: (a) => `${a.title}, ${nis(a.rent)}, ${place(a)}. Enter פותח פרטים, החצים מחליפים תמונה`,
+      photo: (i, n) => `תמונה ${i} מתוך ${n}`
+    },
+
+    deck: {
+      h1: 'דירות להשכרה',
+      nope: 'דילוג',
+      star: 'כוכב, אהבתי במיוחד',
+      like: 'שמירה באהבתי',
+      hint: 'ימינה שומרים, שמאלה מדלגים, למעלה כוכב',
+      saved: 'נשמר ב«אהבתי»',
+      starred: 'סימנת כוכב. נציג יותר דירות כמו זו',
+      learned: (r) => (r.kind === 'price' ? 'הבנו. נציג פחות דירות במחיר הזה'
+        : r.kind === 'balcony' ? 'הבנו. נציג פחות דירות בלי מרפסת'
+          : `הבנו. נציג פחות דירות ב${r.hood}`),
+      activeFilter: 'הסינון הפעיל',
+      clearChip: 'ניקוי',
+      chip: {
+        q: (q) => `«${q}»`, max: (v) => `עד ${nis(v)}`, beds: (n) => `${n}+ חדרי שינה`, baths: (n) => `${n}+ חדרי רחצה`,
+        sqm: (n) => `${n}+ מ״ר`, rooms: (n) => `${n}+ חדרים`, foryou: 'מותאם לך', ai: 'לפי העוזר'
+      },
+      emptyFilterTitle: 'אין עוד דירות שמתאימות לסינון',
+      emptyFilterSeen: (n) => (n === 1 ? 'עברת על הדירה היחידה שמתאימה' : `עברת על כל ${num(n)} הדירות שמתאימות`),
+      emptyFilterNone: 'אף דירה לא עונה על כל התנאים יחד',
+      widen: 'הרחבת הטווח',
+      widenNote: (changes) => 'אחרי ההרחבה: ' + changes.map((c) => (c.kind === 'max' ? `עד ${nis(c.value)}`
+        : c.kind === 'cat' ? `בלי «${c.label}»`
+          : c.kind === 'feat' || c.kind === 'place' ? `בלי «${c.value}»`
+            : c.kind === 'q' ? `בלי החיפוש «${c.value}»`
+              : c.kind === 'all' ? 'בלי סינון'
+                : c.kind === 'max0' ? 'בלי תקרת מחיר'
+                  : { beds: 'בלי מינימום חדרי שינה', baths: 'בלי מינימום חדרי רחצה', sqm: 'בלי מינימום מ״ר', rooms: 'בלי מינימום חדרים', foryou: 'בלי «מותאם לך»' }[c.kind])).join(', '),
+      widened: (n) => `הטווח הורחב. יש עוד ${apts(n)}`,
+      clearFilter: 'ניקוי הסינון',
+      cleared: 'הסינון נוקה',
+      emptyAllTitle: 'ראית את כל הדירות',
+      emptyAllText: 'דירות חדשות מופיעות כאן כשהן מתפרסמות',
+      again: (n) => (n === 1 ? 'להציג שוב את הדירה שדילגת עליה' : `להציג שוב ${num(n)} דירות שדילגת עליהן`),
+      againDone: 'הדירות חזרו לערימה',
+      publish: 'פרסום דירה'
+    },
+
+    filter: {
+      title: 'סינון חכם',
+      reset: 'איפוס',
+      q: 'חיפוש חופשי',
+      qPh: 'לדוגמה: כרמל, מרפסת, נוף לים',
+      price: 'מחיר חודשי עד',
+      priceAria: 'מחיר חודשי מרבי',
+      noLimit: 'ללא הגבלה',
+      beds: 'חדרי שינה, לפחות',
+      baths: 'חדרי רחצה, לפחות',
+      any: 'הכול',
+      sqm: 'שטח, לפחות',
+      sqmAria: 'שטח מינימלי במ״ר',
+      sqmNone: 'ללא',
+      sqmVal: (n) => `${n} מ״ר`,
+      cats: 'קטגוריות',
+      kept: 'נשמרים גם:',
+      clearAll: 'ניקוי הכול',
+      apply: (n) => (n ? `הצגת ${apts(n)}` : 'החלה, אין דירות מתאימות'),
+      applied: (n) => (n ? `${apts(n)} מתאימות לסינון` : 'אין דירות שמתאימות לסינון')
+    },
+
+    details: {
+      example: 'דירה לדוגמה',
+      pay: 'תשלומים ודרישות',
+      vaad: 'ועד בית',
+      arnona: 'ארנונה דו-חודשית',
+      contract: 'חוזה מינימלי',
+      guarantee: 'ערבות בנקאית',
+      guarantors: 'ערבים',
+      partners: 'שותפים',
+      smoking: 'עישון',
+      entry: 'כניסה',
+      by: 'מפרסם',
+      address: 'כתובת מלאה',
+      months: (n) => `${n} חודשים`,
+      notSaid: 'לא צוין',
+      notNeeded: 'לא נדרשת',
+      needed: 'נדרשים',
+      notNeededPl: 'לא נדרשים',
+      allowed: 'מותר',
+      notAllowed: 'לא מותר',
+      now: 'מיידית',
+      byLine: (a) => `${a.by.name}, ${a.by.role}`,
+      mineBy: 'את הדירה הזאת פרסמת בדמו',
+      hidden: (a) => `מספר הבית והטלפון של ${a.by.name} נחשפים אחרי התאמה.`,
+      send: (a) => `שליחת פנייה ל${a.by.name}`,
+      sendNote: (a) => `${a.by.name} ${g(a.by.g, 'יחליט', 'תחליט')} אם לאשר. אחרי אישור נפתחת שיחה.`,
+      waiting: 'הפנייה נשלחה. מחכים לאישור',
+      matched: 'יש התאמה. השיחה פתוחה',
+      toMatch: 'למסך ההתאמה',
+      star: 'כוכב',
+      starOn: 'יש כוכב',
+      save: 'שמירה',
+      saveOn: 'נשמרה',
+      sent: (a) => `הפנייה נשלחה ל${a.by.name}. אחרי אישור נפתחת שיחה`,
+      alreadySent: 'כבר שלחת פנייה על הדירה הזאת'
+    },
+
+    favs: {
+      h1: 'דירות שאהבתי',
+      emptyTitle: 'עוד לא שמרת דירות',
+      emptyText: 'החלקה ימינה או ♥ שומרת דירה כאן',
+      toDeck: 'לדירות',
+      star: '★ כוכב',
+      wait: 'ממתין לאישור',
+      match: 'יש התאמה',
+      open: (a) => `${a.title}, ${nis(a.rent)}`,
+      remove: (a) => `הסרה מאהבתי: ${a.title}`,
+      removed: 'הוסר מ«אהבתי»',
+      locked: 'יש פנייה על הדירה הזאת, ולכן היא נשארת ב«אהבתי»',
+      foot: 'פנייה לבעל הדירה נשלחת מתוך פרטי הדירה',
+      ownerLink: 'איך זה נראה אצל בעל הדירה'
+    },
+
+    cats: {
+      h1: 'חיפוש לפי קטגוריות',
+      count: (n) => apts(n),
+      forYouOn: (n) => `${apts(n)} לפי הכוכבים שסימנת`,
+      forYouOff: 'סמנו כוכב ונתחיל ללמוד',
+      forYouNone: 'עוד אין כוכבים. אפשר לסמן ★ על דירה שאהבת במיוחד',
+      applied: (label, n) => `${label}: ${apts(n)}`
+    },
+
+    ai: {
+      h1: 'עוזר AI אישי',
+      hello: 'היי, מה חשוב לך בדירה הבאה? למשל: 3 חדרים בכרמל עם מרפסת, עד 5,500 ₪.',
+      notReal: 'בדמו העוזר מחפש לפי המילים שכתבת. זה לא AI אמיתי.',
+      suggestions: ['3 חדרים עם מרפסת', 'עד 4,500 בחיפה', 'דירה עם חניה בקריות'],
+      placeholder: 'מה חשוב לך בדירה?',
+      inputAria: 'הבקשה לעוזר',
+      send: 'שליחה',
+      typing: 'העוזר כותב',
+      notUnderstood: 'לא הבנתי מה לחפש. אפשר לכתוב מספר חדרים, מחיר, אזור, או משהו כמו מרפסת או חניה.',
+      criterion: (k, v) => ({ rooms: `${v} חדרים ומעלה`, max: `עד ${nis(v)}` }[k] || v),
+      droppedWord: (d) => ({ rooms: `${d.value} חדרים`, max: 'המחיר' }[d.kind] || d.value),
+      found: (n, labels) => `מצאתי ${apts(n)}: ${labels.join(', ')}.`,
+      partial: (n, dropped) => `לא מצאתי דירה עם הכול יחד. הנה ${n === 1 ? 'הכי קרובה' : num(n) + ' הכי קרובות'}, בלי ${dropped.join(' ובלי ')}.`,
+      results: 'תוצאות שנמצאו',
+      details: 'פרטים',
+      save: 'שמירה',
+      showInDeck: (n) => `הצגת ${apts(n)} בערימה`,
+      applied: 'הערימה מציגה עכשיו רק את מה שביקשת'
+    },
+
+    match: {
+      hello: 'יש התאמה',
+      seekerTitle: (a) => `${a.by.name} ${g(a.by.g, 'אישר', 'אישרה')} את הפנייה שלך`,
+      seekerSub: (a) => `${a.title}, ${nis(a.rent)}`,
+      toYou: 'נחשף לך',
+      toYouText: (a) => `הכתובת המלאה, ${a.street} ${a.houseNo}, והטלפון בשיחה`,
+      toThem: (a) => `נחשף ל${a.by.name}`,
+      toThemText: 'שם מלא, מקור הכנסה, הכנסה נוספת, נפשות וקצת עליך',
+      openChat: 'פתיחת השיחה',
+      fillAndChat: 'השלמת פרטים ופתיחת השיחה',
+      backFavs: 'חזרה לאהבתי',
+      ownerTitle: (s) => `יש התאמה עם ${s.first} ${s.last}`,
+      ownerSub: 'עכשיו נחשפים הפרטים שלא ראית קודם',
+      fullName: 'שם מלא',
+      income: 'מקור הכנסה',
+      extra: 'הכנסה נוספת',
+      occupants: 'נפשות',
+      entry: 'כניסה',
+      about: (s) => g(s.g, 'עליו', 'עליה'),
+      backOwner: 'חזרה לפניות',
+      banner: (a) => `${a.by.name} ${g(a.by.g, 'אישר', 'אישרה')}. יש התאמה`,
+      bannerText: (a) => `${a.street}. לחיצה פותחת את ההתאמה`
+    },
+
+    profile: {
+      h1: 'הפרטים שלך',
+      sub: (a) => `${a.by.name} ${g(a.by.g, 'יראה', 'תראה')} אותם עכשיו, כי יש ביניכם התאמה. אף אחד אחר לא רואה אותם.`,
+      fill: 'מילוי לדוגמה',
+      name: 'שם מלא',
+      about: 'קצת עליך',
+      aboutPh: 'מי גר בדירה, עבודה מהבית, חיות',
+      income: 'מקור הכנסה',
+      extra: 'הכנסה נוספת',
+      occupants: 'נפשות',
+      submit: 'שמירה ופתיחת השיחה',
+      errName: 'חסר שם מלא. אפשר גם ללחוץ «מילוי לדוגמה»',
+      example: { name: 'דנה לוי', about: 'גרה לבד עם חתולה, עובדת מהבית פעמיים בשבוע.', income: 'שכיר/ה', extra: 'אין', occupants: '1' }
+    },
+
+    chat: {
+      sys: 'השיחה בדמו מדומה. ההודעות לא נשלחות לאף אחד',
+      inputAria: 'הודעה',
+      send: 'שליחה',
+      typing: 'מקליד',
+      seekerTitle: (a) => `${a.by.name}, ${a.by.role}`,
+      seekerPrefill: (a) => `היי ${a.by.name}, ראיתי את הדירה ב${a.street}. אפשר לתאם ביקור?`,
+      seekerReplies: (a) => [`היי! ${g(a.by.g, 'שמח', 'שמחה')} שיש התאמה. אפשר לבוא מחר בשש. הטלפון שלי 050-0000000 (מספר לדוגמה)`, 'מעולה, נתראה מחר.', 'בשמחה 🙂'],
+      ownerTitle: (s) => `${s.first} ${s.last}`,
+      ownerSub: (apt) => `על הדירה ב${apt.street}`,
+      ownerPrefill: (s) => `היי ${s.first}, אישרתי את הפנייה. מתי נוח לך לבוא לראות את הדירה?`,
+      ownerReplies: ['היי, תודה שאישרת! מחר אחרי חמש מתאים?', 'מעולה, נתראה מחר.', 'תודה 🙂'],
+      toOwner: 'איך זה נראה אצל בעל הדירה',
+      toPublish: 'יש לך דירה? פרסום דירה',
+      toSeeker: 'לצד של מי שמחפש דירה'
+    },
+
+    publish: {
+      h1: 'פרסום דירה',
+      steps: { addr: 'כתובת מדויקת', details: 'פרטי הדירה', pay: 'תשלומים ודרישות', media: 'מדיה: תמונות וסרטון', contact: 'איש קשר' },
+      stepOf: (i, n) => `שלב ${i} מתוך ${n}`,
+      next: 'המשך',
+      prev: 'הקודם',
+      submit: 'פרסום הדירה',
+      cityStreet: 'עיר ורחוב',
+      city: 'עיר',
+      cityPick: 'בחירה מהרשימה',
+      street: 'רחוב',
+      houseNo: 'מספר בית',
+      entrance: 'כניסה',
+      floor: 'קומה',
+      floors: 'קומות בבניין',
+      title: 'כותרת הנכס',
+      rent: 'מחיר חודשי (₪)',
+      sqm: 'מ״ר בנוי',
+      outSqm: 'מ״ר גינה או מרפסת (לא חובה)',
+      beds: 'חדרי שינה',
+      baths: 'חדרי רחצה',
+      type: 'סוג הנכס',
+      cond: 'מצב הדירה',
+      features: 'מאפייני הדירה',
+      acType: 'סוג מיזוג',
+      acPick: 'בחירה',
+      parking: 'חניה',
+      parkingNone: 'ללא',
+      desc: 'תיאור',
+      autowrite: (label) => `כתיבה אוטומטית של ${label}`,
+      autowriteNote: 'בדמו הכתיבה האוטומטית מדומה: היא מרכיבה טקסט מהשדות שמילאת.',
+      writing: 'תכף מוכן',
+      written: 'נכתב אוטומטית. אפשר לערוך',
+      payments: 'תשלומים',
+      vaad: 'ועד בית (₪)',
+      arnona: 'ארנונה דו-חודשית (₪)',
+      contractReq: 'דרישות חוזה',
+      contract: 'אורך חוזה מינימלי (חודשים)',
+      guarantee: 'ערבות בנקאית נדרשת',
+      guaranteeAmt: 'סכום הערבות (₪)',
+      guarantors: 'דרושים ערבים',
+      partners: 'שותפים מותר',
+      smoking: 'עישון מותר',
+      notes: 'הערות או דרישות נוספות (לא חובה)',
+      yes: 'כן',
+      no: 'לא',
+      photos: 'תמונות הדירה (עד 10)',
+      addPhotos: 'הוספת תמונות',
+      photosCount: (n, max) => `${n} מתוך ${max}`,
+      video: 'סרטון (לא חובה)',
+      addVideo: 'הוספת סרטון',
+      videoAdded: (name) => `נוסף סרטון: ${name}`,
+      mediaNote: 'בלי תמונות, הכרטיס יוצג עם איור. בדמו הקבצים לא עולים לשום מקום, והם נעלמים ברענון הדף.',
+      name: 'שם',
+      phone: 'טלפון',
+      phoneNote: 'הטלפון לא מופיע במודעה. הוא נחשף רק למי שאישרת, בשיחה.',
+      err: {
+        city: 'חובה לבחור עיר מהרשימה',
+        street: 'חובה למלא רחוב',
+        houseNo: 'חובה למלא מספר בית',
+        rent: 'חובה למלא מחיר',
+        sqm: 'חובה למלא מ״ר',
+        acType: 'חובה לבחור סוג מיזוג',
+        guaranteeAmt: 'חובה למלא את סכום הערבות',
+        phone: 'חובה למלא טלפון, לפחות 9 ספרות'
+      },
+      errToast: (n) => (n === 1 ? 'שדה חובה אחד לא מולא. הוא מסומן באדום' : `${n} שדות חובה לא מולאו. הם מסומנים באדום`),
+      published: 'הדירה פורסמה. היא הכרטיס הבא בערימה',
+      ownerDefault: 'בעל הדירה'
+    },
+
+    owner: {
+      h1: 'הפניות לדירה שלך',
+      side: 'צד בעל הדירה',
+      plan: 'מנוי',
+      aptLine: (a) => `${a.rooms} חדרים, ${nis(a.rent)}, כניסה ${date(a.entry)}`,
+      list: 'פניות לפי סדר הגעה',
+      waiting: (n) => (n === 1 ? 'אחת ממתינה' : `${n} ממתינות`),
+      rule: (a) => `«מתאים» נקבע רק לפי שני דברים: אם טווח התשלום מכסה ${nis(a.rent)}, ואם הכניסה עד 30 יום אחרי ${date(a.entry)}. מספר הנפשות מוצג ולא נספר.`,
+      fit: 'מתאים',
+      unfit: 'לא מתאים',
+      approved: 'אושר',
+      rejected: 'נדחה',
+      arrived: (s) => `${g(s.g, 'הגיע', 'הגיעה')} ב-${s.arrived}`,
+      payTo: (s) => `עד ${nis(s.payMax)}`,
+      entryOn: (s) => `כניסה ${date(s.entry)}`,
+      occupants: (n) => (n === 1 ? 'נפש אחת' : `${n} נפשות`),
+      rowAria: (s, tag) => `${s.first}, ${tag}`,
+      toSeeker: 'לצד של מי שמחפש דירה',
+      allExample: 'כל המחפשים כאן לדוגמה',
+      banner: (n) => `${n} פניות חדשות מאז הבוקר`,
+      bannerText: 'מסודרות לפי סדר הגעה',
+      sheetSub: (s) => `${g(s.g, 'מחפש', 'מחפשת')} לדוגמה, ${g(s.g, 'הגיע', 'הגיעה')} ב-${s.arrived}`,
+      range: 'טווח תשלום',
+      rangeVal: (s) => `${num(s.payMin)} עד ${num(s.payMax)} ₪`,
+      occLabel: 'נפשות',
+      entryLabel: 'כניסה',
+      payLabel: 'תשלום',
+      dateLabel: 'תאריך',
+      payLine: (ok, a) => (ok ? `מכסה את ${nis(a.rent)}` : `לא מכסה את ${nis(a.rent)}`),
+      dateLine: (ok, a) => (ok ? `עד 30 יום אחרי ${date(a.entry)}` : `לא בטווח של 30 יום אחרי ${date(a.entry)}`),
+      hiddenList: (s) => `נחשף רק אחרי שמאשרים: שם משפחה, מקור הכנסה, הכנסה נוספת וקצת ${g(s.g, 'עליו', 'עליה')}.`,
+      approve: 'אישור',
+      reject: 'דחייה',
+      already: (d) => (d === 'ok' ? 'כבר אישרת את הפנייה הזאת' : 'כבר דחית את הפנייה הזאת'),
+      toMatch: 'לפרטים שנחשפו',
+      rejectedToast: 'הפנייה נדחתה',
+      planTitle: 'מנוי לבעלי דירות ומתווכים',
+      planSub: 'בפיילוט אין תשלום. המחיר ייקבע אחריו',
+      planRows: [['עכשיו', 'בפיילוט, ללא תשלום'], ['פרסום', 'הדירה נשארת בערימה, בלי להקפיץ מודעה'], ['פניות', 'מסומנות לפי תשלום ותאריך כניסה'], ['שיחות', 'רק עם מי שאישרת']],
+      planOk: 'הבנתי'
+    },
+
+    log: {
+      title: 'יומן הדמו',
+      privacy: 'היומן נשמר רק בדפדפן הזה. אין בו שמות ואין בו פרטים אישיים.',
+      whatsapp: 'שליחת הסיכום בוואטסאפ',
+      clear: 'ניקוי היומן',
+      reset: 'איפוס הדמו',
+      cleared: 'היומן נוקה',
+      resetDone: 'הדמו אופס. הכול חזר להתחלה',
+      empty: 'עוד אין אירועים',
+      tableCaption: 'אירועים אחרונים',
+      cols: ['שעה', 'אירוע', 'על מה', 'זמן'],
+      sec: (v) => `${v} ש׳`,
+      stats: (m) => [
+        [num(m.swipes), 'החלקות'], [num(m.likes), 'שמירות ♥'], [num(m.stars), 'כוכבים'], [num(m.nopes), 'דילוגים'],
+        [String(m.secPerCard), 'שניות לכרטיס'], [num(m.requests), 'פניות'], [`${m.approvals}/${m.approvals + m.rejections}`, 'אישורים של בעל הדירה'],
+        [num(m.published), 'דירות שפורסמו'], [num(m.quickExits), 'יציאות תוך 10 שניות']
+      ],
+      summary: (m) => [
+        'סיכום דמו «דירה בהחלקה»',
+        `החלקות: ${m.swipes}`,
+        `שמירות: ${m.likes}, כוכבים: ${m.stars}, דילוגים: ${m.nopes}`,
+        `שניות לכרטיס: ${m.secPerCard}`,
+        `פניות: ${m.requests}, התאמות: ${m.matches}`,
+        `אישורים של בעל הדירה: ${m.approvals}, דחיות: ${m.rejections}`,
+        `דירות שפורסמו: ${m.published}`,
+        `יציאות תוך 10 שניות: ${m.quickExits}`
+      ].join('\n'),
+      event: (t) => ({
+        open: 'פתיחה', swipe: 'החלקה', request: 'פנייה', match: 'התאמה', approve: 'אישור', reject: 'דחייה',
+        filter: 'סינון', category: 'קטגוריה', ai: 'עוזר', publish: 'פרסום', profile: 'פרטים', chat: 'הודעה', exit: 'יציאה'
+      }[t] || t)
+    }
+  };
+
+  Dira.S = S;
+})(globalThis.Dira = globalThis.Dira || {});
+
+</script>
+<script>
+/* איורי דירות לדוגמה. בלי תמונות מהרשת, בלי זכויות של אחרים. */
+(function (Dira) {
+  const PAL = {
+    sea:     { wall: '#DCE8EC', wall2: '#C5D8E0', floor: '#B48A67', accent: '#2F6F8F', accent2: '#F2C14E', soft: '#F7F4EE' },
+    sand:    { wall: '#EFE3D0', wall2: '#E1CFB4', floor: '#9C7A5B', accent: '#C8553D', accent2: '#3E7C6B', soft: '#FBF7F0' },
+    pine:    { wall: '#DDE7DF', wall2: '#C8D8CC', floor: '#8C6B52', accent: '#2F5D50', accent2: '#E9B44C', soft: '#F6F7F2' },
+    bauhaus: { wall: '#F1EEE8', wall2: '#DFD9CE', floor: '#77716B', accent: '#1F4E9C', accent2: '#E4572E', soft: '#FFFFFF' },
+    rose:    { wall: '#F2E1DE', wall2: '#E6CBC6', floor: '#A47B62', accent: '#8C3B4A', accent2: '#5B8C85', soft: '#FFF8F5' },
+    slate:   { wall: '#E3E6EA', wall2: '#CDD3DB', floor: '#7D6553', accent: '#36465A', accent2: '#D9A441', soft: '#F8F9FA' }
+  };
+  const SKY = [['#8FC3E4', '#E4F1F8'], ['#F0A97F', '#FBE3C6'], ['#7F70AE', '#F2A67C']];
+  let uid = 0;
+
+  function rng(seed) {
+    let a = 0;
+    for (const c of String(seed)) a = (a * 31 + c.charCodeAt(0)) | 0;
+    return function () {
+      a = (a + 0x6D2B79F5) | 0;
+      let t = Math.imul(a ^ (a >>> 15), 1 | a);
+      t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+      return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+    };
+  }
+
+  function wallFloor(p, k, H) {
+    let planks = '';
+    for (let i = 0; i < 9; i++) {
+      const x = i * 38;
+      planks += `<line x1="${x}" y1="${H}" x2="${x * 1.35 - 52}" y2="400" stroke="#000" stroke-opacity=".09" stroke-width="1.5"/>`;
+    }
+    return {
+      defs: `<linearGradient id="${k}w" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${p.wall}"/><stop offset="1" stop-color="${p.wall2}"/></linearGradient>
+             <linearGradient id="${k}f" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${p.floor}" stop-opacity=".82"/><stop offset="1" stop-color="${p.floor}"/></linearGradient>
+             <radialGradient id="${k}g"><stop offset="0" stop-color="#FFE7A8" stop-opacity=".75"/><stop offset="1" stop-color="#FFE7A8" stop-opacity="0"/></radialGradient>`,
+      svg: `<rect width="300" height="${H}" fill="url(#${k}w)"/><rect y="${H}" width="300" height="${400 - H}" fill="url(#${k}f)"/>${planks}
+            <rect y="${H - 5}" width="300" height="5" fill="${p.soft}" opacity=".85"/>`
+    };
+  }
+
+  function view(x, y, w, h, p, k, sky, R) {
+    const sx = x + w * (0.25 + R() * 0.5);
+    return {
+      defs: `<linearGradient id="${k}s" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${sky[0]}"/><stop offset="1" stop-color="${sky[1]}"/></linearGradient>
+             <clipPath id="${k}c"><rect x="${x}" y="${y}" width="${w}" height="${h}"/></clipPath>`,
+      svg: `<rect x="${x - 7}" y="${y - 7}" width="${w + 14}" height="${h + 14}" rx="3" fill="${p.soft}"/>
+            <g clip-path="url(#${k}c)">
+              <rect x="${x}" y="${y}" width="${w}" height="${h}" fill="url(#${k}s)"/>
+              <circle cx="${sx}" cy="${y + h * 0.32}" r="9" fill="#FFF3D6"/>
+              <path d="M${x} ${y + h * 0.62} C${x + w * 0.3} ${y + h * 0.5} ${x + w * 0.6} ${y + h * 0.6} ${x + w} ${y + h * 0.52} L${x + w} ${y + h} L${x} ${y + h}Z" fill="#7C9A8B"/>
+              <rect x="${x}" y="${y + h * 0.7}" width="${w}" height="${h * 0.3}" fill="#3E7FA6"/>
+              <line x1="${x + w * 0.78}" y1="${y + h * 0.7}" x2="${x + w * 0.78}" y2="${y + h * 0.5}" stroke="#34404C" stroke-width="1.5"/>
+              <line x1="${x + w * 0.7}" y1="${y + h * 0.52}" x2="${x + w * 0.9}" y2="${y + h * 0.52}" stroke="#34404C" stroke-width="1.5"/>
+            </g>
+            <rect x="${x + w / 2 - 2}" y="${y}" width="4" height="${h}" fill="${p.soft}"/>
+            <rect x="${x - 12}" y="${y + h + 5}" width="${w + 24}" height="6" rx="2" fill="${p.soft}"/>`
+    };
+  }
+
+  function plant(x, base) {
+    let leaves = '';
+    [-44, -22, 0, 22, 44].forEach((a, i) => {
+      leaves += `<ellipse cx="${x}" cy="${base - 48}" rx="7" ry="22" fill="${i % 2 ? '#3F6E50' : '#56866A'}" transform="rotate(${a} ${x} ${base - 30})"/>`;
+    });
+    return `${leaves}<path d="M${x - 15} ${base - 28} L${x + 15} ${base - 28} L${x + 11} ${base} L${x - 11} ${base}Z" fill="#C98B5E"/>`;
+  }
+
+  function lamp(x, top, bottom, k) {
+    return `<circle cx="${x}" cy="${top + 10}" r="62" fill="url(#${k}g)"/>
+            <line x1="${x}" y1="${top + 14}" x2="${x}" y2="${bottom}" stroke="#2B2B2B" stroke-width="2"/>
+            <path d="M${x - 16} ${top + 18} L${x + 16} ${top + 18} L${x + 10} ${top} L${x - 10} ${top}Z" fill="#F4E3C1"/>`;
+  }
+
+  function art(x, y, w, h, p) {
+    return `<rect x="${x}" y="${y}" width="${w}" height="${h}" fill="${p.soft}" stroke="${p.wall2}" stroke-width="3"/>
+            <circle cx="${x + w * 0.36}" cy="${y + h * 0.45}" r="${h * 0.24}" fill="${p.accent2}"/>
+            <rect x="${x + w * 0.5}" y="${y + h * 0.3}" width="${w * 0.3}" height="${h * 0.45}" fill="${p.accent}"/>`;
+  }
+
+  function living(p, k, R, sky) {
+    const H = 272, left = R() < 0.5;
+    const wf = wallFloor(p, k, H), win = view(left ? 26 : 164, 56, 110, 126, p, k, sky, R);
+    const lx = left ? 268 : 32, px = left ? 30 : 270;
+    return {
+      defs: wf.defs + win.defs,
+      svg: wf.svg + win.svg + art(left ? 186 : 44, 86, 70, 50, p) + lamp(lx, 142, H + 8, k) +
+        `<ellipse cx="150" cy="334" rx="130" ry="28" fill="${p.accent2}" opacity=".3"/>
+         <rect x="52" y="190" width="196" height="50" rx="15" fill="${p.accent}"/>
+         <rect x="44" y="226" width="212" height="42" rx="11" fill="${p.accent}"/>
+         <rect x="44" y="226" width="212" height="42" rx="11" fill="#fff" opacity=".1"/>
+         <rect x="34" y="212" width="24" height="56" rx="11" fill="${p.accent}"/>
+         <rect x="242" y="212" width="24" height="56" rx="11" fill="${p.accent}"/>
+         <rect x="72" y="198" width="54" height="36" rx="10" fill="${p.accent2}"/>
+         <rect x="174" y="198" width="54" height="36" rx="10" fill="${p.soft}" opacity=".92"/>
+         <rect x="60" y="267" width="6" height="11" fill="#2B2B2B"/><rect x="234" y="267" width="6" height="11" fill="#2B2B2B"/>
+         <ellipse cx="150" cy="306" rx="48" ry="11" fill="${p.soft}"/>
+         <line x1="126" y1="310" x2="122" y2="334" stroke="#2B2B2B" stroke-width="2"/><line x1="174" y1="310" x2="178" y2="334" stroke="#2B2B2B" stroke-width="2"/>
+         <rect x="140" y="294" width="10" height="10" rx="2" fill="${p.accent2}"/>` + plant(px, H + 20)
+    };
+  }
+
+  function kitchen(p, k, R, sky) {
+    const H = 280, wf = wallFloor(p, k, H), win = view(118, 42, 64, 80, p, k, sky, R);
+    let tiles = '';
+    for (let x = 0; x <= 300; x += 18) tiles += `<line x1="${x}" y1="130" x2="${x}" y2="196" stroke="#000" stroke-opacity=".06"/>`;
+    for (let y = 130; y <= 196; y += 18) tiles += `<line x1="0" y1="${y}" x2="300" y2="${y}" stroke="#000" stroke-opacity=".06"/>`;
+    const cab = (x) => `<rect x="${x}" y="38" width="46" height="78" rx="3" fill="${p.soft}" stroke="${p.wall2}" stroke-width="2"/><rect x="${x + 19}" y="102" width="8" height="3" rx="1.5" fill="${p.accent}"/>`;
+    return {
+      defs: wf.defs + win.defs,
+      svg: wf.svg + `<rect y="126" width="300" height="72" fill="${p.soft}" opacity=".6"/>` + tiles + win.svg +
+        cab(14) + cab(62) + cab(192) + cab(240) +
+        `<rect y="196" width="300" height="10" fill="#ECE6DC"/>
+         <rect y="206" width="300" height="74" fill="${p.accent}"/>
+         <line x1="60" y1="210" x2="60" y2="276" stroke="#000" stroke-opacity=".14"/><line x1="120" y1="210" x2="120" y2="276" stroke="#000" stroke-opacity=".14"/>
+         <line x1="180" y1="210" x2="180" y2="276" stroke="#000" stroke-opacity=".14"/><line x1="240" y1="210" x2="240" y2="276" stroke="#000" stroke-opacity=".14"/>
+         <rect x="120" y="196" width="60" height="4" fill="#9AA3A8"/>
+         <ellipse cx="58" cy="190" rx="22" ry="8" fill="${p.soft}"/>
+         <circle cx="50" cy="183" r="6" fill="${p.accent2}"/><circle cx="62" cy="182" r="6" fill="${p.accent2}"/><circle cx="56" cy="176" r="6" fill="${p.accent2}"/>
+         <rect x="216" y="168" width="32" height="28" rx="4" fill="#C7A27C"/>
+         <ellipse cx="108" cy="318" rx="23" ry="7" fill="${p.accent2}"/><line x1="96" y1="322" x2="92" y2="392" stroke="#2B2B2B" stroke-width="2.5"/><line x1="120" y1="322" x2="124" y2="392" stroke="#2B2B2B" stroke-width="2.5"/>
+         <ellipse cx="192" cy="318" rx="23" ry="7" fill="${p.accent2}"/><line x1="180" y1="322" x2="176" y2="392" stroke="#2B2B2B" stroke-width="2.5"/><line x1="204" y1="322" x2="208" y2="392" stroke="#2B2B2B" stroke-width="2.5"/>`
+    };
+  }
+
+  function bedroom(p, k, R, sky) {
+    const H = 270, wf = wallFloor(p, k, H), win = view(192, 58, 82, 104, p, k, sky, R);
+    return {
+      defs: wf.defs + win.defs,
+      svg: wf.svg + win.svg +
+        `<rect x="178" y="48" width="12" height="128" fill="${p.accent2}" opacity=".85"/><rect x="276" y="48" width="12" height="128" fill="${p.accent2}" opacity=".85"/>` +
+        art(104, 76, 64, 46, p) + lamp(32, 196, 238, k) +
+        `<rect x="10" y="236" width="46" height="54" rx="4" fill="${p.soft}" stroke="${p.wall2}" stroke-width="2"/>
+         <ellipse cx="160" cy="352" rx="128" ry="26" fill="${p.accent}" opacity=".18"/>
+         <rect x="70" y="148" width="180" height="100" rx="16" fill="${p.accent}"/>
+         <rect x="62" y="226" width="196" height="28" rx="7" fill="${p.soft}"/>
+         <rect x="92" y="208" width="60" height="26" rx="10" fill="#fff"/><rect x="168" y="208" width="60" height="26" rx="10" fill="#fff"/>
+         <rect x="62" y="246" width="196" height="64" rx="11" fill="${p.accent2}"/>
+         <path d="M62 270 Q160 258 258 270" stroke="#000" stroke-opacity=".1" stroke-width="2" fill="none"/>`
+    };
+  }
+
+  function balcony(p, k, R, sky) {
+    const sx = 60 + R() * 180;
+    let bal = '', sparks = '', city = '';
+    for (let x = 6; x < 300; x += 16) bal += `<rect x="${x}" y="270" width="4" height="60" fill="#2C3A46"/>`;
+    for (let i = 0; i < 7; i++) sparks += `<line x1="${20 + i * 42}" y1="${214 + (i % 3) * 14}" x2="${36 + i * 42}" y2="${214 + (i % 3) * 14}" stroke="#fff" stroke-opacity=".35" stroke-width="2"/>`;
+    for (let i = 0; i < 12; i++) city += `<rect x="${14 + i * 23}" y="${170 - (i % 4) * 3}" width="7" height="${6 + (i % 3) * 2}" fill="#F3EDE2" opacity=".75"/>`;
+    return {
+      defs: `<linearGradient id="${k}s" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${sky[0]}"/><stop offset="1" stop-color="${sky[1]}"/></linearGradient>
+             <linearGradient id="${k}m" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#4A8DB3"/><stop offset="1" stop-color="#2D6A90"/></linearGradient>`,
+      svg: `<rect width="300" height="270" fill="url(#${k}s)"/>
+            <circle cx="${sx}" cy="92" r="48" fill="#FFF1CF" opacity=".28"/><circle cx="${sx}" cy="92" r="22" fill="#FFF1CF"/>
+            <path d="M0 178 C60 160 120 172 180 158 S270 150 300 164 L300 204 L0 204Z" fill="#8FA79B"/>${city}
+            <rect y="198" width="300" height="72" fill="url(#${k}m)"/>${sparks}
+            <line x1="222" y1="198" x2="222" y2="150" stroke="#3B4652" stroke-width="2"/><line x1="206" y1="154" x2="250" y2="154" stroke="#3B4652" stroke-width="2"/>
+            <line x1="252" y1="198" x2="252" y2="160" stroke="#3B4652" stroke-width="2"/><line x1="240" y1="164" x2="276" y2="164" stroke="#3B4652" stroke-width="2"/>
+            <rect y="262" width="300" height="9" fill="#2C3A46"/>${bal}<rect y="326" width="300" height="5" fill="#2C3A46"/>
+            <rect y="330" width="300" height="70" fill="${p.soft}"/>
+            <line x1="0" y1="360" x2="300" y2="360" stroke="#000" stroke-opacity=".08"/><line x1="100" y1="330" x2="80" y2="400" stroke="#000" stroke-opacity=".08"/><line x1="200" y1="330" x2="220" y2="400" stroke="#000" stroke-opacity=".08"/>
+            <rect x="44" y="300" width="50" height="10" rx="4" fill="${p.accent}"/><rect x="44" y="258" width="10" height="52" rx="4" fill="${p.accent}"/>
+            <line x1="50" y1="310" x2="46" y2="376" stroke="${p.accent}" stroke-width="4"/><line x1="90" y1="310" x2="94" y2="376" stroke="${p.accent}" stroke-width="4"/>
+            <ellipse cx="150" cy="316" rx="30" ry="8" fill="${p.accent2}"/><line x1="150" y1="320" x2="150" y2="378" stroke="#2B2B2B" stroke-width="3"/>
+            <rect x="140" y="298" width="8" height="14" rx="2" fill="#fff" opacity=".85"/>` + plant(252, 386)
+    };
+  }
+
+  const SCENE = { living, kitchen, bedroom, balcony };
+
+  function render(type, palName, seed) {
+    const k = 'sc' + (++uid);
+    const R = rng(seed);
+    const p = PAL[palName] || PAL.sea;
+    const sky = SKY[Math.floor(R() * SKY.length)];
+    const out = (SCENE[type] || living)(p, k, R, sky);
+    return `<svg viewBox="0 0 300 400" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false"><defs>${out.defs}</defs>${out.svg}</svg>`;
+  }
+
+  /* תמונה מספר i של דירה: תמונה אמיתית אם יש, אחרת איור */
+  function photo(apt, i) {
+    if (apt.photos && apt.photos.length) {
+      const src = apt.photos[i % apt.photos.length];
+      return `<img src="${String(src).replace(/"/g, '%22')}" alt="" draggable="false">`;
+    }
+    const list = apt.scenes && apt.scenes.length ? apt.scenes : ['living'];
+    return render(list[i % list.length], apt.pal, apt.id + ':' + i);
+  }
+
+  function count(apt) {
+    return apt.photos && apt.photos.length ? apt.photos.length : (apt.scenes || ['living']).length;
+  }
+
+  Dira.scenes = { render, photo, count };
+})(globalThis.Dira = globalThis.Dira || {});
+
+</script>
+<script>
+/*
+ * הלוגיקה של הערימה: כלל «מתאים», סינון, דמיון לכוכבים, למידה מ-✕, והרחבת טווח.
+ * פונקציות טהורות בלבד. בלי DOM ובלי מצב גלובלי.
+ */
+(function (Dira) {
+  'use strict';
+
+  const DAY = 86400000;
+  const toUTC = (iso) => { const [y, m, d] = iso.split('-').map(Number); return Date.UTC(y, m - 1, d); };
+  const daysBetween = (later, earlier) => Math.round((toUTC(later) - toUTC(earlier)) / DAY);
+
+  /* הכרעה 11: טווח התשלום מכסה את שכר הדירה, והכניסה בין יום הכניסה של הדירה ל-30 יום אחריו. נפשות לא נספרות. */
+  function fit(seeker, apt, cfg) {
+    const pay = seeker.payMax >= apt.rent;
+    const gap = daysBetween(seeker.entry, apt.entry);
+    const date = gap >= 0 && gap <= cfg.entryWindowDays;
+    return { pay, date, ok: pay && date };
+  }
+
+  /* ——— סינון (הכרעה 16) ——— */
+  const hasPrefix = (w) => w.length > 3 && /^[בלהו]/.test(w);
+  const looseHas = (hay, w) => hay.includes(w) || (hasPrefix(w) && hay.includes(w.slice(1)));
+
+  function isEmptyFilter(f) {
+    if (!f) return true;
+    return !(f.q || f.max || f.beds || f.baths || f.sqm || f.rooms || f.foryou ||
+      (f.cats && f.cats.length) || (f.feats && f.feats.length) || (f.places && f.places.length));
+  }
+
+  /* ctx: { categories, tune, cfg } · נדרש רק כשיש קטגוריות או «מותאם לך» */
+  function passes(a, f, ctx) {
+    if (isEmptyFilter(f)) return true;
+    if (f.max && a.rent > f.max) return false;
+    if (f.beds && a.beds < f.beds) return false;
+    if (f.baths && a.baths < f.baths) return false;
+    if (f.sqm && a.sqm < f.sqm) return false;
+    if (f.rooms && a.rooms < f.rooms) return false;
+    if (f.cats && f.cats.length) {
+      const ok = f.cats.every((id) => {
+        const c = ctx.categories.find((x) => x.id === id);
+        return !c || !c.test || c.test(a);
+      });
+      if (!ok) return false;
+    }
+    if (f.feats && f.feats.length && !f.feats.every((x) => a.features.includes(x))) return false;
+    if (f.places && f.places.length && !f.places.some((p) => (p === 'הקריות' ? a.area === 'krayot' : `${a.city} ${a.hood} ${a.street}`.includes(p)))) return false;
+    if (f.q) {
+      const hay = [a.title, a.street, a.hood, a.city, a.type, a.cond, a.desc].concat(a.features).join(' ');
+      if (!f.q.split(/[\s,]+/).filter(Boolean).every((w) => looseHas(hay, w))) return false;
+    }
+    if (f.foryou && similarity(a, ctx.tune, ctx.cfg) < ctx.cfg.forYouMin) return false;
+    return true;
+  }
+
+  /* ——— דמיון לכוכבים (הכרעה 7) ——— */
+  function similarity(a, tune, cfg) {
+    if (!tune || !tune.n) return 0;
+    let s = 0;
+    a.features.forEach((x) => { s += (tune.f[x] || 0) / tune.n; });
+    s += ((tune.h[a.hood] || 0) / tune.n) * cfg.hoodWeight;
+    s += Math.max(0, cfg.roomsWeight - Math.abs(a.rooms - tune.rooms / tune.n));
+    s += Math.max(0, cfg.rentWeight - Math.abs(a.rent - tune.rent / tune.n) / cfg.rentScale);
+    return s;
+  }
+
+  function learnStar(tune, a) {
+    const t = { n: tune.n + 1, f: Object.assign({}, tune.f), h: Object.assign({}, tune.h), rooms: tune.rooms + a.rooms, rent: tune.rent + a.rent };
+    a.features.forEach((x) => { t.f[x] = (t.f[x] || 0) + 1; });
+    t.h[a.hood] = (t.h[a.hood] || 0) + 1;
+    return t;
+  }
+
+  /* ✕ מלמד דבר אחד: מחיר גבוה, בלי מרפסת, או השכונה. מחזיר את הסיבה כדי שהממשק יאמר אותה */
+  function learnNope(pen, a, cfg) {
+    const p = Object.assign({}, pen);
+    let reason;
+    if (a.rent > cfg.expensiveFrom) { p.high = (p.high || 0) + 1; reason = { kind: 'price' }; }
+    else if (!a.features.includes('מרפסת')) { p.noBalcony = (p.noBalcony || 0) + 1; reason = { kind: 'balcony' }; }
+    else { p['hood:' + a.hood] = (p['hood:' + a.hood] || 0) + 1; reason = { kind: 'hood', hood: a.hood }; }
+    return { pen: p, reason };
+  }
+
+  function penalty(a, pen, cfg) {
+    return ((pen['hood:' + a.hood] || 0) +
+      (a.features.includes('מרפסת') ? 0 : pen.noBalcony || 0) +
+      (a.rent > cfg.expensiveFrom ? pen.high || 0 : 0)) * cfg.penaltyWeight;
+  }
+
+  /* סדר הערימה: מה שלא הוחלק ועובר את הסינון. שלך ראשונה, אחר כך לפי דמיון פחות עונש */
+  function deckOrder(apts, st, ctx) {
+    const cfg = ctx.cfg;
+    return apts
+      .filter((a) => !st.swiped[a.id] && passes(a, st.filter, ctx))
+      .map((a, i) => ({ a, i, s: a.mine ? cfg.mineFirst : penalty(a, st.pen, cfg) - similarity(a, st.tune, cfg) * cfg.similarityWeight }))
+      .sort((x, y) => x.s - y.s || x.i - y.i)
+      .map((x) => x.a);
+  }
+
+  /*
+   * הכרעה 24: «הרחבת הטווח» באמת מרחיבה.
+   * מרפים תנאי אחרי תנאי עד שיש לפחות דירה אחת שלא הוחלקה. מחזיר null אם גם בלי סינון אין כלום.
+   * changes: רשימת מה שהשתנה, כדי שהממשק יאמר אותו.
+   */
+  function widen(f, apts, swiped, ctx) {
+    const left = (g) => apts.filter((a) => !swiped[a.id] && passes(a, g, ctx)).length;
+    if (isEmptyFilter(f) || !apts.some((a) => !swiped[a.id])) return null;
+    const g = JSON.parse(JSON.stringify(f));
+    const changes = [];
+
+    if (g.max) {
+      const noMax = Object.assign({}, g, { max: 0 });
+      const above = apts.filter((a) => !swiped[a.id] && a.rent > g.max && passes(a, noMax, ctx)).map((a) => a.rent);
+      if (above.length) {
+        const r = ctx.cfg.widenRound;
+        g.max = Math.ceil(Math.min.apply(null, above) / r) * r;
+        changes.push({ kind: 'max', value: g.max });
+        return { filter: g, changes };
+      }
+    }
+    const steps = [
+      ['max0', () => { delete g.max; }],
+      ['beds', () => { delete g.beds; }],
+      ['baths', () => { delete g.baths; }],
+      ['sqm', () => { delete g.sqm; }],
+      ['rooms', () => { delete g.rooms; }],
+      ['foryou', () => { delete g.foryou; }]
+    ];
+    (g.cats || []).slice().reverse().forEach((id) => steps.push(['cat', () => { g.cats = g.cats.filter((x) => x !== id); }, id]));
+    (g.feats || []).slice().reverse().forEach((x) => steps.push(['feat', () => { g.feats = g.feats.filter((y) => y !== x); }, x]));
+    (g.places || []).slice().reverse().forEach((x) => steps.push(['place', () => { g.places = g.places.filter((y) => y !== x); }, x]));
+    steps.push(['q', () => { delete g.q; }, g.q]);
+
+    for (const [kind, apply, value] of steps) {
+      const before = JSON.stringify(g);
+      apply();
+      if (JSON.stringify(g) === before) continue;
+      changes.push({ kind, value });
+      if (left(g)) return { filter: isEmptyFilter(g) ? null : g, changes };
+    }
+    return { filter: null, changes: [{ kind: 'all' }] };
+  }
+
+  /* דירה מלאה: ברירות מחדל לשדות שחסרים בדירה שהוחלפה מ-data.js */
+  function normalize(a) {
+    const beds = a.beds || Math.max(1, Math.floor(a.rooms) - 1);
+    return Object.assign({ beds, baths: 1, type: 'דירה', cond: 'במצב טוב', title: `דירת ${a.rooms} חדרים ב${a.street}`, desc: '', photos: [] }, a);
+  }
+
+  Dira.match = { fit, passes, isEmptyFilter, similarity, learnStar, learnNope, deckOrder, widen, normalize, daysBetween };
+})(globalThis.Dira = globalThis.Dira || {});
+
+</script>
+<script>
+/*
+ * מצב הדמו. כל שינוי עובר דרך setState, שמעדכן, שומר ומודיע למי שנרשם לנושא.
+ * בלי DOM, כדי שאפשר יהיה לבדוק ב-node.
+ */
+(function (Dira) {
+  'use strict';
+
+  function fresh(schema) {
+    return {
+      schema,
+      saved: {},                 // id ⟵ { star, t } · «אהבתי»
+      swiped: {},                // id ⟵ 'L' | 'R' | 'U'
+      pen: {},                   // מה ✕ לימד, לסידור הערימה
+      tune: { n: 0, f: {}, h: {}, rooms: 0, rent: 0 },   // מה הכוכבים לימדו
+      filter: null,              // הסינון הפעיל
+      requests: [],              // { id, t, due, status: 'wait' | 'match', seen }
+      chats: {},                 // key ⟵ [{ who, text }]
+      profile: null,             // פרטי המחפש, נמסרים רק אחרי התאמה
+      added: [],                 // דירות שפורסמו בדמו
+      owner: { decisions: {} },  // sid ⟵ 'ok' | 'no'
+      aiChat: [],
+      log: [],
+      flags: { hint: false, ownerBanner: false }
+    };
+  }
+
+  /*
+   * storage: אובייקט עם getItem/setItem (localStorage בדפדפן, מדומה בבדיקות).
+   * גרסה ישנה או שבורה נמחקת ומתחילה מחדש. לא ממזגים.
+   */
+  function createStore(opts) {
+    const cfg = opts.config;
+    const storage = opts.storage;
+    const subs = {};
+    let state = load();
+
+    function load() {
+      try {
+        const raw = storage && storage.getItem(cfg.storageKey);
+        const obj = raw ? JSON.parse(raw) : null;
+        if (obj && obj.schema === cfg.schema) return Object.assign(fresh(cfg.schema), obj);
+      } catch (e) { /* שמירה שבורה: מתחילים מחדש */ }
+      return fresh(cfg.schema);
+    }
+
+    function save() {
+      try { storage && storage.setItem(cfg.storageKey, JSON.stringify(state)); } catch (e) { /* גלישה פרטית: הדמו עובד בלי שמירה */ }
+    }
+
+    function emit(topics) {
+      topics.concat('*').forEach((t) => (subs[t] || []).slice().forEach((fn) => fn(state, topics)));
+    }
+
+    /* topic: שם אחד או מערך. mutate מקבל את המצב ומשנה אותו במקום */
+    function setState(topic, mutate) {
+      const topics = [].concat(topic);
+      const out = mutate(state);
+      save();
+      emit(topics);
+      return out;
+    }
+
+    function subscribe(topic, fn) {
+      (subs[topic] = subs[topic] || []).push(fn);
+      return () => { subs[topic] = subs[topic].filter((x) => x !== fn); };
+    }
+
+    function reset() {
+      state = fresh(cfg.schema);
+      save();
+      emit(['reset']);
+    }
+
+    return { get: () => state, setState, subscribe, reset };
+  }
+
+  Dira.createStore = createStore;
+})(globalThis.Dira = globalThis.Dira || {});
+
+</script>
+<script>
+/*
+ * נתב hash מלא. כל מסך וכל גיליון בכתובת, ולכן «חזרה» של הדפדפן עובדת.
+ * #/deck · #/favs · #/categories · #/ai · #/match/:id · #/profile/:id · #/chat/:id · #/publish
+ * #/owner · #/owner/match/:sid · #/owner/chat/:sid · #/log
+ * גיליון: ?s=שם:ערך בסוף הכתובת. הקישורים הישנים #owner ו-#log עדיין עובדים.
+ * history.state.i = כמה צעדים בתוך הדמו, כדי שכפתור «חזרה» בממשק לא יוציא מהדמו.
+ */
+(function (Dira) {
+  'use strict';
+
+  const PATTERNS = [
+    '/deck', '/favs', '/categories', '/ai', '/match/:id', '/profile/:id', '/chat/:id', '/publish',
+    '/owner', '/owner/match/:sid', '/owner/chat/:sid', '/log'
+  ];
+  const LEGACY = { '': '/deck', '#': '/deck', '#owner': '/owner', '#log': '/log', '#seeker': '/deck' };
+
+  function matchPath(path) {
+    const parts = path.split('/').filter(Boolean);
+    for (const p of PATTERNS) {
+      const pp = p.split('/').filter(Boolean);
+      if (pp.length !== parts.length) continue;
+      const params = {};
+      const ok = pp.every((seg, i) => (seg[0] === ':' ? ((params[seg.slice(1)] = decodeURIComponent(parts[i])), true) : seg === parts[i]));
+      if (ok) return { name: p, params };
+    }
+    return null;
+  }
+
+  /* '#/deck?s=apt:a1' ⟵ { path, route, params, sheet: { name, arg } } */
+  function parse(hash) {
+    const h = LEGACY[hash] !== undefined ? '#' + LEGACY[hash] : hash;
+    const body = h.replace(/^#/, '');
+    const [path, query] = body.split('?');
+    const route = matchPath(path || '');
+    const sm = (query || '').match(/(?:^|&)s=([^&]*)/);
+    let sheet = null;
+    if (sm) {
+      const [name, arg] = decodeURIComponent(sm[1]).split(':');
+      sheet = { name, arg: arg || '' };
+    }
+    return route ? { path, route: route.name, params: route.params, sheet } : { path: '/deck', route: '/deck', params: {}, sheet: null };
+  }
+
+  function createRouter(opts) {
+    const onRoute = opts.onRoute;     // (current, previous) ⟵ מצייר
+    let current = null;
+
+    const depth = () => (history.state && typeof history.state.i === 'number' ? history.state.i : 0);
+
+    function handle() {
+      /* קישור ישן (#owner, #log) או כתובת ריקה: מיישרים את הכתובת בלי להוסיף צעד להיסטוריה */
+      if (LEGACY[location.hash] !== undefined) history.replaceState({ i: depth() }, '', '#' + LEGACY[location.hash]);
+      const next = parse(location.hash);
+      const prev = current;
+      current = next;
+      onRoute(next, prev);
+    }
+
+    function hashOf(path, sheet) { return '#' + path + (sheet ? '?s=' + encodeURIComponent(sheet) : ''); }
+
+    /* go('/favs') · go('/deck', { sheet: 'apt:a1' }) · go('/match/a1', { replace: true }) */
+    function go(path, o) {
+      o = o || {};
+      const url = hashOf(path, o.sheet);
+      if (url === location.hash && !o.replace) return handle();
+      if (o.replace) history.replaceState({ i: depth() }, '', url);
+      else history.pushState({ i: depth() + 1 }, '', url);
+      handle();
+    }
+
+    /* כפתור «חזרה» בממשק: צעד אחורה בדמו, ואם זו הכניסה הראשונה, למסך ההורה בלי לצאת */
+    function back(fallback) {
+      if (depth() > 0) history.back();
+      else go(fallback, { replace: true });
+    }
+
+    function openSheet(sheet) { go(current.path, { sheet }); }
+    function closeSheet() { if (current && current.sheet) back(current.path); }
+
+    function start() {
+      if (!history.state || typeof history.state.i !== 'number') history.replaceState({ i: 0 }, '', location.hash || '#/deck');
+      /* שניהם יורים על קישור או הקלדה בשורת הכתובת. onRoute מתעלם כשלא השתנה כלום */
+      window.addEventListener('popstate', handle);
+      window.addEventListener('hashchange', handle);
+      handle();
+    }
+
+    return { start, go, back, openSheet, closeSheet, get current() { return current; } };
+  }
+
+  Dira.router = { parse, createRouter };
+})(globalThis.Dira = globalThis.Dira || {});
+
+</script>
+<script>
+/*
+ * יומן הדמו (הכרעה 23): מה קרה, בלי שמות ובלי פרטים אישיים. נשמר רק בדפדפן.
+ * push ו-metrics טהורים. screen מצייר את #/log.
+ */
+(function (Dira) {
+  'use strict';
+
+  /* נקרא רק מתוך setState, כדי שהשמירה תעבור במקום אחד */
+  function push(state, event, t) {
+    state.log.push(Object.assign({ t }, event));
+    const max = Dira.config.logMax;
+    if (state.log.length > max) state.log.splice(0, state.log.length - max);
+  }
+
+  function metrics(log, cfg) {
+    const swipes = log.filter((e) => e.type === 'swipe');
+    const count = (type, pred) => log.filter((e) => e.type === type && (!pred || pred(e))).length;
+    const avgMs = swipes.length ? swipes.reduce((s, e) => s + (e.ms || 0), 0) / swipes.length : 0;
+    return {
+      swipes: swipes.length,
+      likes: swipes.filter((e) => e.dir === 'R').length,
+      stars: swipes.filter((e) => e.dir === 'U').length,
+      nopes: swipes.filter((e) => e.dir === 'L').length,
+      secPerCard: Math.round(avgMs / 100) / 10,
+      requests: count('request'),
+      matches: count('match', (e) => e.side === 'seeker'),
+      approvals: count('approve'),
+      rejections: count('reject'),
+      published: count('publish'),
+      quickExits: count('exit', (e) => e.ms < cfg.quickExitMs)
+    };
+  }
+
+  function screen(root, ctx) {
+    const { S, ui, store, cfg } = ctx;
+    const draw = () => {
+      const st = store.get();
+      const m = metrics(st.log, cfg);
+      const rows = st.log.slice(-cfg.logRowsShown).reverse().map((e) => `
+        <tr><td>${ui.esc(new Date(e.t).toLocaleTimeString('he-IL'))}</td><td>${ui.esc(S.log.event(e.type))}</td>
+        <td>${ui.esc([e.id, e.sid, e.dir, e.side].filter(Boolean).join(' '))}</td><td>${e.ms ? ui.esc(S.log.sec(Math.round(e.ms / 100) / 10)) : ''}</td></tr>`).join('');
+      const stats = S.log.stats(m).map(([v, l]) => `<div><b>${ui.esc(v)}</b>${ui.esc(l)}</div>`).join('');
+      root.innerHTML = `
+        <section class="screen">
+        <header class="page-top">${ui.backBtn()}<h1>${ui.esc(S.log.title)}</h1></header>
+        <div class="scroll grow log">
+          <div class="stat-row">${stats}</div>
+          <p class="note">${ui.esc(S.log.privacy)}</p>
+          <div class="btn-row">
+            <a class="btn-primary" target="_blank" rel="noopener" href="https://wa.me/?text=${encodeURIComponent(S.log.summary(m))}">${ui.esc(S.log.whatsapp)}</a>
+            <button class="btn-ghost" type="button" data-clear>${ui.esc(S.log.clear)}</button>
+            <button class="btn-ghost" type="button" data-reset>${ui.esc(S.log.reset)}</button>
+          </div>
+          ${rows ? `<table><caption class="sr-only">${ui.esc(S.log.tableCaption)}</caption><thead><tr>${S.log.cols.map((c) => `<th scope="col">${ui.esc(c)}</th>`).join('')}</tr></thead><tbody>${rows}</tbody></table>` : `<p class="fine">${ui.esc(S.log.empty)}</p>`}
+        </div>
+        </section>`;
+      ui.bindBack(root, '/deck');
+      root.querySelector('[data-clear]').onclick = () => { store.setState('log', (s) => { s.log = []; }); ui.toast(S.log.cleared); };
+      root.querySelector('[data-reset]').onclick = () => { store.reset(); ui.toast(S.log.resetDone); };
+    };
+    draw();
+    return { topics: { log: draw, reset: draw } };
+  }
+
+  Dira.log = { push, metrics };
+  (Dira.screens = Dira.screens || {})['/log'] = screen;
+})(globalThis.Dira = globalThis.Dira || {});
+
+</script>
+<script>
+/*
+ * אישורים מדומים של בעלי דירות. מתזמן אחד שרץ מטעינת הדף, לא תלוי במסך.
+ * זמן היעד נשמר בפנייה עצמה (due), ולכן פנייה ששרדה רענון עדיין מאושרת.
+ * הזמן והטיימרים מוזרקים, כדי שאפשר יהיה לבדוק ב-node.
+ */
+(function (Dira) {
+  'use strict';
+
+  function createScheduler(opts) {
+    const store = opts.store;
+    const now = opts.now || (() => Date.now());
+    const setTimer = opts.setTimer || ((fn, ms) => setTimeout(fn, ms));
+    const onApprove = opts.onApprove || (() => {});
+    const timers = {};
+
+    function approve(id) {
+      delete timers[id];
+      const req = store.get().requests.find((r) => r.id === id);
+      if (!req || req.status !== 'wait') return;
+      store.setState(['requests', 'log'], (s) => {
+        const r = s.requests.find((x) => x.id === id);
+        r.status = 'match';
+        r.matchedAt = now();
+        Dira.log.push(s, { type: 'match', id, side: 'seeker' }, now());
+      });
+      onApprove(id);
+    }
+
+    function watch(req) {
+      if (req.status !== 'wait' || timers[req.id]) return;
+      timers[req.id] = setTimer(() => approve(req.id), Math.max(0, req.due - now()));
+    }
+
+    /* בטעינה: כל פנייה שממתינה, כולל כאלה שנשלחו לפני רענון */
+    function start() { store.get().requests.forEach(watch); }
+
+    return { start, watch };
+  }
+
+  Dira.createScheduler = createScheduler;
+})(globalThis.Dira = globalThis.Dira || {});
+
+</script>
+<script>
+/*
+ * העוזר המדומה (הכרעה 18): מפרש מילים בבקשה לסינון, ומחפש.
+ * אין כאן AI. טהור, בלי DOM.
+ */
+(function (Dira) {
+  'use strict';
+
+  const HE = 'א-ת';
+  const word = (w) => new RegExp(`(^|[^${HE}])${w}($|[^${HE}])`);
+
+  const FEATS = [
+    [/מרפסת/, 'מרפסת'],
+    [/חני/, 'חניה'],
+    [/ממ["״']?ד/, 'ממ"ד'],
+    [/מעלית/, 'מעלית'],
+    [/מזגן|מיזוג|ממוזג/, 'מזגנים'],
+    [/חיות|כלב|חתול/, 'חיות מחמד'],
+    [/מרוהט|ריהוט/, 'מרוהטת'],
+    [new RegExp(`נוף|${word('(?:ל|ה|ליד ה)?ים').source}`), 'נוף לים'],
+    [/גינה|חצר|דירת גן/, 'גינה'],
+    [/מחסן/, 'מחסן']
+  ];
+  const PLACES = ['נווה שאנן', 'רמת אלמוגי', 'כרמל', 'הדר', 'אחוזה', 'קריית ביאליק', 'קריית מוצקין', 'קריית אתא', 'הקריות', 'חיפה'];
+
+  /* «3 חדרים עם מרפסת עד 5500 בכרמל» ⟵ { rooms: 3, feats: ['מרפסת'], max: 5500, places: ['כרמל'] } */
+  function parse(text) {
+    const t = String(text || '');
+    const filter = {};
+    const rm = t.match(/(\d(?:\.\d)?)\s*\+?\s*(?:חדרים|חדר|חד׳|חד')/);
+    if (rm) filter.rooms = Number(rm[1]);
+    const pm = t.match(/עד\s*([\d.,]+)\s*(אלף)?/);
+    if (pm) {
+      let v = Number(pm[1].replace(/,/g, ''));
+      if (pm[2] || v < 100) v *= 1000;
+      if (v > 0) filter.max = Math.round(v);
+    }
+    filter.feats = FEATS.filter(([re]) => re.test(t)).map(([, v]) => v);
+    let places = PLACES.filter((p) => t.includes(p));
+    if (!places.includes('הקריות') && /קריות/.test(t)) places.push('הקריות');
+    if (places.includes('חיפה') && places.length > 1) places = places.filter((p) => p !== 'חיפה');
+    filter.places = places;
+    const understood = !!(filter.rooms || filter.max || filter.feats.length || filter.places.length);
+    return { understood, filter };
+  }
+
+  /*
+   * מחפש. אם אין דירה עם הכול יחד, מוריד תנאי אחרי תנאי ואומר מה הוריד.
+   * ctx: { categories, tune, cfg } כמו ב-match.passes
+   */
+  function search(text, apts, ctx) {
+    const { understood, filter } = parse(text);
+    if (!understood) return { understood: false };
+    const passes = (q) => apts.filter((a) => Dira.match.passes(a, q, ctx));
+    const q = JSON.parse(JSON.stringify(filter));
+    let res = passes(q);
+    const dropped = [];
+    while (!res.length && (q.feats.length || q.places.length || q.rooms || q.max)) {
+      if (q.feats.length) dropped.push({ kind: 'feat', value: q.feats.pop() });
+      else if (q.places.length) dropped.push({ kind: 'place', value: q.places.pop() });
+      else if (q.rooms) { dropped.push({ kind: 'rooms', value: q.rooms }); delete q.rooms; }
+      else { dropped.push({ kind: 'max', value: q.max }); delete q.max; }
+      res = passes(q);
+    }
+    return {
+      understood: true,
+      asked: filter,
+      filter: Object.assign(q, { label: 'ai' }),
+      dropped,
+      total: res.length,
+      ids: res.slice(0, ctx.cfg.aiResultsShown).map((a) => a.id)
+    };
+  }
+
+  Dira.assist = { parse, search };
+})(globalThis.Dira = globalThis.Dira || {});
+
+</script>
+<script>
+/*
+ * פרסום דירה (הכרעה 19): טופס ריק, כתיבה אוטומטית מדומה, בדיקת חובה בכל שלב, והמרה לדירה.
+ * טהור, בלי DOM.
+ */
+(function (Dira) {
+  'use strict';
+
+  const STEPS = ['addr', 'details', 'pay', 'media', 'contact'];
+
+  const emptyDraft = () => ({
+    city: '', street: '', houseNo: '', entrance: '', floor: '', floors: '',
+    title: '', rent: '', sqm: '', outSqm: '', beds: '2', baths: '1', type: 'דירה', cond: 'שמורה מאוד',
+    features: [], acType: '', parking: '0', desc: '',
+    vaad: '', arnona: '', contract: '12', guarantee: 'no', guaranteeAmt: '', guarantors: 'no', partners: 'no', smoking: 'no', notes: '',
+    name: '', phone: ''
+  });
+
+  const num = (v) => Number(String(v == null ? '' : v).replace(/[^\d.]/g, '')) || 0;
+  const typeOf = (d, types) => types.find((t) => t.label === d.type) || { label: d.type };
+  const rooms = (d) => num(d.beds || 1) + 1;
+
+  /* «משופצת» ⟵ «משופץ» לסוג נכס בלשון זכר */
+  const COND_SHORT = { 'חדשה מהקבלן': ['חדשה', 'חדש'], 'משופצת': ['משופצת', 'משופץ'], 'שמורה מאוד': ['שמורה', 'שמור'] };
+  function condWord(d, types) {
+    const pair = COND_SHORT[d.cond];
+    if (!pair) return '';
+    return typeOf(d, types).m ? pair[1] : pair[0];
+  }
+
+  function kindText(d) {
+    return d.type === 'דירה' ? `דירת ${rooms(d)} חדרים` : `${d.type} ${rooms(d)} חדרים`;
+  }
+
+  const joinHe = (list) => (list.length > 1 ? list.slice(0, -1).join(', ') + ' ו' + list[list.length - 1] : list[0] || '');
+
+  function autoTitle(d, types) {
+    const extras = [];
+    if (d.features.includes('מרפסת')) extras.push('מרפסת');
+    if (num(d.parking) > 0 || d.features.includes('חניה')) extras.push('חניה');
+    if (d.features.includes('ממ"ד')) extras.push('ממ"ד');
+    const cond = condWord(d, types);
+    return [kindText(d), cond, extras.length ? 'עם ' + joinHe(extras) : '', d.street.trim() ? 'ב' + d.street.trim() : '']
+      .filter(Boolean).join(' ');
+  }
+
+  function autoDesc(d, types) {
+    const cond = condWord(d, types);
+    const where = [d.street.trim(), d.city].filter(Boolean).join(', ');
+    const size = [d.sqm ? `${num(d.sqm)} מ״ר` : '', d.floor !== '' ? (num(d.floor) === 0 ? 'קומת קרקע' : `קומה ${num(d.floor)}${d.floors ? ' מתוך ' + num(d.floors) : ''}`) : '']
+      .filter(Boolean).join(', ');
+    const inside = d.features.filter((x) => x !== 'מיזוג' && x !== 'חניה').concat(d.acType ? [d.acType] : []);
+    const park = num(d.parking);
+    return [
+      `${kindText(d)}${cond ? ' ' + cond : ''}${where ? ' ב' + where : ''}.`,
+      size ? size + '.' : '',
+      inside.length ? `בדירה: ${inside.join(', ')}.` : '',
+      park === 1 ? 'חניה צמודה.' : park > 1 ? `${park} חניות צמודות.` : ''
+    ].filter(Boolean).join(' ');
+  }
+
+  /* מחזיר { שדה: קוד שגיאה }. ריק = השלב תקין */
+  function validate(step, d, data) {
+    const e = {};
+    if (step === 'addr') {
+      if (!data.cities.includes(d.city)) e.city = 'city';
+      if (!d.street.trim()) e.street = 'street';
+      if (!String(d.houseNo).trim()) e.houseNo = 'houseNo';
+    }
+    if (step === 'details') {
+      if (!num(d.rent)) e.rent = 'rent';
+      if (!num(d.sqm)) e.sqm = 'sqm';
+      if (d.features.includes('מיזוג') && !d.acType) e.acType = 'acType';
+    }
+    if (step === 'pay' && d.guarantee === 'yes' && !num(d.guaranteeAmt)) e.guaranteeAmt = 'guaranteeAmt';
+    if (step === 'contact' && String(d.phone).replace(/\D/g, '').length < 9) e.phone = 'phone';
+    return e;
+  }
+
+  function hash(s) {
+    let h = 0;
+    for (const c of String(s)) h = (h * 31 + c.charCodeAt(0)) | 0;
+    return Math.abs(h);
+  }
+
+  /* opts: { id, today (YYYY-MM-DD), cfg, types } */
+  function toApartment(d, opts) {
+    const feats = d.features.map((x) => (x === 'מיזוג' ? 'מזגנים' : x));
+    if (num(d.parking) > 0 && !feats.includes('חניה')) feats.push('חניה');
+    return {
+      id: opts.id, mine: true, example: false,
+      area: d.city === 'חיפה' ? 'haifa' : 'krayot', city: d.city, hood: '', street: d.street.trim(), houseNo: String(d.houseNo).trim(),
+      title: d.title.trim() || autoTitle(d, opts.types), type: d.type, cond: d.cond,
+      rooms: rooms(d), beds: num(d.beds), baths: num(d.baths), sqm: num(d.sqm), floor: num(d.floor), floors: num(d.floors),
+      rent: num(d.rent), entry: opts.today, features: feats,
+      desc: d.desc.trim() || autoDesc(d, opts.types),
+      vaad: num(d.vaad) || null, arnona: num(d.arnona) || null, contract: num(d.contract),
+      guarantee: d.guarantee === 'yes' ? num(d.guaranteeAmt) : 0,
+      guarantors: d.guarantors === 'yes', partners: d.partners === 'yes', smoking: d.smoking === 'yes',
+      by: { name: d.name.trim(), g: 'm', role: 'בעל הדירה' },
+      pal: opts.cfg.pals[hash(opts.id) % opts.cfg.pals.length], scenes: opts.cfg.publishedScenes.slice(), photos: []
+    };
+  }
+
+  Dira.listing = { STEPS, emptyDraft, autoTitle, autoDesc, validate, toApartment };
+})(globalThis.Dira = globalThis.Dira || {});
+
+</script>
+<script>
+/*
+ * רכיבי ממשק משותפים: סינון HTML, אייקונים, טוסט, באנר, גיליון נגיש, כפתור חזרה.
+ * הטוסט הוא אזור ה-aria-live היחיד בדמו.
+ */
+(function (Dira) {
+  'use strict';
+
+  const esc = (s) => String(s == null ? '' : s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+
+  function el(html) {
+    const t = document.createElement('template');
+    t.innerHTML = html.trim();
+    return t.content.firstElementChild;
+  }
+
+  const svg = (body, o) => `<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false" ${o || 'fill="currentColor"'}>${body}</svg>`;
+  const stroke = (w) => `fill="none" stroke="currentColor" stroke-width="${w}" stroke-linecap="round" stroke-linejoin="round"`;
+  const I = {
+    heart: svg('<path d="M12 21s-7.5-4.6-9.6-9.2C.9 8.4 3 4.5 6.8 4.5c2.1 0 3.6 1.1 4.4 2.5.8-1.4 2.4-2.5 4.5-2.5 3.8 0 5.9 3.9 4.4 7.3C19.5 16.4 12 21 12 21z"/>'),
+    x: svg('<path d="M6 6l12 12M18 6L6 18"/>', stroke(2.8)),
+    star: svg('<path d="M12 2.8l2.8 5.9 6.4.8-4.7 4.4 1.2 6.4L12 17.2l-5.7 3.1 1.2-6.4L2.8 9.5l6.4-.8z"/>'),
+    back: svg('<path d="M9 5l7 7-7 7"/>', stroke(2.4)),
+    send: svg('<path d="M21 20L3 12l18-8v6L9 12l12 2z"/>'),
+    home: svg('<path d="M3 11l9-7 9 7v9a1 1 0 0 1-1 1h-5v-6h-6v6H4a1 1 0 0 1-1-1z"/>', stroke(2)),
+    grid: svg('<circle cx="7" cy="7" r="3.2"/><circle cx="17" cy="7" r="3.2"/><circle cx="7" cy="17" r="3.2"/><path d="M17 13.5l3.5 6h-7z"/>'),
+    spark: svg('<path d="M11 2l1.9 5.6L18.5 9.5l-5.6 1.9L11 17l-1.9-5.6L3.5 9.5l5.6-1.9z"/><path d="M19 14l.9 2.6 2.6.9-2.6.9L19 21l-.9-2.6-2.6-.9 2.6-.9z"/>'),
+    sliders: svg('<path d="M4 6h9M17 6h3M4 12h3M11 12h9M4 18h11M19 18h1"/><circle cx="15" cy="6" r="2"/><circle cx="9" cy="12" r="2"/><circle cx="17" cy="18" r="2"/>', stroke(2)),
+    addHome: svg('<path d="M3 11l9-7 9 7"/><path d="M5 10v10h6M19 13v-3"/><path d="M17 16v6M14 19h6"/>', stroke(2)),
+    pin: svg('<path d="M12 2a7 7 0 0 0-7 7c0 5 7 13 7 13s7-8 7-13a7 7 0 0 0-7-7zm0 9.5A2.5 2.5 0 1 1 12 6.5a2.5 2.5 0 0 1 0 5z"/>'),
+    bed: svg('<path d="M3 18V7M3 13h18v5M21 18v-3a3 3 0 0 0-3-3h-7v1"/><circle cx="7" cy="10.5" r="1.6"/>', stroke(2)),
+    bath: svg('<path d="M4 12h16v3a4 4 0 0 1-4 4H8a4 4 0 0 1-4-4z"/><path d="M6 12V6a2 2 0 0 1 4 0"/>', stroke(2)),
+    ruler: svg('<path d="M4 20V4l16 16z"/><path d="M8 16h3v-3"/>', stroke(2)),
+    search: svg('<circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/>', stroke(2.2)),
+    check: svg('<path d="M5 12.5l4.5 4.5L19 7.5"/>', stroke(3))
+  };
+
+  /* ——— שכבות קבועות ——— */
+  let toastEl, bannerEl, toastTimer, bannerTimer, cfg, S;
+
+  function init(opts) {
+    cfg = opts.cfg; S = opts.S;
+    toastEl = opts.toast; bannerEl = opts.banner;
+  }
+
+  function toast(text, kind, ms) {
+    toastEl.textContent = text;
+    toastEl.className = 'toast' + (kind ? ' ' + kind : '');
+    void toastEl.offsetWidth;
+    toastEl.classList.add('show');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => toastEl.classList.remove('show'), ms || cfg.toastMs);
+  }
+
+  /* התראה עליונה. הטקסט נקרא גם לקורא מסך דרך הטוסט, שהוא אזור ה-live היחיד */
+  function banner(title, text, onTap) {
+    bannerEl.innerHTML = `<span class="banner-sign" aria-hidden="true">${I.check}</span><span class="banner-text"><b>${esc(title)}</b><span>${esc(text)}</span></span>`;
+    bannerEl.onclick = () => { hideBanner(); onTap && onTap(); };
+    bannerEl.hidden = false;
+    void bannerEl.offsetWidth;
+    bannerEl.classList.add('show');
+    toastEl.textContent = '';
+    toastEl.className = 'toast sr-only';
+    toastEl.textContent = title;
+    clearTimeout(bannerTimer);
+    bannerTimer = setTimeout(hideBanner, cfg.bannerMs);
+  }
+  function hideBanner() {
+    bannerEl.classList.remove('show');
+    setTimeout(() => { if (!bannerEl.classList.contains('show')) bannerEl.hidden = true; }, 350);
+  }
+
+  /* ——— גיליון: לכידת פוקוס, Escape, aria-labelledby, והחזרת הפוקוס למי שפתח ——— */
+  let openSheetEl = null;
+
+  function focusables(root) {
+    return Array.from(root.querySelectorAll('a[href], button:not([disabled]), input:not([disabled]):not([type="hidden"]), select, textarea, [tabindex]:not([tabindex="-1"])'))
+      .filter((x) => !x.hidden && x.offsetParent !== null);
+  }
+
+  /*
+   * opts: { html, labelId, onMount(body), onDismiss() , inertRoots: [elements] }
+   * onDismiss: המשתמש ביקש לסגור (Escape, רקע, כפתור סגירה). הנתב מחליט ואז קורא ל-closeSheet.
+   */
+  function openSheet(opts) {
+    closeSheet();
+    const opener = document.activeElement;
+    const s = el(`
+      <div class="sheet">
+        <button class="sheet-scrim" type="button" tabindex="-1" aria-label="${esc(S.app.close)}"></button>
+        <div class="sheet-body" role="dialog" aria-modal="true" aria-labelledby="${opts.labelId}">
+          <div class="sheet-bar"><span class="sheet-grip" aria-hidden="true"></span>
+            <button class="icon-btn sheet-x" type="button" aria-label="${esc(S.app.close)}">${I.x}</button></div>
+          <div class="sheet-content">${opts.html}</div>
+        </div>
+      </div>`);
+    const body = s.querySelector('.sheet-body');
+    const dismiss = () => opts.onDismiss();
+    s.querySelector('.sheet-scrim').onclick = dismiss;
+    s.querySelector('.sheet-x').onclick = dismiss;
+    s.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') { e.preventDefault(); dismiss(); return; }
+      if (e.key !== 'Tab') return;
+      const list = focusables(body);
+      if (!list.length) return;
+      const first = list[0], last = list[list.length - 1];
+      if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
+      else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
+    });
+    (opts.inertRoots || []).forEach((r) => { r.inert = true; });
+    s._restore = () => {
+      (opts.inertRoots || []).forEach((r) => { r.inert = false; });
+      if (opener && opener.isConnected && opener.focus) opener.focus();
+    };
+    document.getElementById('app').append(s);
+    openSheetEl = s;
+    opts.onMount && opts.onMount(body, s);
+    const title = body.querySelector('#' + opts.labelId);
+    if (title) { title.tabIndex = -1; title.focus({ preventScroll: true }); }
+    return s;
+  }
+
+  function closeSheet() {
+    if (!openSheetEl) return;
+    const s = openSheetEl;
+    openSheetEl = null;
+    s.remove();
+    s._restore();
+  }
+
+  /* ——— כפתור חזרה בכותרת ——— */
+  const backBtn = () => `<button class="icon-btn back" type="button" data-back aria-label="${esc(S.app.back)}">${I.back}</button>`;
+  function bindBack(root, fallback, router) {
+    const b = root.querySelector('[data-back]');
+    if (b) b.onclick = () => (router || Dira.app.router).back(fallback);
+  }
+
+  /* גלילה לסוף של רשימת הודעות */
+  const scrollEnd = (node) => { node.scrollTop = node.scrollHeight; };
+
+  Dira.ui = { esc, el, I, init, toast, banner, openSheet, closeSheet, backBtn, bindBack, scrollEnd };
+})(globalThis.Dira = globalThis.Dira || {});
+
+</script>
+<script>
+/*
+ * פעולה אחת לכל דבר. כל מסך שרוצה לשמור, לשלוח פנייה או לסנן, קורא לכאן.
+ * כל שינוי מצב עובר דרך store.setState, וכל אירוע נרשם ביומן באותה קריאה.
+ */
+(function (Dira) {
+  'use strict';
+
+  function createActions(ctx) {
+    const { store, cfg, S, ui, match: M, data } = ctx;
+    const now = () => Date.now();
+    const log = (s, e) => Dira.log.push(s, e, now());
+    const matchCtx = () => ({ categories: data.categories, tune: store.get().tune, cfg });
+
+    /* החלקה: ✕ = 'L', ♥ = 'R', ★ = 'U' */
+    function swipe(a, dir, ms) {
+      const reason = store.setState(['deck', 'saved', 'log'], (s) => {
+        s.swiped[a.id] = dir;
+        log(s, { type: 'swipe', id: a.id, dir, ms: Math.round(ms || 0) });
+        if (dir === 'L') { const r = M.learnNope(s.pen, a, cfg); s.pen = r.pen; return r.reason; }
+        const had = s.saved[a.id];
+        s.saved[a.id] = { star: dir === 'U' || !!(had && had.star), t: now() };
+        if (dir === 'U' && !(had && had.star)) s.tune = M.learnStar(s.tune, a);
+        return null;
+      });
+      if (dir === 'L') ui.toast(S.deck.learned(reason));
+      else ui.toast(dir === 'U' ? S.deck.starred : S.deck.saved, 'ok');
+    }
+
+    /* שמירה או כוכב מחוץ לערימה (פרטים, עוזר). לא מוציאה את הדירה מהערימה */
+    function save(a, star) {
+      const st = store.get().saved[a.id];
+      if (st && (st.star || !star)) return ui.toast(star ? S.deck.starred : S.deck.saved, 'ok');
+      store.setState(['saved', 'deck'], (s) => {
+        s.saved[a.id] = { star: !!star, t: now() };
+        if (star) s.tune = M.learnStar(s.tune, a);
+      });
+      ui.toast(star ? S.deck.starred : S.deck.saved, 'ok');
+    }
+
+    function unsave(id) {
+      if (store.get().requests.some((r) => r.id === id)) return ui.toast(S.favs.locked);
+      store.setState('saved', (s) => { delete s.saved[id]; });
+      ui.toast(S.favs.removed);
+    }
+
+    /* הכרעה 8: הפנייה יוצאת רק מתוך פרטי הדירה */
+    function sendRequest(a) {
+      if (store.get().requests.some((r) => r.id === a.id)) return ui.toast(S.details.alreadySent);
+      const req = store.setState(['requests', 'saved', 'log'], (s) => {
+        const r = { id: a.id, t: now(), due: now() + cfg.approveDelayMs, status: 'wait', seen: false };
+        s.requests.push(r);
+        if (!s.saved[a.id]) s.saved[a.id] = { star: false, t: now() };
+        log(s, { type: 'request', id: a.id });
+        return r;
+      });
+      ctx.scheduler.watch(req);
+      ui.toast(S.details.sent(a), null, cfg.toastLongMs);
+    }
+
+    function markSeen(id) {
+      const r = store.get().requests.find((x) => x.id === id);
+      if (r && !r.seen) store.setState('requests', (s) => { s.requests.find((x) => x.id === id).seen = true; });
+    }
+
+    /* מחיל סינון ועובר לערימה. סינון ריק = בלי סינון */
+    function applyFilter(f, msg) {
+      const next = M.isEmptyFilter(f) ? null : f;
+      store.setState(['filter', 'log'], (s) => { s.filter = next; log(s, { type: 'filter', on: !!next }); });
+      if (ctx.router.current.route !== '/deck') ctx.router.go('/deck');
+      if (msg) ui.toast(msg);
+    }
+
+    function countFor(f) {
+      return ctx.allApts().filter((a) => M.passes(a, f, matchCtx())).length;
+    }
+
+    function logCategory(id) { store.setState('log', (s) => log(s, { type: 'category', id })); }
+
+    /* מחזיר לערימה את מה שדולג, ומוחק את מה ש-✕ לימד */
+    function resetSkipped() {
+      store.setState('deck', (s) => {
+        Object.keys(s.swiped).forEach((id) => { if (s.swiped[id] === 'L') delete s.swiped[id]; });
+        s.pen = {};
+      });
+      ui.toast(S.deck.againDone);
+    }
+
+    /* ——— צד בעל הדירה ——— */
+    function decide(sid, ok) {
+      const s0 = data.seekers.find((x) => x.id === sid);
+      const f = M.fit(s0, data.ownerApt, cfg);
+      store.setState(['owner', 'log'], (s) => {
+        s.owner.decisions[sid] = ok ? 'ok' : 'no';
+        log(s, { type: ok ? 'approve' : 'reject', sid, fit: f.ok });
+      });
+    }
+
+    function seenOwnerBanner() { store.setState('flags', (s) => { s.flags.ownerBanner = true; }); }
+    function seenHint() { store.setState('flags', (s) => { s.flags.hint = true; }); }
+
+    /* ——— פרטים, שיחה, עוזר ——— */
+    function saveProfile(p) {
+      store.setState(['profile', 'log'], (s) => { s.profile = p; log(s, { type: 'profile' }); });
+    }
+
+    function chatPush(key, msg, side) {
+      store.setState(['chats', 'log'], (s) => {
+        (s.chats[key] = s.chats[key] || []).push(msg);
+        if (msg.who === 'me') log(s, { type: 'chat', side });
+      });
+    }
+
+    function aiPush(msg) {
+      store.setState(msg.who === 'me' ? ['ai', 'log'] : 'ai', (s) => {
+        s.aiChat.push(msg);
+        if (msg.who === 'me') log(s, { type: 'ai', len: msg.text.length });
+      });
+    }
+
+    /* ——— פרסום ——— */
+    function publish(apt, photos, hasVideo) {
+      ctx.media[apt.id] = photos.slice();
+      store.setState(['deck', 'filter', 'log'], (s) => {
+        s.added.unshift(apt);
+        s.filter = null;
+        log(s, { type: 'publish', photos: photos.length, video: !!hasVideo });
+      });
+      ctx.router.go('/deck', { replace: true });
+      ui.toast(S.publish.published, 'ok', cfg.toastLongMs);
+    }
+
+    return { swipe, save, unsave, sendRequest, markSeen, applyFilter, countFor, logCategory, resetSkipped, decide, seenOwnerBanner, seenHint, saveProfile, chatPush, aiPush, publish };
+  }
+
+  Dira.createActions = createActions;
+})(globalThis.Dira = globalThis.Dira || {});
+
+</script>
+<script>
+/*
+ * מסכים משותפים: פרטי דירה (גיליון), התאמה ושיחה לשני הצדדים, ופרטי המחפש אחרי התאמה.
+ * מסך התאמה ומסך שיחה אחד, עם פרמטר צד.
+ */
+(function (Dira) {
+  'use strict';
+
+  const screens = Dira.screens = Dira.screens || {};
+  const sheets = Dira.sheets = Dira.sheets || {};
+  const { esc, I } = Dira.ui;
+  const scenes = Dira.scenes;
+
+  /* ——— חלקי כרטיס שחוזרים בכמה מסכים ——— */
+  const parts = {
+    photo: (a, i) => `<div class="photo">${scenes.photo(a, i)}</div>`,
+    specs(a, S) {
+      const c = S.card;
+      return `<span class="specs">
+        <span>${I.bed}<span class="sr-only">${c.beds}</span>${a.beds}</span>
+        <span>${I.bath}<span class="sr-only">${c.baths}</span>${a.baths}</span>
+        <span>${I.ruler}${a.sqm} ${c.sqm}</span></span>`;
+    }
+  };
+  Dira.parts = parts;
+
+  /* ——— פרטי דירה (#...?s=apt:ID) ——— */
+  sheets.apt = function (ctx, id) {
+    const { S, store, actions, router } = ctx;
+    const a = ctx.aptById(id);
+    if (!a) return null;
+    const D = S.details, f = S.fmt;
+    const yesNo = (v) => (v ? D.allowed : D.notAllowed);
+    const today = new Date().toISOString().slice(0, 10);
+
+    const actionsHTML = () => {
+      const st = store.get();
+      const req = st.requests.find((r) => r.id === a.id);
+      const saved = st.saved[a.id];
+      let main;
+      if (a.mine) main = `<p class="note">${esc(D.mineBy)}</p>`;
+      else if (!req) main = `<button class="btn-primary" type="button" data-req>${esc(D.send(a))}</button><p class="fine">${esc(D.sendNote(a))}</p>`;
+      else if (req.status === 'wait') main = `<p class="status wait">${esc(D.waiting)}</p>`;
+      else main = `<p class="status ok">${esc(D.matched)}</p><button class="btn-primary" type="button" data-match>${esc(D.toMatch)}</button>`;
+      return `${main}
+        <div class="two-btn">
+          <button class="btn-ghost" type="button" data-star aria-pressed="${!!(saved && saved.star)}">${I.star} ${esc(saved && saved.star ? D.starOn : D.star)}</button>
+          <button class="btn-ghost" type="button" data-save aria-pressed="${!!saved}">${I.heart} ${esc(saved ? D.saveOn : D.save)}</button>
+        </div>`;
+    };
+
+    const matched = store.get().requests.some((r) => r.id === a.id && r.status === 'match');
+    const html = `
+      <div class="sheet-photo">${parts.photo(a, 1)}</div>
+      <h2 id="sh-apt">${esc(a.title)}</h2>
+      <p class="sub">${esc(f.place(a) ? f.place(a) + ', ' + a.city : a.city)}${a.example ? ' · ' + esc(D.example) : ''}</p>
+      <div class="detail-price"><span class="price">${esc(f.nis(a.rent))}</span>${parts.specs(a, S)}</div>
+      <ul class="feat-list">${[a.type, a.cond].concat(a.features).filter(Boolean).map((x) => `<li>${esc(x)}</li>`).join('')}</ul>
+      ${a.desc ? `<p>${esc(a.desc)}</p>` : ''}
+      <h3 class="sec-title">${esc(D.pay)}</h3>
+      <dl class="kv">
+        <dt>${esc(D.vaad)}</dt><dd>${esc(a.vaad != null ? f.nis(a.vaad) : D.notSaid)}</dd>
+        <dt>${esc(D.arnona)}</dt><dd>${esc(a.arnona != null ? f.nis(a.arnona) : D.notSaid)}</dd>
+        <dt>${esc(D.contract)}</dt><dd>${esc(a.contract ? D.months(a.contract) : D.notSaid)}</dd>
+        <dt>${esc(D.guarantee)}</dt><dd>${esc(a.guarantee ? f.nis(a.guarantee) : D.notNeeded)}</dd>
+        <dt>${esc(D.guarantors)}</dt><dd>${esc(a.guarantors ? D.needed : D.notNeededPl)}</dd>
+        <dt>${esc(D.partners)}</dt><dd>${esc(yesNo(a.partners))}</dd>
+        <dt>${esc(D.smoking)}</dt><dd>${esc(yesNo(a.smoking))}</dd>
+        <dt>${esc(D.entry)}</dt><dd>${esc(!a.entry || a.entry <= today ? D.now : f.date(a.entry, true))}</dd>
+        ${a.mine ? '' : `<dt>${esc(D.by)}</dt><dd>${esc(D.byLine(a))}</dd>`}
+        ${matched ? `<dt>${esc(D.address)}</dt><dd>${esc(f.fullAddress(a))}</dd>` : ''}
+      </dl>
+      ${matched || a.mine ? '' : `<p class="note">${esc(D.hidden(a))}</p>`}
+      <div class="sheet-actions btn-row">${actionsHTML()}</div>`;
+
+    function mount(body) {
+      const box = body.querySelector('.sheet-actions');
+      const bind = () => {
+        const q = (s) => box.querySelector(s);
+        if (q('[data-req]')) q('[data-req]').onclick = () => actions.sendRequest(a);
+        if (q('[data-match]')) q('[data-match]').onclick = () => router.go('/match/' + a.id, { replace: true });
+        q('[data-star]').onclick = () => keep('U');
+        q('[data-save]').onclick = () => keep('R');
+      };
+      /* ציור מחדש של אזור הכפתורים בלבד, והפוקוס נשאר על אותו כפתור */
+      const redraw = () => {
+        const act = document.activeElement;
+        const key = box.contains(act) && ['data-star', 'data-save', 'data-req', 'data-match'].find((k) => act.hasAttribute(k));
+        box.innerHTML = actionsHTML();
+        bind();
+        if (key) (box.querySelector(`[${key}]`) || box.querySelector('button')).focus();
+      };
+      /* כוכב או שמירה: אם הדירה היא הכרטיס העליון בערימה, הכרטיס עף. אחרת רק נשמרת */
+      function keep(dir) {
+        const deck = ctx.deckApi;
+        if (router.current.route === '/deck' && deck && deck.topId() === a.id) {
+          ctx.closeSheetNow();
+          deck.fly(dir);
+          return;
+        }
+        actions.save(a, dir === 'U');
+      }
+      bind();
+      return { requests: redraw, saved: redraw };
+    }
+
+    return { html, labelId: 'sh-apt', mount };
+  };
+
+  /* ——— התאמה: #/match/:id (מחפש) · #/owner/match/:sid (בעל הדירה) ——— */
+  function matchScreen(root, ctx, spec) {
+    root.innerHTML = `
+      <section class="screen match scroll">
+        <div class="match-center">
+          <span class="hello">${I.check} ${esc(ctx.S.match.hello)}</span>
+          <div class="match-art">${parts.photo(spec.apt, 0)}</div>
+          <h1>${esc(spec.title)}</h1>
+          <p class="sub">${esc(spec.sub)}</p>
+        </div>
+        <dl class="reveal">${spec.rows.map(([k, v]) => `<div><dt>${esc(k)}</dt><dd>${esc(v)}</dd></div>`).join('')}</dl>
+        <div class="btn-row">
+          <button class="btn-primary" type="button" data-go>${esc(spec.go)}</button>
+          <button class="btn-ghost" type="button" data-back>${esc(spec.backLabel)}</button>
+        </div>
+      </section>`;
+    root.querySelector('[data-go]').onclick = spec.onGo;
+    root.querySelector('[data-back]').onclick = () => ctx.router.back(spec.backTo);
+  }
+
+  const redirect = (ctx, path) => { queueMicrotask(() => ctx.router.go(path, { replace: true })); };
+
+  screens['/match/:id'] = function (root, ctx, p) {
+    const { S, store, actions, router } = ctx;
+    const a = ctx.aptById(p.id);
+    const req = a && store.get().requests.find((r) => r.id === a.id);
+    if (!req || req.status !== 'match') return redirect(ctx, '/favs');
+    actions.markSeen(a.id);
+    const M = S.match;
+    matchScreen(root, ctx, {
+      apt: a, title: M.seekerTitle(a), sub: M.seekerSub(a),
+      rows: [[M.toYou, M.toYouText(a)], [M.toThem(a), M.toThemText]],
+      go: store.get().profile ? M.openChat : M.fillAndChat,
+      onGo: () => router.go(store.get().profile ? '/chat/' + a.id : '/profile/' + a.id),
+      backLabel: M.backFavs, backTo: '/favs'
+    });
+  };
+
+  screens['/owner/match/:sid'] = function (root, ctx, p) {
+    const { S, store, router, data } = ctx;
+    const s = data.seekers.find((x) => x.id === p.sid);
+    if (!s || store.get().owner.decisions[s.id] !== 'ok') return redirect(ctx, '/owner');
+    const M = S.match;
+    matchScreen(root, ctx, {
+      apt: data.ownerApt, title: M.ownerTitle(s), sub: M.ownerSub,
+      rows: [[M.fullName, `${s.first} ${s.last}`], [M.income, s.income], [M.extra, s.extra], [M.occupants, String(s.occupants)],
+        [M.entry, S.fmt.date(s.entry, true)], [M.about(s), s.about]],
+      go: M.openChat, onGo: () => router.go('/owner/chat/' + s.id),
+      backLabel: M.backOwner, backTo: '/owner'
+    });
+  };
+
+  /* ——— פרטי המחפש, רק אחרי התאמה ולפני השיחה הראשונה ——— */
+  screens['/profile/:id'] = function (root, ctx, p) {
+    const { S, store, actions, router, data } = ctx;
+    const a = ctx.aptById(p.id);
+    if (!a || !store.get().requests.some((r) => r.id === a.id && r.status === 'match')) return redirect(ctx, '/favs');
+    const P = S.profile;
+    const pr = store.get().profile || {};
+    const field = (name, label, input) => `<div class="field"><label for="pf-${name}">${esc(label)}</label>${input}</div>`;
+    root.innerHTML = `
+      <section class="screen">
+        <header class="page-top">${Dira.ui.backBtn()}<h1>${esc(P.h1)}</h1></header>
+        <form class="form scroll grow" novalidate>
+          <p class="sub">${esc(P.sub(a))}</p>
+          <button class="linkish" type="button" data-fill>${esc(P.fill)}</button>
+          <div class="field"><label for="pf-name">${esc(P.name)}</label>
+            <input id="pf-name" name="name" autocomplete="name" value="${esc(pr.name || '')}" aria-describedby="pf-name-err">
+            <span class="err" id="pf-name-err" hidden>${esc(P.errName)}</span></div>
+          ${field('about', P.about, `<textarea id="pf-about" name="about" placeholder="${esc(P.aboutPh)}">${esc(pr.about || '')}</textarea>`)}
+          <div class="row2">
+            ${field('income', P.income, `<select id="pf-income" name="income">${data.incomes.map((o) => `<option ${pr.income === o ? 'selected' : ''}>${esc(o)}</option>`).join('')}</select>`)}
+            ${field('occupants', P.occupants, `<input id="pf-occupants" name="occupants" inputmode="numeric" value="${esc(pr.occupants || '')}">`)}
+          </div>
+          ${field('extra', P.extra, `<input id="pf-extra" name="extra" value="${esc(pr.extra || '')}">`)}
+          <button class="btn-primary" type="submit">${esc(P.submit)}</button>
+        </form>
+      </section>`;
+    Dira.ui.bindBack(root, '/match/' + a.id);
+    const form = root.querySelector('form');
+    const nameEl = form.elements.name, nameErr = root.querySelector('#pf-name-err');
+    root.querySelector('[data-fill]').onclick = () => { Object.keys(P.example).forEach((k) => { form.elements[k].value = P.example[k]; }); showErr(false); };
+    const showErr = (on) => { nameErr.hidden = !on; nameEl.setAttribute('aria-invalid', String(on)); nameEl.closest('.field').classList.toggle('bad', on); };
+    form.onsubmit = (e) => {
+      e.preventDefault();
+      if (!nameEl.value.trim()) { showErr(true); nameEl.focus(); return; }
+      showErr(false);
+      const out = {};
+      ['name', 'about', 'income', 'occupants', 'extra'].forEach((k) => { out[k] = form.elements[k].value.trim(); });
+      actions.saveProfile(out);
+      router.go('/chat/' + a.id, { replace: true });
+    };
+  };
+
+  /* ——— שיחה: #/chat/:id (מחפש) · #/owner/chat/:sid (בעל הדירה) ——— */
+  function chatScreen(root, ctx, spec) {
+    const { S, store, actions, router, cfg } = ctx;
+    const C = S.chat;
+    root.innerHTML = `
+      <section class="screen">
+        <header class="chat-top">${Dira.ui.backBtn()}
+          <span class="avatar" aria-hidden="true">${esc(spec.initials)}</span>
+          <div><h1>${esc(spec.title)}</h1><span>${esc(spec.subtitle)}</span></div>
+        </header>
+        <div class="msgs" role="log"></div>
+        <form class="composer">
+          <input type="text" aria-label="${esc(C.inputAria)}" autocomplete="off" enterkeyhint="send">
+          <button type="submit" aria-label="${esc(C.send)}">${I.send}</button>
+        </form>
+      </section>`;
+    Dira.ui.bindBack(root, spec.backTo);
+    const list = root.querySelector('.msgs'), input = root.querySelector('input');
+    const msgs = () => store.get().chats[spec.key] || [];
+    const add = (m) => { list.append(Dira.ui.el(`<p class="msg ${m.who}">${esc(m.text)}</p>`)); Dira.ui.scrollEnd(list); };
+    const showAfter = () => {
+      if (list.querySelector('.after-chat')) return;
+      const box = Dira.ui.el(`<div class="after-chat btn-row">${spec.after.map((x, i) => `<button class="${i ? 'btn-primary' : 'btn-ghost'}" type="button" data-i="${i}">${esc(x.label)}</button>`).join('')}</div>`);
+      box.querySelectorAll('[data-i]').forEach((b) => { b.onclick = () => router.go(spec.after[Number(b.dataset.i)].go); });
+      list.append(box); Dira.ui.scrollEnd(list);
+    };
+
+    add({ who: 'sys', text: C.sys });
+    msgs().forEach(add);
+    if (msgs().some((m) => m.who === 'them')) showAfter();
+    if (!msgs().length) input.value = spec.prefill;
+
+    root.querySelector('form').onsubmit = (e) => {
+      e.preventDefault();
+      const text = input.value.trim();
+      if (!text) return;
+      input.value = '';
+      const me = { who: 'me', text };
+      actions.chatPush(spec.key, me, spec.side);
+      add(me);
+      const mine = msgs().filter((m) => m.who === 'me').length;
+      const reply = spec.replies[Math.min(mine - 1, spec.replies.length - 1)];
+      const dots = Dira.ui.el(`<p class="typing" aria-label="${esc(C.typing)}"><i></i><i></i><i></i></p>`);
+      setTimeout(() => { if (list.isConnected) { list.append(dots); Dira.ui.scrollEnd(list); } }, cfg.typingDelayMs);
+      setTimeout(() => {
+        dots.remove();
+        const them = { who: 'them', text: reply };
+        actions.chatPush(spec.key, them, spec.side);
+        if (list.isConnected) { add(them); showAfter(); }
+      }, cfg.replyDelayMs);
+    };
+  }
+
+  screens['/chat/:id'] = function (root, ctx, p) {
+    const { S, store } = ctx;
+    const a = ctx.aptById(p.id);
+    if (!a || !store.get().requests.some((r) => r.id === a.id && r.status === 'match')) return redirect(ctx, '/favs');
+    const C = S.chat;
+    chatScreen(root, ctx, {
+      key: 'a-' + a.id, side: 'seeker', backTo: '/favs',
+      title: C.seekerTitle(a), subtitle: S.fmt.fullAddress(a), initials: a.by.name[0],
+      prefill: C.seekerPrefill(a), replies: C.seekerReplies(a),
+      after: [{ label: C.toOwner, go: '/owner' }, { label: C.toPublish, go: '/publish' }]
+    });
+  };
+
+  screens['/owner/chat/:sid'] = function (root, ctx, p) {
+    const { S, store, data } = ctx;
+    const s = data.seekers.find((x) => x.id === p.sid);
+    if (!s || store.get().owner.decisions[s.id] !== 'ok') return redirect(ctx, '/owner');
+    const C = S.chat;
+    chatScreen(root, ctx, {
+      key: 'o-' + s.id, side: 'owner', backTo: '/owner',
+      title: C.ownerTitle(s), subtitle: C.ownerSub(data.ownerApt), initials: s.first[0] + s.last[0],
+      prefill: C.ownerPrefill(s), replies: C.ownerReplies,
+      after: [{ label: C.toSeeker, go: '/deck' }]
+    });
+  };
+})(globalThis.Dira = globalThis.Dira || {});
+
+</script>
+<script>
+/*
+ * לשונית «דירות»: ערימה, החלקה, שלושה כפתורים, שבבי סינון, מסך ריק שמרחיב באמת, וסינון חכם.
+ * הכפתורים לפי הכרעה 5: ♥ מימין, ★ באמצע, ✕ משמאל. סדר ה-DOM הוא סדר הקריאה מימין לשמאל.
+ */
+(function (Dira) {
+  'use strict';
+
+  const screens = Dira.screens = Dira.screens || {};
+  const sheets = Dira.sheets = Dira.sheets || {};
+  const { esc, el, I } = Dira.ui;
+  const scenes = Dira.scenes;
+
+  screens['/deck'] = function (root, ctx) {
+    const { S, store, actions, router, cfg, match: M } = ctx;
+    root.innerHTML = `
+      <section class="screen deck-screen">
+        <header class="app-top">
+          <h1 class="brand">${I.home} ${esc(S.app.brand)}</h1>
+          <div class="top-icons">
+            <button class="icon-btn" type="button" data-filter></button>
+            <button class="icon-btn" type="button" data-publish aria-label="${esc(S.top.publish)}">${I.addHome}</button>
+          </div>
+        </header>
+        <div class="chips filter-row" role="group" aria-label="${esc(S.deck.activeFilter)}" hidden></div>
+        <div class="deck"></div>
+        <div class="actions">
+          <button class="rb rb-like" type="button" data-dir="R" aria-label="${esc(S.deck.like)}">${I.heart}</button>
+          <button class="rb rb-star" type="button" data-dir="U" aria-label="${esc(S.deck.star)}">${I.star}</button>
+          <button class="rb rb-nope" type="button" data-dir="L" aria-label="${esc(S.deck.nope)}">${I.x}</button>
+        </div>
+      </section>`;
+    const deckEl = root.querySelector('.deck'), actsEl = root.querySelector('.actions');
+    const chipsEl = root.querySelector('.filter-row'), filterBtn = root.querySelector('[data-filter]');
+    root.querySelector('[data-publish]').onclick = () => router.go('/publish');
+    filterBtn.onclick = () => router.openSheet('filter');
+    actsEl.querySelectorAll('[data-dir]').forEach((b) => { b.onclick = () => topCard && topCard.fly(b.dataset.dir); });
+
+    let topCard = null;
+    ctx.deckApi = { topId: () => (topCard ? topCard.a.id : null), fly: (dir) => topCard && topCard.fly(dir) };
+
+    /* ——— כרטיס ——— */
+    function cardHTML(a, under) {
+      const st = store.get();
+      const n = scenes.count(a);
+      const saved = st.saved[a.id];
+      const similar = !a.mine && st.tune.n && M.similarity(a, st.tune, cfg) >= cfg.similarTagMin;
+      return `
+        <article class="card${under ? ' under' : ''}" data-id="${esc(a.id)}" ${under ? 'aria-hidden="true"' : `tabindex="0" aria-roledescription="${esc(S.card.role)}" aria-label="${esc(S.card.aria(a))}"`}>
+          ${Dira.parts.photo(a, 0)}
+          <div class="bars" aria-hidden="true">${Array.from({ length: n }, (_, i) => `<i class="bar${i === 0 ? ' on' : ''}"></i>`).join('')}</div>
+          <div class="card-tags">
+            ${a.mine ? `<span class="tag tag-mine">${esc(S.card.mine)}</span>` : ''}
+            ${a.example ? `<span class="tag">${esc(S.card.example)}</span>` : ''}
+            ${saved && saved.star ? `<span class="tag tag-star">${esc(S.card.starred)}</span>` : ''}
+            ${similar ? `<span class="tag tag-similar">${esc(S.card.similar)}</span>` : ''}
+          </div>
+          <div class="stamp stamp-like" aria-hidden="true">${esc(S.card.stampLike)}</div>
+          <div class="stamp stamp-nope" aria-hidden="true">${esc(S.card.stampNope)}</div>
+          <div class="stamp stamp-star" aria-hidden="true">${esc(S.card.stampStar)}</div>
+          <div class="info">
+            <h2 class="title">${esc(a.title)}</h2>
+            <p class="loc">${I.pin}${esc(S.fmt.place(a) || a.city)}</p>
+            <div class="specs-row"><span class="price">${esc(S.fmt.nis(a.rent))}</span>${Dira.parts.specs(a, S)}</div>
+            <p class="desc">${esc(a.desc)}</p>
+          </div>
+          <span class="sr-only" data-photo-label aria-live="off">${esc(S.card.photo(1, n))}</span>
+        </article>`;
+    }
+
+    function bindCard(card, a) {
+      const n = scenes.count(a);
+      const stamps = { R: card.querySelector('.stamp-like'), L: card.querySelector('.stamp-nope'), U: card.querySelector('.stamp-star') };
+      const t0 = performance.now();
+      let sx = 0, sy = 0, dx = 0, dy = 0, down = false, photoI = 0, gone = false;
+      const clamp = (v) => Math.max(0, Math.min(1, v));
+      const setStamps = () => {
+        stamps.R.style.opacity = clamp(dx / cfg.stampFullDx);
+        stamps.L.style.opacity = clamp(-dx / cfg.stampFullDx);
+        stamps.U.style.opacity = Math.abs(dx) < cfg.starMaxDx ? clamp(-dy / cfg.stampFullDy) : 0;
+      };
+
+      function showPhoto(i) {
+        photoI = Math.max(0, Math.min(n - 1, i));
+        card.querySelector('.photo').innerHTML = scenes.photo(a, photoI);
+        card.querySelectorAll('.bar').forEach((b, k) => b.classList.toggle('on', k <= photoI));
+        card.querySelector('[data-photo-label]').textContent = S.card.photo(photoI + 1, n);
+      }
+
+      function fly(dir) {
+        if (gone) return;
+        gone = true;
+        topCard = null;
+        card.classList.remove('snap');
+        card.classList.add('fly');
+        stamps[dir].style.opacity = 1;
+        const w = card.offsetWidth;
+        card.style.transform = dir === 'U' ? 'translateY(-120%) scale(.9)'
+          : `translate(${(dir === 'R' ? 1 : -1) * w * cfg.flyOutFactor}px, ${dy * cfg.dragYFactor}px) rotate(${dir === 'R' ? cfg.flyTiltDeg : -cfg.flyTiltDeg}deg)`;
+        card.style.opacity = '0';
+        const ms = performance.now() - t0;
+        setTimeout(() => actions.swipe(a, dir, ms), ctx.motionMs);
+      }
+
+      card.addEventListener('pointerdown', (e) => {
+        if (e.button || gone) return;
+        down = true; sx = e.clientX; sy = e.clientY; dx = dy = 0;
+        card.classList.remove('snap');
+        try { card.setPointerCapture(e.pointerId); } catch (_) { /* דפדפן ישן */ }
+      });
+      card.addEventListener('pointermove', (e) => {
+        if (!down) return;
+        dx = e.clientX - sx; dy = e.clientY - sy;
+        card.style.transform = `translate(${dx}px, ${dy * cfg.dragYFactor}px) rotate(${dx / cfg.tiltDivisor}deg)`;
+        setStamps();
+      });
+      const end = (e) => {
+        if (!down) return;
+        down = false;
+        if (Math.abs(dx) > card.offsetWidth * cfg.swipeRatio) return fly(dx > 0 ? 'R' : 'L');
+        if (dy < -card.offsetHeight * cfg.starRatio && Math.abs(dx) < cfg.starMaxDx) return fly('U');
+        if (e.type === 'pointerup' && Math.abs(dx) < cfg.tapSlop && Math.abs(dy) < cfg.tapSlop) tap(e);
+        card.classList.add('snap');
+        card.style.transform = '';
+        dx = dy = 0; setStamps();
+      };
+      card.addEventListener('pointerup', end);
+      card.addEventListener('pointercancel', end);
+
+      /* הקשה על המידע = פרטים. הקשה על התמונה = תמונה הבאה לכיוון הקריאה (שמאלה), או הקודמת (ימינה) */
+      function tap(e) {
+        if (e.target.closest('.info')) return router.openSheet('apt:' + a.id);
+        const r = card.getBoundingClientRect();
+        showPhoto(e.clientX < r.left + r.width / 2 ? photoI + 1 : photoI - 1);
+      }
+      card.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') { e.preventDefault(); router.openSheet('apt:' + a.id); }
+        else if (e.key === 'ArrowLeft') { e.preventDefault(); showPhoto(photoI + 1); }
+        else if (e.key === 'ArrowRight') { e.preventDefault(); showPhoto(photoI - 1); }
+      });
+      return { a, fly };
+    }
+
+    /* ——— ציור אזורי ——— */
+    function drawDeck() {
+      const list = M.deckOrder(ctx.allApts(), store.get(), ctx.matchCtx());
+      const hadFocus = deckEl.contains(document.activeElement);
+      deckEl.innerHTML = '';
+      topCard = null;
+      if (!list.length) { actsEl.hidden = true; deckEl.append(emptyEl()); return; }
+      actsEl.hidden = false;
+      if (list[1]) deckEl.append(el(cardHTML(list[1], true)));
+      const card = el(cardHTML(list[0], false));
+      deckEl.append(card);
+      topCard = bindCard(card, list[0]);
+      if (hadFocus) card.focus({ preventScroll: true });
+    }
+
+    function chipLabels(f) {
+      const C = S.deck.chip, out = [];
+      if (f.label === 'ai') out.push(C.ai);
+      if (f.foryou) out.push(C.foryou);
+      if (f.q) out.push(C.q(f.q));
+      if (f.max) out.push(C.max(f.max));
+      if (f.rooms) out.push(C.rooms(f.rooms));
+      if (f.beds) out.push(C.beds(f.beds));
+      if (f.baths) out.push(C.baths(f.baths));
+      if (f.sqm) out.push(C.sqm(f.sqm));
+      (f.cats || []).forEach((id) => { const c = ctx.data.categories.find((x) => x.id === id); if (c) out.push(c.label); });
+      (f.feats || []).forEach((x) => out.push(x));
+      (f.places || []).forEach((x) => out.push(x));
+      return out;
+    }
+
+    function drawChips() {
+      const f = store.get().filter;
+      filterBtn.innerHTML = I.sliders + (f ? '<i class="dot" aria-hidden="true"></i>' : '');
+      filterBtn.setAttribute('aria-label', f ? S.top.filterOn : S.top.filter);
+      chipsEl.hidden = !f;
+      if (!f) { chipsEl.innerHTML = ''; return; }
+      chipsEl.innerHTML = chipLabels(f).map((p) => `<button class="chip on" type="button" data-open>${esc(p)}</button>`).join('') +
+        `<button class="chip" type="button" data-clear>${I.x} ${esc(S.deck.clearChip)}</button>`;
+      chipsEl.querySelectorAll('[data-open]').forEach((b) => { b.onclick = () => router.openSheet('filter'); });
+      chipsEl.querySelector('[data-clear]').onclick = () => actions.applyFilter(null, S.deck.cleared);
+    }
+
+    /* ——— מסך ריק (הכרעה 24) ——— */
+    function emptyEl() {
+      const st = store.get(), f = st.filter, all = ctx.allApts(), D = S.deck;
+      let title, text, note = '', primary = null;
+      if (f) {
+        const hits = all.filter((a) => M.passes(a, f, ctx.matchCtx())).length;
+        title = D.emptyFilterTitle;
+        text = hits ? D.emptyFilterSeen(hits) : D.emptyFilterNone;
+        const w = M.widen(f, all, st.swiped, ctx.matchCtx());
+        if (w) {
+          w.changes.forEach((c) => { if (c.kind === 'cat') c.label = (ctx.data.categories.find((x) => x.id === c.value) || {}).label; });
+          note = D.widenNote(w.changes);
+          primary = [D.widen, () => {
+            const n = all.filter((a) => !st.swiped[a.id] && M.passes(a, w.filter, ctx.matchCtx())).length;
+            actions.applyFilter(w.filter, D.widened(n));
+          }];
+        } else primary = [D.clearFilter, () => actions.applyFilter(null, D.cleared)];
+      } else {
+        title = D.emptyAllTitle;
+        text = D.emptyAllText;
+        const skipped = Object.keys(st.swiped).filter((id) => st.swiped[id] === 'L').length;
+        if (skipped) primary = [D.again(skipped), actions.resetSkipped];
+      }
+      const node = el(`
+        <div class="empty">
+          <div class="big" aria-hidden="true">${I.home}</div>
+          <h2>${esc(title)}</h2><p>${esc(text)}</p>
+          <div class="btn-row">
+            ${primary ? `<button class="btn-primary" type="button" data-act>${esc(primary[0])}</button>` : ''}
+            ${note ? `<p class="fine">${esc(note)}</p>` : ''}
+            <button class="btn-ghost" type="button" data-pub>${I.addHome} ${esc(D.publish)}</button>
+          </div>
+        </div>`);
+      if (primary) node.querySelector('[data-act]').onclick = primary[1];
+      node.querySelector('[data-pub]').onclick = () => router.go('/publish');
+      return node;
+    }
+
+    drawChips();
+    drawDeck();
+    if (!store.get().flags.hint) setTimeout(() => { actions.seenHint(); Dira.ui.toast(S.deck.hint); }, cfg.hintDelayMs);
+
+    return { topics: { deck: drawDeck, filter: () => { drawChips(); drawDeck(); } } };
+  };
+
+  /* ——— סינון חכם (#/deck?s=filter), הכרעה 16 ——— */
+  sheets.filter = function (ctx) {
+    const { S, store, actions, cfg, data } = ctx;
+    const F = S.filter;
+    const cur = store.get().filter || {};
+    const f = { q: cur.q || '', max: cur.max || 0, beds: cur.beds || 0, baths: cur.baths || 0, sqm: cur.sqm || 0, cats: (cur.cats || []).slice() };
+    /* מה שהגיע מהעוזר או מ«מותאם לך» נשמר, ומוצג כשבבים */
+    const kept = { rooms: cur.rooms, feats: cur.feats, places: cur.places, foryou: cur.foryou, label: cur.label };
+    const keptLabels = [cur.foryou ? S.deck.chip.foryou : '', cur.rooms ? S.deck.chip.rooms(cur.rooms) : ''].concat(cur.feats || [], cur.places || []).filter(Boolean);
+    const seg = (key, vals) => vals.map(([v, l]) => `<button class="opt" type="button" data-k="${key}" data-v="${v}" aria-pressed="${f[key] === v}">${esc(l)}</button>`).join('');
+    const maxText = () => (f.max ? S.fmt.nis(f.max) : F.noLimit);
+    const sqmText = () => (f.sqm ? F.sqmVal(f.sqm) : F.sqmNone);
+    const build = () => {
+      const q = Object.assign({}, kept, f);
+      Object.keys(q).forEach((k) => { if (!q[k] || (Array.isArray(q[k]) && !q[k].length)) delete q[k]; });
+      return q;
+    };
+
+    const html = `
+      <div class="sheet-head"><h2 id="sh-filter">${I.sliders} ${esc(F.title)}</h2><button class="linkish" type="button" data-reset>${esc(F.reset)}</button></div>
+      <div class="q"><label class="q-label" for="flt-q">${esc(F.q)}</label>
+        <div class="search">${I.search}<input id="flt-q" type="search" value="${esc(f.q)}" placeholder="${esc(F.qPh)}"></div></div>
+      <div class="q"><label class="q-label" for="flt-max">${esc(F.price)} <output class="range-out" data-maxout>${esc(maxText())}</output></label>
+        <input id="flt-max" class="range" type="range" min="${cfg.priceFloor}" max="${cfg.priceCeil}" step="${cfg.priceStep}" value="${f.max || cfg.priceCeil}" aria-valuetext="${esc(maxText())}"></div>
+      <fieldset class="q"><legend class="q-label">${esc(F.beds)}</legend><div class="opts">${seg('beds', [[0, F.any], [1, '1'], [2, '2'], [3, '3'], [4, '4+']])}</div></fieldset>
+      <fieldset class="q"><legend class="q-label">${esc(F.baths)}</legend><div class="opts">${seg('baths', [[0, F.any], [1, '1'], [2, '2+']])}</div></fieldset>
+      <div class="q"><label class="q-label" for="flt-sqm">${esc(F.sqm)} <output class="range-out" data-sqmout>${esc(sqmText())}</output></label>
+        <input id="flt-sqm" class="range" type="range" min="0" max="${cfg.sqmCeil}" step="${cfg.sqmStep}" value="${f.sqm}" aria-valuetext="${esc(sqmText())}"></div>
+      <fieldset class="q"><legend class="q-label">${esc(F.cats)}</legend><div class="opts">${data.categories.filter((c) => c.test).map((c) => `<button class="chip" type="button" data-cat="${c.id}" aria-pressed="${f.cats.includes(c.id)}">${esc(c.label)}</button>`).join('')}</div></fieldset>
+      ${keptLabels.length ? `<p class="fine">${esc(F.kept)} ${esc(keptLabels.join(', '))}</p>` : ''}
+      <div class="two-btn sheet-foot">
+        <button class="btn-ghost" type="button" data-clear>${esc(F.clearAll)}</button>
+        <button class="btn-primary" type="button" data-apply></button>
+      </div>`;
+
+    function mount(sh) {
+      const apply = sh.querySelector('[data-apply]');
+      const count = () => { apply.innerHTML = `${I.check} ${esc(F.apply(actions.countFor(build())))}`; };
+      sh.querySelectorAll('[data-k]').forEach((b) => {
+        b.onclick = () => {
+          f[b.dataset.k] = Number(b.dataset.v);
+          sh.querySelectorAll(`[data-k="${b.dataset.k}"]`).forEach((x) => x.setAttribute('aria-pressed', String(x === b)));
+          count();
+        };
+      });
+      sh.querySelectorAll('[data-cat]').forEach((b) => {
+        b.onclick = () => {
+          const on = !f.cats.includes(b.dataset.cat);
+          f.cats = on ? f.cats.concat(b.dataset.cat) : f.cats.filter((x) => x !== b.dataset.cat);
+          b.setAttribute('aria-pressed', String(on));
+          count();
+        };
+      });
+      const q = sh.querySelector('#flt-q'), mx = sh.querySelector('#flt-max'), sq = sh.querySelector('#flt-sqm');
+      q.oninput = () => { f.q = q.value.trim(); count(); };
+      mx.oninput = () => {
+        f.max = Number(mx.value) >= cfg.priceCeil ? 0 : Number(mx.value);
+        sh.querySelector('[data-maxout]').textContent = maxText(); mx.setAttribute('aria-valuetext', maxText()); count();
+      };
+      sq.oninput = () => {
+        f.sqm = Number(sq.value);
+        sh.querySelector('[data-sqmout]').textContent = sqmText(); sq.setAttribute('aria-valuetext', sqmText()); count();
+      };
+      const clear = () => { ctx.closeSheetNow(); actions.applyFilter(null, S.deck.cleared); };
+      sh.querySelector('[data-reset]').onclick = clear;
+      sh.querySelector('[data-clear]').onclick = clear;
+      apply.onclick = () => {
+        const out = build();
+        const n = actions.countFor(out);
+        ctx.closeSheetNow();
+        actions.applyFilter(out, F.applied(n));
+      };
+      count();
+    }
+
+    return { html, labelId: 'sh-filter', mount };
+  };
+})(globalThis.Dira = globalThis.Dira || {});
+
+</script>
+<script>
+/* לשונית «אהבתי»: רשימה עם תג מצב, הסרה, כניסה לפרטים או להתאמה */
+(function (Dira) {
+  'use strict';
+
+  const screens = Dira.screens = Dira.screens || {};
+  const { esc, I } = Dira.ui;
+
+  screens['/favs'] = function (root, ctx) {
+    const { S, store, actions, router } = ctx;
+    const F = S.favs;
+    root.innerHTML = `
+      <section class="screen">
+        <header class="page-top"><h1>${esc(F.h1)}</h1></header>
+        <div class="scroll grow" data-body></div>
+      </section>`;
+    const body = root.querySelector('[data-body]');
+
+    function draw() {
+      const st = store.get();
+      const reqs = {};
+      st.requests.forEach((r) => { reqs[r.id] = r; });
+      const byId = {};
+      ctx.allApts().forEach((a) => { byId[a.id] = a; });
+      const ids = Object.keys(st.saved).filter((id) => byId[id]).sort((x, y) => st.saved[y].t - st.saved[x].t);
+
+      if (!ids.length) {
+        body.innerHTML = `
+          <div class="empty"><div class="big" aria-hidden="true">${I.heart}</div><h2>${esc(F.emptyTitle)}</h2><p>${esc(F.emptyText)}</p>
+            <div class="btn-row"><button class="btn-primary" type="button" data-deck>${esc(F.toDeck)}</button></div></div>`;
+        body.querySelector('[data-deck]').onclick = () => router.go('/deck');
+        return;
+      }
+      const rows = ids.map((id) => {
+        const a = byId[id], r = reqs[id], s = st.saved[id];
+        const pill = r ? (r.status === 'match' ? `<span class="state ok">${esc(F.match)}</span>` : `<span class="state wait">${esc(F.wait)}</span>`)
+          : s.star ? `<span class="state star">${esc(F.star)}</span>` : '';
+        return `
+          <li class="fav">
+            <button class="fav-main" type="button" data-open="${esc(id)}" aria-label="${esc(F.open(a))}">
+              <span class="thumb">${Dira.parts.photo(a, 0)}</span>
+              <span class="main"><b>${esc(a.title)}</b><span class="p">${esc(S.fmt.nis(a.rent))}</span><small>${esc(S.fmt.place(a) || a.city)}</small></span>
+            </button>
+            <span class="side">${pill}<button class="icon-btn unsave" type="button" data-unsave="${esc(id)}" aria-label="${esc(F.remove(a))}">${I.heart}</button></span>
+          </li>`;
+      }).join('');
+      body.innerHTML = `<ul class="fav-list">${rows}</ul>
+        <p class="fine">${esc(F.foot)}<br><button class="linkish" type="button" data-owner>${esc(F.ownerLink)}</button></p>`;
+
+      body.querySelectorAll('[data-open]').forEach((b) => {
+        b.onclick = () => {
+          const id = b.dataset.open, r = reqs[id];
+          if (r && r.status === 'match') return router.go(store.get().chats['a-' + id] ? '/chat/' + id : '/match/' + id);
+          router.openSheet('apt:' + id);
+        };
+      });
+      body.querySelectorAll('[data-unsave]').forEach((b) => { b.onclick = () => actions.unsave(b.dataset.unsave); });
+      body.querySelector('[data-owner]').onclick = () => router.go('/owner');
+    }
+
+    draw();
+    return { topics: { saved: draw, requests: draw, deck: draw } };
+  };
+})(globalThis.Dira = globalThis.Dira || {});
+
+</script>
+<script>
+/* לשונית «קטגוריות»: רשת 2 עמודות עם מספר דירות בכל אחת, ו«מותאם לך» לפי הכוכבים (הכרעה 17) */
+(function (Dira) {
+  'use strict';
+
+  const screens = Dira.screens = Dira.screens || {};
+  const { esc } = Dira.ui;
+
+  screens['/categories'] = function (root, ctx) {
+    const { S, store, actions, match: M, cfg, data } = ctx;
+    const C = S.cats;
+    root.innerHTML = `
+      <section class="screen">
+        <header class="page-top"><h1>${esc(C.h1)}</h1></header>
+        <div class="scroll grow"><ul class="cat-grid" data-grid></ul></div>
+      </section>`;
+    const grid = root.querySelector('[data-grid]');
+
+    function draw() {
+      const all = ctx.allApts();
+      const tune = store.get().tune;
+      const mctx = ctx.matchCtx();
+      grid.innerHTML = data.categories.map((c) => {
+        const forYou = !c.test;
+        const list = forYou
+          ? all.filter((a) => M.passes(a, { foryou: true }, mctx)).sort((x, y) => M.similarity(y, tune, cfg) - M.similarity(x, tune, cfg))
+          : all.filter(c.test);
+        const small = forYou ? (tune.n ? C.forYouOn(list.length) : C.forYouOff) : C.count(list.length);
+        const pic = list[0] || all[0];
+        return `<li><button class="cat" type="button" data-cat="${c.id}">
+          ${Dira.parts.photo(pic, 0)}
+          <span class="badge2" aria-hidden="true">${c.badge}</span>
+          <span class="label">${esc(c.label)}<small>${esc(small)}</small></span></button></li>`;
+      }).join('');
+      grid.querySelectorAll('[data-cat]').forEach((b) => {
+        b.onclick = () => {
+          const c = data.categories.find((x) => x.id === b.dataset.cat);
+          actions.logCategory(c.id);
+          if (!c.test) {
+            if (!store.get().tune.n) return Dira.ui.toast(C.forYouNone);
+            const f = { foryou: true };
+            return actions.applyFilter(f, C.applied(c.label, actions.countFor(f)));
+          }
+          const f = { cats: [c.id] };
+          actions.applyFilter(f, C.applied(c.label, actions.countFor(f)));
+        };
+      });
+    }
+
+    draw();
+    return { topics: { deck: draw } };
+  };
+})(globalThis.Dira = globalThis.Dira || {});
+
+</script>
+<script>
+/* לשונית «עוזר AI»: מדומה לפי הכרעה 18. מפרש מילים, מחזיר כרטיסים, ואומר בממשק שהוא לא AI אמיתי */
+(function (Dira) {
+  'use strict';
+
+  const screens = Dira.screens = Dira.screens || {};
+  const { esc, el, I } = Dira.ui;
+
+  screens['/ai'] = function (root, ctx) {
+    const { S, store, actions, router, cfg } = ctx;
+    const A = S.ai;
+    root.innerHTML = `
+      <section class="screen">
+        <header class="page-top"><h1>${esc(A.h1)}</h1></header>
+        <div class="msgs" role="log"></div>
+        <form class="composer">
+          <input type="text" aria-label="${esc(A.inputAria)}" placeholder="${esc(A.placeholder)}" autocomplete="off" enterkeyhint="send">
+          <button type="submit" aria-label="${esc(A.send)}">${I.send}</button>
+        </form>
+      </section>`;
+    const list = root.querySelector('.msgs'), input = root.querySelector('input'), form = root.querySelector('form');
+
+    /* ההודעה של העוזר נבנית מתוצאת החיפוש השמורה, כדי שהטקסט יישב רק ב-strings */
+    function botText(m) {
+      if (!m.understood) return A.notUnderstood;
+      if (m.dropped.length) return A.partial(m.total, m.dropped.map(A.droppedWord));
+      const labels = [];
+      if (m.asked.rooms) labels.push(A.criterion('rooms', m.asked.rooms));
+      if (m.asked.max) labels.push(A.criterion('max', m.asked.max));
+      m.asked.feats.concat(m.asked.places).forEach((x) => labels.push(x));
+      return A.found(m.total, labels);
+    }
+
+    function add(m) {
+      if (m.who === 'me') { list.append(el(`<p class="msg me">${esc(m.text)}</p>`)); return Dira.ui.scrollEnd(list); }
+      list.append(el(`<p class="msg bot">${esc(botText(m))}</p>`));
+      if (m.understood && m.ids.length) {
+        const box = el(`<div class="ai-results"><p class="head">${I.spark} ${esc(A.results)}</p></div>`);
+        m.ids.forEach((id) => {
+          const a = ctx.aptById(id);
+          if (!a) return;
+          const card = el(`
+            <article class="ai-card"><div class="pic">${Dira.parts.photo(a, 0)}</div><div class="body">
+              <h2>${esc(a.title)}</h2><p class="meta"><span>${esc(S.fmt.place(a) || a.city)}</span><span class="p">${esc(S.fmt.nis(a.rent))}</span></p>
+              <div class="two-btn"><button class="btn-ghost" type="button" data-d>${esc(A.details)}</button>
+              <button class="btn-primary" type="button" data-s>${I.heart} ${esc(A.save)}</button></div></div></article>`);
+          card.querySelector('[data-d]').onclick = () => router.openSheet('apt:' + a.id);
+          card.querySelector('[data-s]').onclick = () => actions.save(a, false);
+          box.append(card);
+        });
+        /* הכפתור סופר רק מה שעוד לא הוחלק, כי זה מה שיופיע בערימה */
+        const swiped = store.get().swiped;
+        const left = ctx.allApts().filter((a) => !swiped[a.id] && Dira.match.passes(a, m.filter, ctx.matchCtx())).length;
+        if (left) {
+          const all = el(`<button class="btn-primary" type="button">${esc(A.showInDeck(left))}</button>`);
+          all.onclick = () => actions.applyFilter(m.filter, A.applied);
+          box.append(all);
+        }
+        list.append(box);
+      }
+      Dira.ui.scrollEnd(list);
+    }
+
+    list.append(el(`<p class="msg bot">${esc(A.hello)}</p>`));
+    list.append(el(`<p class="msg sys">${esc(A.notReal)}</p>`));
+    const history = store.get().aiChat;
+    if (!history.length) {
+      const sug = el(`<div class="chips suggest">${A.suggestions.map((s) => `<button class="chip" type="button">${esc(s)}</button>`).join('')}</div>`);
+      sug.querySelectorAll('.chip').forEach((b) => { b.onclick = () => { input.value = b.textContent; sug.remove(); form.requestSubmit(); }; });
+      list.append(sug);
+    }
+    history.forEach(add);
+
+    form.onsubmit = (e) => {
+      e.preventDefault();
+      const text = input.value.trim();
+      if (!text) return;
+      input.value = '';
+      const sug = list.querySelector('.suggest');
+      if (sug) sug.remove();
+      const me = { who: 'me', text };
+      actions.aiPush(me);
+      add(me);
+      const dots = el(`<p class="typing" aria-label="${esc(A.typing)}"><i></i><i></i><i></i></p>`);
+      list.append(dots); Dira.ui.scrollEnd(list);
+      setTimeout(() => {
+        dots.remove();
+        const bot = Object.assign({ who: 'bot' }, Dira.assist.search(text, ctx.allApts(), ctx.matchCtx()));
+        actions.aiPush(bot);
+        if (list.isConnected) add(bot);
+      }, cfg.aiReplyMs);
+    };
+  };
+})(globalThis.Dira = globalThis.Dira || {});
+
+</script>
+<script>
+/*
+ * פרסום דירה בחמישה שלבים (הכרעה 19): כתובת, פרטי הדירה, תשלומים ודרישות, מדיה, איש קשר.
+ * בדיקת חובה בכל שלב, כתיבה אוטומטית מדומה, תמונות מהמכשיר. בסוף הדירה היא הכרטיס הבא בערימה.
+ */
+(function (Dira) {
+  'use strict';
+
+  const screens = Dira.screens = Dira.screens || {};
+  const { esc, I } = Dira.ui;
+  const L = Dira.listing;
+
+  screens['/publish'] = function (root, ctx) {
+    const { S, actions, cfg, data } = ctx;
+    const P = S.publish;
+    const d = L.emptyDraft();
+    const photos = [];
+    let videoName = '';
+    let cur = 0;
+    let errs = {};
+
+    root.innerHTML = `
+      <section class="screen">
+        <header class="page-top">${Dira.ui.backBtn()}<h1>${esc(P.h1)}</h1></header>
+        <ol class="stepper scroll grow" data-steps></ol>
+      </section>`;
+    Dira.ui.bindBack(root, '/deck');
+    const stepsEl = root.querySelector('[data-steps]');
+
+    /* ——— שדות ——— */
+    const errAttrs = (name) => (errs[name] ? `aria-invalid="true" aria-describedby="p-${name}-err"` : '');
+    const errMsg = (name) => (errs[name] ? `<span class="err" id="p-${name}-err">${esc(P.err[errs[name]])}</span>` : '');
+    const wrap = (name, label, control) => `<div class="field${errs[name] ? ' bad' : ''}"><label for="p-${name}">${esc(label)}</label>${control}${errMsg(name)}</div>`;
+    const input = (name, label, attrs) => wrap(name, label, `<input id="p-${name}" name="${name}" value="${esc(d[name])}" ${attrs || ''} ${errAttrs(name)}>`);
+    const select = (name, label, options, first) => wrap(name, label, `<select id="p-${name}" name="${name}" ${errAttrs(name)}>
+      ${first ? `<option value="">${esc(first)}</option>` : ''}${options.map((o) => `<option value="${esc(o)}" ${String(d[name]) === String(o) ? 'selected' : ''}>${esc(o)}</option>`).join('')}</select>`);
+    const yn = (name, label) => `<div class="yn-row"><span id="p-${name}-l">${esc(label)}</span><div class="yn" role="group" aria-labelledby="p-${name}-l">
+      <button type="button" data-yn="${name}" data-v="yes" aria-pressed="${d[name] === 'yes'}">${esc(P.yes)}</button>
+      <button type="button" data-yn="${name}" data-v="no" aria-pressed="${d[name] === 'no'}">${esc(P.no)}</button></div></div>`;
+    const withAi = (name, label, tag) => `<div class="field with-ai"><label for="p-${name}">${esc(label)}</label>
+      ${tag === 'textarea' ? `<textarea id="p-${name}" name="${name}">${esc(d[name])}</textarea>` : `<input id="p-${name}" name="${name}" value="${esc(d[name])}">`}
+      <button class="ai-btn" type="button" data-ai="${name}" aria-label="${esc(P.autowrite(label))}">${I.spark}</button></div>`;
+
+    function body(step) {
+      if (step === 'addr') return `
+        <p class="sub-h">${esc(P.cityStreet)}</p>
+        ${select('city', P.city, data.cities, P.cityPick)}
+        ${input('street', P.street, 'list="p-streets" autocomplete="off"')}<datalist id="p-streets">${data.streets.map((s) => `<option value="${esc(s)}">`).join('')}</datalist>
+        ${input('houseNo', P.houseNo, 'inputmode="numeric"')}
+        <div class="row3">${input('entrance', P.entrance)}${input('floor', P.floor, 'inputmode="numeric"')}${input('floors', P.floors, 'inputmode="numeric"')}</div>`;
+      if (step === 'details') return `
+        ${withAi('title', P.title)}
+        <div class="row2">${input('rent', P.rent, 'inputmode="numeric"')}${input('sqm', P.sqm, 'inputmode="numeric"')}</div>
+        ${input('outSqm', P.outSqm, 'inputmode="numeric"')}
+        <div class="row2">${select('beds', P.beds, [1, 2, 3, 4, 5])}${select('baths', P.baths, [1, 2, 3])}</div>
+        <div class="row2">${select('type', P.type, data.types.map((t) => t.label))}${select('cond', P.cond, data.conds)}</div>
+        <fieldset class="field"><legend class="label">${esc(P.features)}</legend><div class="opts">${data.featureList.map((x) => `<button class="chip" type="button" data-feat="${esc(x)}" aria-pressed="${d.features.includes(x)}">${esc(x)}</button>`).join('')}</div></fieldset>
+        ${d.features.includes('מיזוג') ? select('acType', P.acType, data.acTypes, P.acPick) : ''}
+        <fieldset class="field"><legend class="label">${esc(P.parking)}</legend><div class="opts">${[['0', P.parkingNone], ['1', '1'], ['2', '2'], ['3', '3']].map(([v, l]) => `<button class="opt" type="button" data-park="${v}" aria-pressed="${d.parking === v}">${esc(l)}</button>`).join('')}</div></fieldset>
+        ${withAi('desc', P.desc, 'textarea')}
+        <p class="note">${esc(P.autowriteNote)}</p>`;
+      if (step === 'pay') return `
+        <p class="sub-h">${esc(P.payments)}</p>
+        <div class="row2">${input('vaad', P.vaad, 'inputmode="numeric"')}${input('arnona', P.arnona, 'inputmode="numeric"')}</div>
+        <p class="sub-h">${esc(P.contractReq)}</p>
+        ${select('contract', P.contract, [1, 6, 9, 12, 18, 24])}
+        ${yn('guarantee', P.guarantee)}
+        ${d.guarantee === 'yes' ? input('guaranteeAmt', P.guaranteeAmt, 'inputmode="numeric"') : ''}
+        ${yn('guarantors', P.guarantors)}${yn('partners', P.partners)}${yn('smoking', P.smoking)}
+        ${input('notes', P.notes)}`;
+      if (step === 'media') return `
+        <div class="media-add"><span class="label">${esc(P.photos)}</span>
+          <label class="btn-primary btn-small">${esc(P.addPhotos)}<input type="file" accept="image/*" multiple class="sr-only" data-photos></label></div>
+        <div class="thumbs">${photos.map((p) => `<img src="${esc(p)}" alt="">`).join('')}<span class="count">${esc(P.photosCount(photos.length, cfg.photosMax))}</span></div>
+        <div class="media-add"><span class="label">${esc(P.video)}</span>
+          <label class="btn-ghost btn-small">${esc(P.addVideo)}<input type="file" accept="video/*" class="sr-only" data-video></label></div>
+        ${videoName ? `<p class="note">${esc(P.videoAdded(videoName))}</p>` : ''}
+        <p class="note">${esc(P.mediaNote)}</p>`;
+      return `
+        ${input('name', P.name, 'autocomplete="name"')}
+        ${input('phone', P.phone, 'inputmode="tel" autocomplete="tel"')}
+        <p class="note">${esc(P.phoneNote)}</p>`;
+    }
+
+    /* ——— ציור: רק הרשימה של השלבים. focusSel מחזיר את הפוקוס אחרי ציור ——— */
+    function draw(focusSel) {
+      const n = L.STEPS.length;
+      stepsEl.innerHTML = L.STEPS.map((id, i) => `
+        <li class="step${i === cur ? ' on' : ''}${i < cur ? ' done' : ''}" ${i === cur ? 'aria-current="step"' : ''}>
+          <span class="step-num" aria-hidden="true">${i < cur ? I.check : i + 1}</span>
+          <h2><button class="step-head" type="button" data-step="${i}" ${i < cur ? '' : 'aria-disabled="true"'}>
+            <span class="sr-only">${esc(P.stepOf(i + 1, n))}: </span>${esc(P.steps[id])}</button></h2>
+          ${i === cur ? `<form class="step-body" novalidate>${body(id)}
+            <div class="step-actions">
+              <button class="btn-primary" type="submit">${esc(i === n - 1 ? P.submit : P.next)}</button>
+              ${i ? `<button class="btn-ghost" type="button" data-prev>${esc(P.prev)}</button>` : ''}
+            </div></form>` : ''}
+        </li>`).join('');
+      bind();
+      const f = focusSel && stepsEl.querySelector(focusSel);
+      if (f) f.focus();
+    }
+
+    function go(i, focusFirst) {
+      cur = i; errs = {};
+      draw(focusFirst ? `.step.on .step-head` : null);
+    }
+
+    function bind() {
+      stepsEl.querySelectorAll('[data-step]').forEach((b) => { b.onclick = () => { const i = Number(b.dataset.step); if (i < cur) go(i, true); }; });
+      const form = stepsEl.querySelector('.step-body');
+      const prev = form.querySelector('[data-prev]');
+      if (prev) prev.onclick = () => go(cur - 1, true);
+      const keep = (e) => { if (e.target.name) d[e.target.name] = e.target.value; };
+      form.addEventListener('input', keep);
+      form.addEventListener('change', keep);
+      form.querySelectorAll('[data-yn]').forEach((b) => {
+        b.onclick = () => { d[b.dataset.yn] = b.dataset.v; draw(`[data-yn="${b.dataset.yn}"][data-v="${b.dataset.v}"]`); };
+      });
+      form.querySelectorAll('[data-feat]').forEach((b) => {
+        b.onclick = () => {
+          const x = b.dataset.feat;
+          d.features = d.features.includes(x) ? d.features.filter((y) => y !== x) : d.features.concat(x);
+          if (!d.features.includes('מיזוג')) d.acType = '';
+          draw(`[data-feat="${CSS.escape(x)}"]`);
+        };
+      });
+      form.querySelectorAll('[data-park]').forEach((b) => { b.onclick = () => { d.parking = b.dataset.park; draw(`[data-park="${b.dataset.park}"]`); }; });
+      form.querySelectorAll('[data-ai]').forEach((b) => {
+        b.onclick = () => {
+          const name = b.dataset.ai;
+          b.classList.add('busy');
+          Dira.ui.toast(P.writing);
+          setTimeout(() => {
+            d[name] = name === 'title' ? L.autoTitle(d, data.types) : L.autoDesc(d, data.types);
+            draw('#p-' + name);
+            Dira.ui.toast(P.written, 'ok');
+          }, cfg.autowriteMs);
+        };
+      });
+      const ph = form.querySelector('[data-photos]');
+      if (ph) ph.onchange = () => {
+        const files = Array.from(ph.files).filter((f) => /^image\//.test(f.type)).slice(0, cfg.photosMax - photos.length);
+        let left = files.length;
+        files.forEach((file) => {
+          const rd = new FileReader();
+          rd.onload = () => {
+            if (/^data:image\//.test(rd.result)) photos.push(rd.result);
+            if (--left === 0) draw('[data-photos]');
+          };
+          rd.readAsDataURL(file);
+        });
+      };
+      const vd = form.querySelector('[data-video]');
+      if (vd) vd.onchange = () => { if (vd.files[0]) { videoName = vd.files[0].name; draw('[data-video]'); } };
+
+      form.onsubmit = (ev) => {
+        ev.preventDefault();
+        const step = L.STEPS[cur];
+        errs = L.validate(step, d, data);
+        const bad = Object.keys(errs);
+        if (bad.length) {
+          draw('#p-' + bad[0]);
+          Dira.ui.toast(P.errToast(bad.length));
+          return;
+        }
+        if (cur < L.STEPS.length - 1) return go(cur + 1, true);
+        const apt = L.toApartment(Object.assign({}, d, { name: d.name.trim() || P.ownerDefault }),
+          { id: 'm' + Date.now(), today: new Date().toISOString().slice(0, 10), cfg, types: data.types });
+        actions.publish(apt, photos, !!videoName);
+      };
+    }
+
+    draw();
+  };
+})(globalThis.Dira = globalThis.Dira || {});
+
+</script>
+<script>
+/*
+ * צד בעל הדירה (#/owner): הדירה שלו, פניות לפי סדר הגעה עם תג לפי הכרעה 11,
+ * כרטיס מחפש אנונימי (הכרעה 10), אישור או דחייה בלי סיבה (הכרעה 15), ומסך מנוי (הכרעה 26).
+ */
+(function (Dira) {
+  'use strict';
+
+  const screens = Dira.screens = Dira.screens || {};
+  const sheets = Dira.sheets = Dira.sheets || {};
+  const { esc, I } = Dira.ui;
+
+  screens['/owner'] = function (root, ctx) {
+    const { S, store, actions, router, cfg, data, match: M } = ctx;
+    const O = S.owner, apt = data.ownerApt;
+    root.innerHTML = `
+      <section class="screen">
+        <header class="app-top owner-top">
+          <p class="brand">${esc(S.app.brand)} <span class="pill-demo">${esc(O.side)}</span></p>
+          <button class="chip" type="button" data-plan>${esc(O.plan)}</button>
+        </header>
+        <div class="scroll grow">
+          <h1 class="sr-only">${esc(O.h1)}</h1>
+          <div class="owner-apt">
+            <span class="li-thumb">${Dira.parts.photo(apt, 0)}</span>
+            <p><b>${esc(S.fmt.place(apt))}</b><span>${esc(O.aptLine(apt))}</span></p>
+          </div>
+          <div class="sect-h"><h2>${esc(O.list)}</h2><span data-waiting></span></div>
+          <p class="rule">${esc(O.rule(apt))}</p>
+          <ul class="list" data-list></ul>
+          <div class="btn-row owner-foot">
+            <button class="btn-ghost" type="button" data-seeker>${esc(O.toSeeker)}</button>
+            <p class="fine">${esc(O.allExample)}</p>
+          </div>
+        </div>
+      </section>`;
+    const listEl = root.querySelector('[data-list]');
+    root.querySelector('[data-plan]').onclick = () => router.openSheet('plan');
+    root.querySelector('[data-seeker]').onclick = () => router.go('/deck');
+
+    function draw() {
+      const dec = store.get().owner.decisions;
+      listEl.innerHTML = data.seekers.map((s) => {
+        const f = M.fit(s, apt, cfg);
+        const d = dec[s.id];
+        const tag = d === 'ok' ? O.approved : d === 'no' ? O.rejected : f.ok ? O.fit : O.unfit;
+        const cls = d === 'ok' || (!d && f.ok) ? 'fit' : 'unfit';
+        return `<li><button class="req${d ? ' decided' : ''}" type="button" data-sid="${s.id}" aria-label="${esc(O.rowAria(s, tag))}">
+          <span class="req-name">${esc(s.first)}<small>${esc(O.arrived(s))}</small></span>
+          <span class="fit-tag ${cls}">${esc(tag)}</span>
+          <span class="req-meta">
+            <span class="${f.pay ? 'yes' : 'no'}">${esc(O.payTo(s))}</span>
+            <span class="${f.date ? 'yes' : 'no'}">${esc(O.entryOn(s))}</span>
+            <span>${esc(O.occupants(s.occupants))}</span>
+          </span></button></li>`;
+      }).join('');
+      listEl.querySelectorAll('[data-sid]').forEach((b) => { b.onclick = () => router.openSheet('seeker:' + b.dataset.sid); });
+      const waiting = data.seekers.filter((s) => !dec[s.id]).length;
+      root.querySelector('[data-waiting]').textContent = O.waiting(waiting);
+    }
+
+    draw();
+    if (!store.get().flags.ownerBanner) {
+      setTimeout(() => {
+        actions.seenOwnerBanner();
+        Dira.ui.banner(O.banner(data.seekers.length), O.bannerText, null);
+      }, cfg.ownerBannerDelayMs);
+    }
+    return { topics: { owner: draw } };
+  };
+
+  /* כרטיס מחפש לפני אישור: שם פרטי, טווח תשלום, נפשות, תאריך כניסה. בלי שם משפחה, תמונה ומקום עבודה */
+  sheets.seeker = function (ctx, sid) {
+    const { S, store, actions, router, cfg, data, match: M } = ctx;
+    const s = data.seekers.find((x) => x.id === sid);
+    if (!s) return null;
+    const O = S.owner, apt = data.ownerApt;
+    const f = M.fit(s, apt, cfg);
+    const d = store.get().owner.decisions[sid];
+    const html = `
+      <h2 id="sh-seeker">${esc(s.first)}</h2>
+      <p class="sub">${esc(O.sheetSub(s))}</p>
+      <dl class="anon">
+        <div><dt>${esc(O.range)}</dt><dd>${esc(O.rangeVal(s))}</dd></div>
+        <div><dt>${esc(O.occLabel)}</dt><dd>${esc(String(s.occupants))}</dd></div>
+        <div><dt>${esc(O.entryLabel)}</dt><dd>${esc(S.fmt.date(s.entry))}</dd></div>
+      </dl>
+      <dl class="kv">
+        <dt>${esc(O.payLabel)}</dt><dd class="${f.pay ? 'yes' : 'no'}">${esc(O.payLine(f.pay, apt))}</dd>
+        <dt>${esc(O.dateLabel)}</dt><dd class="${f.date ? 'yes' : 'no'}">${esc(O.dateLine(f.date, apt))}</dd>
+      </dl>
+      <p class="hidden-list">${esc(O.hiddenList(s))}</p>
+      ${d ? `<p class="note">${esc(O.already(d))}</p>${d === 'ok' ? `<button class="btn-primary" type="button" data-open>${esc(O.toMatch)}</button>` : ''}`
+        : `<div class="two-btn"><button class="btn-primary" type="button" data-ok>${I.check} ${esc(O.approve)}</button>
+             <button class="btn-ghost" type="button" data-no>${esc(O.reject)}</button></div>`}`;
+
+    function mount(body) {
+      const q = (x) => body.querySelector(x);
+      if (q('[data-ok]')) q('[data-ok]').onclick = () => { actions.decide(sid, true); router.go('/owner/match/' + sid, { replace: true }); };
+      if (q('[data-no]')) q('[data-no]').onclick = () => { actions.decide(sid, false); ctx.closeSheetNow(); Dira.ui.toast(O.rejectedToast); };
+      if (q('[data-open]')) q('[data-open]').onclick = () => router.go('/owner/match/' + sid, { replace: true });
+    }
+    return { html, labelId: 'sh-seeker', mount };
+  };
+
+  /* הכרעה 26: בפיילוט, ללא תשלום, בלי מחיר מומצא */
+  sheets.plan = function (ctx) {
+    const O = ctx.S.owner;
+    const html = `
+      <h2 id="sh-plan">${esc(O.planTitle)}</h2>
+      <p class="sub">${esc(O.planSub)}</p>
+      <dl class="kv">${O.planRows.map(([k, v]) => `<dt>${esc(k)}</dt><dd>${esc(v)}</dd>`).join('')}</dl>
+      <button class="btn-primary" type="button" data-close>${esc(O.planOk)}</button>`;
+    return { html, labelId: 'sh-plan', mount: (body) => { body.querySelector('[data-close]').onclick = () => ctx.closeSheetNow(); } };
+  };
+})(globalThis.Dira = globalThis.Dira || {});
+
+</script>
+<script>
+/*
+ * הפעלה: בונה את ההקשר המשותף, המעטפת (מסך, ניווט תחתון, טוסט, באנר), והנתב.
+ * מסך מצויר מחדש רק כשהנתיב משתנה. שינוי מצב מגיע למסך דרך נושאים, והמסך מצייר רק את האזור שלו.
+ */
+(function (Dira) {
+  'use strict';
+
+  const cfg = Dira.config, S = Dira.S, ui = Dira.ui, M = Dira.match, data = Dira.data;
+  const TABS = [['/deck', 'home', 'deck'], ['/categories', 'grid', 'categories'], ['/ai', 'spark', 'ai'], ['/favs', 'heart', 'favs']];
+  const reduced = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  let storage = null;
+  try { storage = window.localStorage; } catch (e) { /* גלישה פרטית חוסמת: הדמו עובד בלי שמירה */ }
+
+  const ctx = { cfg, data, S, ui, match: M, media: {} };
+  ctx.store = Dira.createStore({ config: cfg, storage });
+  ctx.motionMs = reduced ? 0 : cfg.swipeMs;
+
+  /* כל הדירות: מה שפורסם בדמו ראשון, עם התמונות שנבחרו במכשיר (לא נשמרות) */
+  ctx.allApts = () => ctx.store.get().added.map((a) => M.normalize(Object.assign({}, a, { photos: ctx.media[a.id] || a.photos || [] })))
+    .concat(data.apartments.map(M.normalize));
+  ctx.aptById = (id) => ctx.allApts().find((a) => a.id === id);
+  ctx.matchCtx = () => ({ categories: data.categories, tune: ctx.store.get().tune, cfg });
+
+  /* ——— מעטפת ——— */
+  const app = document.getElementById('app');
+  app.innerHTML = `
+    <main id="screen" class="screen-host"></main>
+    <nav class="tabbar" aria-label="${ui.esc(S.tabs.nav)}" hidden>${TABS.map(([path, icon, key]) => `
+      <button class="tab" type="button" data-go="${path}">${ui.I[icon]}<span>${ui.esc(S.tabs[key])}</span></button>`).join('')}
+    </nav>
+    <div class="toast" role="status" aria-live="polite"></div>
+    <button class="banner" type="button" hidden></button>`;
+  const host = app.querySelector('#screen');
+  const tabbar = app.querySelector('.tabbar');
+  ui.init({ cfg, S, toast: app.querySelector('.toast'), banner: app.querySelector('.banner') });
+  document.documentElement.style.setProperty('--swipe-ms', ctx.motionMs + 'ms');
+  document.documentElement.style.setProperty('--snap-ms', (reduced ? 0 : cfg.snapMs) + 'ms');
+
+  tabbar.addEventListener('click', (e) => {
+    const b = e.target.closest('[data-go]');
+    if (b && ctx.router.current.route !== b.dataset.go) ctx.router.go(b.dataset.go);
+  });
+
+  function drawTabbar(route) {
+    const isTab = TABS.some(([p]) => p === route);
+    tabbar.hidden = !isTab;
+    tabbar.querySelectorAll('.tab').forEach((b) => {
+      if (b.dataset.go === route) b.setAttribute('aria-current', 'page'); else b.removeAttribute('aria-current');
+    });
+    const n = ctx.store.get().requests.filter((r) => r.status === 'match' && !r.seen).length;
+    const fav = tabbar.querySelector('[data-go="/favs"]');
+    let badge = fav.querySelector('.badge');
+    if (n && !badge) { badge = ui.el('<span class="badge"></span>'); fav.append(badge); }
+    if (badge) { if (n) { badge.textContent = n; badge.setAttribute('aria-label', S.tabs.newMatches(n)); } else badge.remove(); }
+  }
+
+  /* ——— ניתוב ——— */
+  let screen = null;       // { topics }
+  let sheetKey = null;
+  let sheetTopics = {};    // מה שהגיליון הפתוח רוצה לשמוע, מ-mount
+
+  function renderScreen(r, first) {
+    host.innerHTML = '';
+    const fn = Dira.screens[r.route];
+    screen = fn(host, ctx, r.params) || {};
+    drawTabbar(r.route);
+    if (!first) {
+      const h1 = host.querySelector('h1');
+      if (h1) { h1.tabIndex = -1; h1.focus({ preventScroll: true }); }
+    }
+  }
+
+  function syncSheet(r) {
+    const key = r.sheet ? r.sheet.name + ':' + r.sheet.arg : null;
+    if (key === sheetKey) return;
+    ui.closeSheet();
+    sheetKey = null;
+    sheetTopics = {};
+    const make = r.sheet && Dira.sheets[r.sheet.name];
+    const spec = make && make(ctx, r.sheet.arg);
+    if (!spec) return;
+    sheetKey = key;
+    ui.openSheet({
+      html: spec.html, labelId: spec.labelId, onMount: (body) => { sheetTopics = (spec.mount && spec.mount(body)) || {}; },
+      inertRoots: [host, tabbar], onDismiss: () => ctx.router.closeSheet()
+    });
+  }
+
+  /* סגירת גיליון מתוך פעולה (למשל כוכב מהפרטים): סוגר מיד, והנתב מיישר את הכתובת */
+  ctx.closeSheetNow = () => { ui.closeSheet(); sheetKey = null; sheetTopics = {}; ctx.router.closeSheet(); };
+
+  let firstRoute = true;
+  ctx.router = Dira.router.createRouter({
+    onRoute(next, prev) {
+      if (!prev || next.path !== prev.path) renderScreen(next, firstRoute);
+      firstRoute = false;
+      syncSheet(next);
+    }
+  });
+
+  /* ——— שינויי מצב מגיעים למסך הפעיל ולניווט התחתון ——— */
+  ctx.store.subscribe('*', (state, topics) => {
+    if (topics.includes('reset')) { ui.closeSheet(); sheetKey = null; sheetTopics = {}; renderScreen(ctx.router.current, false); return; }
+    if (topics.includes('requests')) drawTabbar(ctx.router.current.route);
+    const handlers = (screen && screen.topics) || {};
+    Array.from(new Set(topics.map((t) => handlers[t]).filter(Boolean))).forEach((fn) => fn());
+    if (sheetKey) Array.from(new Set(topics.map((t) => sheetTopics[t]).filter(Boolean))).forEach((fn) => fn());
+  });
+
+  ctx.actions = Dira.createActions(ctx);
+
+  /* הכרעה 9: בעל הדירה מאשר ⟵ יש התאמה. המתזמן רץ מטעינת הדף ולא תלוי במסך */
+  ctx.scheduler = Dira.createScheduler({
+    store: ctx.store,
+    onApprove(id) {
+      const a = ctx.aptById(id);
+      if (a) ui.banner(S.match.banner(a), S.match.bannerText(a), () => ctx.router.go('/match/' + id));
+    }
+  });
+
+  Dira.app = ctx;
+
+  /* ——— יומן: פתיחה, ויציאה מהירה נמדדת רק מהפתיחה הראשונה להסתרה הראשונה ——— */
+  const openedAt = Date.now();
+  let exitLogged = false;
+  document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState !== 'hidden' || exitLogged) return;
+    exitLogged = true;
+    ctx.store.setState('log', (s) => Dira.log.push(s, { type: 'exit', ms: Date.now() - openedAt }, Date.now()));
+  });
+
+  ctx.store.setState('log', (s) => Dira.log.push(s, { type: 'open', side: /owner/.test(location.hash) ? 'owner' : 'seeker' }, Date.now()));
+  ctx.router.start();
+  ctx.scheduler.start();
+})(globalThis.Dira = globalThis.Dira || {});
+
+</script>
+</body>
+</html>
