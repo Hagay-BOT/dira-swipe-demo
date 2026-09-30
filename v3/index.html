@@ -409,10 +409,7 @@ h1:focus, h2:focus { outline: none; }
 </style>
 </head>
 <body>
-<aside class="aside">
-  <b>דמו. נפתח הכי טוב בטלפון</b>
-  כל הדירות והמחפשים כאן לדוגמה. שום דבר לא נשלח לאף אחד.
-</aside>
+<aside class="aside"></aside>
 <div id="app"></div>
 <noscript>הדמו צריך JavaScript כדי לעבוד.</noscript>
 <script>
@@ -719,13 +716,13 @@ h1:focus, h2:focus { outline: none; }
   const fullAddress = (a) => `${a.street} ${a.houseNo}${a.hood ? ', ' + a.hood : ''}, ${a.city}`;
 
   const S = {
-    fmt: { g, nis, num, date, apts, place, fullAddress },
+    fmt: { nis, date, place, fullAddress },
 
     app: {
       brand: 'דירה בהחלקה',
       title: 'דירה בהחלקה · דמו',
       asideTitle: 'דמו. נפתח הכי טוב בטלפון',
-      asideText: 'כל הדירות והמחפשים כאן לדוגמה. שום דבר לא נשלח לאף אחד.',
+      asideText: 'כל הדירות והמחפשים כאן לדוגמה. שום דבר לא נשלח לאף אחד',
       close: 'סגירה',
       back: 'חזרה'
     },
@@ -794,13 +791,11 @@ h1:focus, h2:focus { outline: none; }
       q: 'חיפוש חופשי',
       qPh: 'לדוגמה: כרמל, מרפסת, נוף לים',
       price: 'מחיר חודשי עד',
-      priceAria: 'מחיר חודשי מרבי',
       noLimit: 'ללא הגבלה',
       beds: 'חדרי שינה, לפחות',
       baths: 'חדרי רחצה, לפחות',
       any: 'הכול',
       sqm: 'שטח, לפחות',
-      sqmAria: 'שטח מינימלי במ״ר',
       sqmNone: 'ללא',
       sqmVal: (n) => `${n} מ״ר`,
       cats: 'קטגוריות',
@@ -1444,7 +1439,7 @@ h1:focus, h2:focus { outline: none; }
     return Object.assign({ beds, baths: 1, type: 'דירה', cond: 'במצב טוב', title: `דירת ${a.rooms} חדרים ב${a.street}`, desc: '', photos: [] }, a);
   }
 
-  Dira.match = { fit, passes, isEmptyFilter, similarity, learnStar, learnNope, deckOrder, widen, normalize, daysBetween };
+  Dira.match = { fit, passes, isEmptyFilter, similarity, learnStar, learnNope, deckOrder, widen, normalize };
 })(globalThis.Dira = globalThis.Dira || {});
 
 </script>
@@ -1464,7 +1459,7 @@ h1:focus, h2:focus { outline: none; }
       pen: {},                   // מה ✕ לימד, לסידור הערימה
       tune: { n: 0, f: {}, h: {}, rooms: 0, rent: 0 },   // מה הכוכבים לימדו
       filter: null,              // הסינון הפעיל
-      requests: [],              // { id, t, due, status: 'wait' | 'match', seen }
+      requests: [],              // { id, due, status: 'wait' | 'match', seen }
       chats: {},                 // key ⟵ [{ who, text }]
       profile: null,             // פרטי המחפש, נמסרים רק אחרי התאמה
       added: [],                 // דירות שפורסמו בדמו
@@ -1717,7 +1712,6 @@ h1:focus, h2:focus { outline: none; }
       store.setState(['requests', 'log'], (s) => {
         const r = s.requests.find((x) => x.id === id);
         r.status = 'match';
-        r.matchedAt = now();
         Dira.log.push(s, { type: 'match', id, side: 'seeker' }, now());
       });
       onApprove(id);
@@ -2118,7 +2112,7 @@ h1:focus, h2:focus { outline: none; }
     function sendRequest(a) {
       if (store.get().requests.some((r) => r.id === a.id)) return ui.toast(S.details.alreadySent);
       const req = store.setState(['requests', 'saved', 'log'], (s) => {
-        const r = { id: a.id, t: now(), due: now() + cfg.approveDelayMs, status: 'wait', seen: false };
+        const r = { id: a.id, due: now() + cfg.approveDelayMs, status: 'wait', seen: false };
         s.requests.push(r);
         if (!s.saved[a.id]) s.saved[a.id] = { star: false, t: now() };
         log(s, { type: 'request', id: a.id });
@@ -2420,7 +2414,7 @@ h1:focus, h2:focus { outline: none; }
           <span class="avatar" aria-hidden="true">${esc(spec.initials)}</span>
           <div><h1>${esc(spec.title)}</h1><span>${esc(spec.subtitle)}</span></div>
         </header>
-        <div class="msgs" role="log"></div>
+        <div class="msgs"></div>
         <form class="composer">
           <input type="text" aria-label="${esc(C.inputAria)}" autocomplete="off" enterkeyhint="send">
           <button type="submit" aria-label="${esc(C.send)}">${I.send}</button>
@@ -2557,7 +2551,7 @@ h1:focus, h2:focus { outline: none; }
             <div class="specs-row"><span class="price">${esc(S.fmt.nis(a.rent))}</span>${Dira.parts.specs(a, S)}</div>
             <p class="desc">${esc(a.desc)}</p>
           </div>
-          <span class="sr-only" data-photo-label aria-live="off">${esc(S.card.photo(1, n))}</span>
+          <span class="sr-only" data-photo-label>${esc(S.card.photo(1, n))}</span>
         </article>`;
     }
 
@@ -2937,7 +2931,7 @@ h1:focus, h2:focus { outline: none; }
     root.innerHTML = `
       <section class="screen">
         <header class="page-top"><h1>${esc(A.h1)}</h1></header>
-        <div class="msgs" role="log"></div>
+        <div class="msgs"></div>
         <form class="composer">
           <input type="text" aria-label="${esc(A.inputAria)}" placeholder="${esc(A.placeholder)}" autocomplete="off" enterkeyhint="send">
           <button type="submit" aria-label="${esc(A.send)}">${I.send}</button>
@@ -2988,13 +2982,13 @@ h1:focus, h2:focus { outline: none; }
 
     list.append(el(`<p class="msg bot">${esc(A.hello)}</p>`));
     list.append(el(`<p class="msg sys">${esc(A.notReal)}</p>`));
-    const history = store.get().aiChat;
-    if (!history.length) {
+    const past = store.get().aiChat;
+    if (!past.length) {
       const sug = el(`<div class="chips suggest">${A.suggestions.map((s) => `<button class="chip" type="button">${esc(s)}</button>`).join('')}</div>`);
       sug.querySelectorAll('.chip').forEach((b) => { b.onclick = () => { input.value = b.textContent; sug.remove(); form.requestSubmit(); }; });
       list.append(sug);
     }
-    history.forEach(add);
+    past.forEach(add);
 
     form.onsubmit = (e) => {
       e.preventDefault();
@@ -3234,12 +3228,14 @@ h1:focus, h2:focus { outline: none; }
         </div>
       </section>`;
     const listEl = root.querySelector('[data-list]');
+    /* הכרעה 12: לפי סדר הגעה */
+    const byArrival = data.seekers.slice().sort((x, y) => x.arrived.localeCompare(y.arrived));
     root.querySelector('[data-plan]').onclick = () => router.openSheet('plan');
     root.querySelector('[data-seeker]').onclick = () => router.go('/deck');
 
     function draw() {
       const dec = store.get().owner.decisions;
-      listEl.innerHTML = data.seekers.map((s) => {
+      listEl.innerHTML = byArrival.map((s) => {
         const f = M.fit(s, apt, cfg);
         const d = dec[s.id];
         const tag = d === 'ok' ? O.approved : d === 'no' ? O.rejected : f.ok ? O.fit : O.unfit;
@@ -3341,6 +3337,7 @@ h1:focus, h2:focus { outline: none; }
   ctx.matchCtx = () => ({ categories: data.categories, tune: ctx.store.get().tune, cfg });
 
   /* ——— מעטפת ——— */
+  document.querySelector('.aside').innerHTML = `<b>${ui.esc(S.app.asideTitle)}</b>${ui.esc(S.app.asideText)}`;
   const app = document.getElementById('app');
   app.innerHTML = `
     <main id="screen" class="screen-host"></main>
