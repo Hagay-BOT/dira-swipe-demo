@@ -67,6 +67,7 @@
   --r-pill: 999px;
 
   --tap: 44px;
+  --rb-offset: 88px;   /* מרחק ✕ ו-♥ ממרכז ★ */
   --app-w: 440px;
   --swipe-ms: 300ms;   /* נדרס מ-config.swipeMs בהפעלה */
   --snap-ms: 200ms;
@@ -190,8 +191,14 @@ h1:focus, h2:focus { outline: none; }
 .stamp-like { inset-inline-end: 20px; color: var(--like); transform: rotate(-12deg); }
 .stamp-nope { inset-inline-start: 20px; color: var(--nope); transform: rotate(12deg); }
 .stamp-star { inset-block-start: auto; inset-block-end: 46%; inset-inline: 0; margin-inline: auto; inline-size: max-content; color: var(--star); }
-/* הכרעה 5: סדר ה-DOM ♥ ★ ✕ נקרא מימין לשמאל, ולכן ♥ מימין ו-✕ משמאל בלי שום היפוך */
-.actions { display: flex; justify-content: center; align-items: center; gap: 26px; padding: 14px 0; }
+/*
+ * הכרעה 5: ✕ משמאל, ★ באמצע, ♥ מימין. המיקום קבוע במפורש ולא תלוי ב-direction:
+ * שלושת הכפתורים באותו תא ממורכז, וכל אחד מוזז על ציר x הפיזי. סדר ה-DOM ♥ ★ ✕ שומר על סדר קריאה מימין לשמאל.
+ */
+.actions { display: grid; place-items: center; padding: 14px 0; }
+.actions > .rb { grid-area: 1 / 1; }
+.rb-like { translate: var(--rb-offset) 0; }
+.rb-nope { translate: calc(-1 * var(--rb-offset)) 0; }
 .rb { display: grid; place-items: center; inline-size: 62px; block-size: 62px; border-radius: 50%; border: 0; background: var(--surface); box-shadow: 0 6px 16px var(--shade); padding: 0; transition: transform .12s; }
 .rb svg { inline-size: 28px; block-size: 28px; }
 .rb-nope { color: var(--nope); }
@@ -347,6 +354,7 @@ h1:focus, h2:focus { outline: none; }
 .step.on .step-num, .step.done .step-num { background: var(--primary); }
 .step.done .step-num svg { inline-size: 15px; block-size: 15px; }
 .step-body { display: grid; gap: 14px; padding: var(--sp-1) 0 18px; }
+.step-fields { display: grid; gap: 14px; }
 .sub-h { font-weight: 800; font-size: 14px; margin-block-start: var(--sp-1); }
 .with-ai { position: relative; }
 .with-ai input, .with-ai textarea { padding-inline-end: 44px; }
@@ -467,6 +475,7 @@ h1:focus, h2:focus { outline: none; }
     toastMs: 2400,
     toastLongMs: 3200,
     bannerMs: 6500,
+    bannerSlideMs: 350,         // זמן יציאת הבאנר, תואם ל-transition שלו ב-CSS
     hintDelayMs: 600,
     ownerBannerDelayMs: 700,
 
@@ -712,15 +721,15 @@ h1:focus, h2:focus { outline: none; }
   }
   const count = (n, one, many) => (n === 1 ? one : `${num(n)} ${many}`);
   const apts = (n) => count(n, 'דירה אחת', 'דירות');
-  const place = (a) => [a.street, a.hood].filter(Boolean).join(', ');
-  const fullAddress = (a) => `${a.street} ${a.houseNo}${a.hood ? ', ' + a.hood : ''}, ${a.city}`;
+  /* מיקום בכרטיס: רחוב ושכונה. כשהשכונה היא «מרכז» או חסרה, העיר במקומה */
+  const place = (a) => [a.street, a.hood && a.hood !== 'מרכז' ? a.hood : a.city].filter(Boolean).join(', ');
+  const fullAddress = (a) => `${a.street} ${a.houseNo}${a.entrance ? ' כניסה ' + a.entrance : ''}${a.hood ? ', ' + a.hood : ''}, ${a.city}`;
 
   const S = {
     fmt: { nis, date, place, fullAddress },
 
     app: {
       brand: 'דירה בהחלקה',
-      title: 'דירה בהחלקה · דמו',
       asideTitle: 'דמו. נפתח הכי טוב בטלפון',
       asideText: 'כל הדירות והמחפשים כאן לדוגמה. שום דבר לא נשלח לאף אחד',
       close: 'סגירה',
@@ -816,6 +825,11 @@ h1:focus, h2:focus { outline: none; }
       partners: 'שותפים',
       smoking: 'עישון',
       entry: 'כניסה',
+      floor: 'קומה',
+      floorVal: (a) => (a.floor == null ? 'לא צוין' : a.floor === 0 ? 'קרקע' : a.floors ? `${a.floor} מתוך ${a.floors}` : String(a.floor)),
+      outSqm: 'גינה או מרפסת',
+      outSqmVal: (n) => `${n} מ״ר`,
+      notes: 'הערות',
       by: 'מפרסם',
       address: 'כתובת מלאה',
       months: (n) => `${n} חודשים`,
@@ -1069,6 +1083,17 @@ h1:focus, h2:focus { outline: none; }
       tableCaption: 'אירועים אחרונים',
       cols: ['שעה', 'אירוע', 'על מה', 'זמן'],
       sec: (v) => `${v} ש׳`,
+      /* עמודת «על מה»: כל שדה שנרשם באירוע, בלי פרטים אישיים */
+      detail: (e) => [
+        e.id, e.sid,
+        e.dir ? { R: '♥', L: '✕', U: '★' }[e.dir] : '',
+        e.side ? { seeker: 'מחפש', owner: 'בעל דירה' }[e.side] : '',
+        e.fit === undefined ? '' : e.fit ? 'מתאים' : 'לא מתאים',
+        e.on === undefined ? '' : e.on ? 'הופעל' : 'נוקה',
+        e.len ? `${e.len} תווים` : '',
+        e.photos === undefined ? '' : `${e.photos} תמונות`,
+        e.video ? 'עם סרטון' : ''
+      ].filter(Boolean).join(' '),
       stats: (m) => [
         [num(m.swipes), 'החלקות'], [num(m.likes), 'שמירות ♥'], [num(m.stars), 'כוכבים'], [num(m.nopes), 'דילוגים'],
         [String(m.secPerCard), 'שניות לכרטיס'], [num(m.requests), 'פניות'], [`${m.approvals}/${m.approvals + m.rejections}`, 'אישורים של בעל הדירה'],
@@ -1276,7 +1301,8 @@ h1:focus, h2:focus { outline: none; }
   function photo(apt, i) {
     if (apt.photos && apt.photos.length) {
       const src = apt.photos[i % apt.photos.length];
-      return `<img src="${String(src).replace(/"/g, '%22')}" alt="" draggable="false">`;
+      const safe = String(src).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+      return `<img src="${safe}" alt="" draggable="false">`;
     }
     const list = apt.scenes && apt.scenes.length ? apt.scenes : ['living'];
     return render(list[i % list.length], apt.pal, apt.id + ':' + i);
@@ -1286,7 +1312,7 @@ h1:focus, h2:focus { outline: none; }
     return apt.photos && apt.photos.length ? apt.photos.length : (apt.scenes || ['living']).length;
   }
 
-  Dira.scenes = { render, photo, count };
+  Dira.scenes = { photo, count };
 })(globalThis.Dira = globalThis.Dira || {});
 
 </script>
@@ -1653,35 +1679,43 @@ h1:focus, h2:focus { outline: none; }
     };
   }
 
+  /* מסך #/log. המעטפת והכפתורים נבנים פעם אחת; אירוע חדש מצייר מחדש רק את המדדים והטבלה */
   function screen(root, ctx) {
     const { S, ui, store, cfg } = ctx;
-    const draw = () => {
-      const st = store.get();
-      const m = metrics(st.log, cfg);
-      const rows = st.log.slice(-cfg.logRowsShown).reverse().map((e) => `
-        <tr><td>${ui.esc(new Date(e.t).toLocaleTimeString('he-IL'))}</td><td>${ui.esc(S.log.event(e.type))}</td>
-        <td>${ui.esc([e.id, e.sid, e.dir, e.side].filter(Boolean).join(' '))}</td><td>${e.ms ? ui.esc(S.log.sec(Math.round(e.ms / 100) / 10)) : ''}</td></tr>`).join('');
-      const stats = S.log.stats(m).map(([v, l]) => `<div><b>${ui.esc(v)}</b>${ui.esc(l)}</div>`).join('');
-      root.innerHTML = `
-        <section class="screen">
-        <header class="page-top">${ui.backBtn()}<h1>${ui.esc(S.log.title)}</h1></header>
+    const L = S.log;
+    root.innerHTML = `
+      <section class="screen">
+        <header class="page-top">${ui.backBtn()}<h1>${ui.esc(L.title)}</h1></header>
         <div class="scroll grow log">
-          <div class="stat-row">${stats}</div>
-          <p class="note">${ui.esc(S.log.privacy)}</p>
+          <div class="stat-row" data-stats></div>
+          <p class="note">${ui.esc(L.privacy)}</p>
           <div class="btn-row">
-            <a class="btn-primary" target="_blank" rel="noopener" href="https://wa.me/?text=${encodeURIComponent(S.log.summary(m))}">${ui.esc(S.log.whatsapp)}</a>
-            <button class="btn-ghost" type="button" data-clear>${ui.esc(S.log.clear)}</button>
-            <button class="btn-ghost" type="button" data-reset>${ui.esc(S.log.reset)}</button>
+            <a class="btn-primary" target="_blank" rel="noopener" data-wa>${ui.esc(L.whatsapp)}</a>
+            <button class="btn-ghost" type="button" data-clear>${ui.esc(L.clear)}</button>
+            <button class="btn-ghost" type="button" data-reset>${ui.esc(L.reset)}</button>
           </div>
-          ${rows ? `<table><caption class="sr-only">${ui.esc(S.log.tableCaption)}</caption><thead><tr>${S.log.cols.map((c) => `<th scope="col">${ui.esc(c)}</th>`).join('')}</tr></thead><tbody>${rows}</tbody></table>` : `<p class="fine">${ui.esc(S.log.empty)}</p>`}
+          <div data-table></div>
         </div>
-        </section>`;
-      ui.bindBack(root, '/deck');
-      root.querySelector('[data-clear]').onclick = () => { store.setState('log', (s) => { s.log = []; }); ui.toast(S.log.cleared); };
-      root.querySelector('[data-reset]').onclick = () => { store.reset(); ui.toast(S.log.resetDone); };
-    };
+      </section>`;
+    ui.bindBack(root, '/deck');
+    root.querySelector('[data-clear]').onclick = () => { store.setState('log', (s) => { s.log = []; }); ui.toast(L.cleared); };
+    root.querySelector('[data-reset]').onclick = () => { store.reset(); ui.toast(L.resetDone); };
+    const statsEl = root.querySelector('[data-stats]'), tableEl = root.querySelector('[data-table]'), wa = root.querySelector('[data-wa]');
+
+    function draw() {
+      const log = store.get().log;
+      const m = metrics(log, cfg);
+      statsEl.innerHTML = L.stats(m).map(([v, l]) => `<div><b>${ui.esc(v)}</b>${ui.esc(l)}</div>`).join('');
+      wa.href = 'https://wa.me/?text=' + encodeURIComponent(L.summary(m));
+      const rows = log.slice(-cfg.logRowsShown).reverse().map((e) => `
+        <tr><td>${ui.esc(new Date(e.t).toLocaleTimeString('he-IL'))}</td><td>${ui.esc(L.event(e.type))}</td>
+        <td>${ui.esc(L.detail(e))}</td><td>${e.ms ? ui.esc(L.sec(Math.round(e.ms / 100) / 10)) : ''}</td></tr>`).join('');
+      tableEl.innerHTML = rows
+        ? `<table><caption class="sr-only">${ui.esc(L.tableCaption)}</caption><thead><tr>${L.cols.map((c) => `<th scope="col">${ui.esc(c)}</th>`).join('')}</tr></thead><tbody>${rows}</tbody></table>`
+        : `<p class="fine">${ui.esc(L.empty)}</p>`;
+    }
     draw();
-    return { topics: { log: draw, reset: draw } };
+    return { topics: { log: draw } };
   }
 
   Dira.log = { push, metrics };
@@ -1903,8 +1937,9 @@ h1:focus, h2:focus { outline: none; }
       id: opts.id, mine: true, example: false,
       area: d.city === 'חיפה' ? 'haifa' : 'krayot', city: d.city, hood: '', street: d.street.trim(), houseNo: String(d.houseNo).trim(),
       title: d.title.trim() || autoTitle(d, opts.types), type: d.type, cond: d.cond,
-      rooms: rooms(d), beds: num(d.beds), baths: num(d.baths), sqm: num(d.sqm), floor: num(d.floor), floors: num(d.floors),
+      rooms: rooms(d), beds: num(d.beds), baths: num(d.baths), sqm: num(d.sqm), floor: String(d.floor).trim() === '' ? null : num(d.floor), floors: num(d.floors) || null,
       rent: num(d.rent), entry: opts.today, features: feats,
+      entrance: d.entrance.trim(), outSqm: num(d.outSqm) || null, notes: d.notes.trim(),
       desc: d.desc.trim() || autoDesc(d, opts.types),
       vaad: num(d.vaad) || null, arnona: num(d.arnona) || null, contract: num(d.contract),
       guarantee: d.guarantee === 'yes' ? num(d.guaranteeAmt) : 0,
@@ -1987,7 +2022,7 @@ h1:focus, h2:focus { outline: none; }
   }
   function hideBanner() {
     bannerEl.classList.remove('show');
-    setTimeout(() => { if (!bannerEl.classList.contains('show')) bannerEl.hidden = true; }, 350);
+    setTimeout(() => { if (!bannerEl.classList.contains('show')) bannerEl.hidden = true; }, cfg.bannerSlideMs);
   }
 
   /* ——— גיליון: לכידת פוקוס, Escape, aria-labelledby, והחזרת הפוקוס למי שפתח ——— */
@@ -2008,7 +2043,7 @@ h1:focus, h2:focus { outline: none; }
     const s = el(`
       <div class="sheet">
         <button class="sheet-scrim" type="button" tabindex="-1" aria-label="${esc(S.app.close)}"></button>
-        <div class="sheet-body" role="dialog" aria-modal="true" aria-labelledby="${opts.labelId}">
+        <div class="sheet-body" role="dialog" aria-modal="true" aria-labelledby="${esc(opts.labelId)}">
           <div class="sheet-bar"><span class="sheet-grip" aria-hidden="true"></span>
             <button class="icon-btn sheet-x" type="button" aria-label="${esc(S.app.close)}">${I.x}</button></div>
           <div class="sheet-content">${opts.html}</div>
@@ -2050,9 +2085,9 @@ h1:focus, h2:focus { outline: none; }
 
   /* ——— כפתור חזרה בכותרת ——— */
   const backBtn = () => `<button class="icon-btn back" type="button" data-back aria-label="${esc(S.app.back)}">${I.back}</button>`;
-  function bindBack(root, fallback, router) {
+  function bindBack(root, fallback) {
     const b = root.querySelector('[data-back]');
-    if (b) b.onclick = () => (router || Dira.app.router).back(fallback);
+    if (b) b.onclick = () => Dira.app.router.back(fallback);
   }
 
   /* גלילה לסוף של רשימת הודעות */
@@ -2220,9 +2255,9 @@ h1:focus, h2:focus { outline: none; }
     specs(a, S) {
       const c = S.card;
       return `<span class="specs">
-        <span>${I.bed}<span class="sr-only">${c.beds}</span>${a.beds}</span>
-        <span>${I.bath}<span class="sr-only">${c.baths}</span>${a.baths}</span>
-        <span>${I.ruler}${a.sqm} ${c.sqm}</span></span>`;
+        <span>${I.bed}<span class="sr-only">${esc(c.beds)}</span>${esc(a.beds)}</span>
+        <span>${I.bath}<span class="sr-only">${esc(c.baths)}</span>${esc(a.baths)}</span>
+        <span>${I.ruler}${esc(a.sqm)} ${esc(c.sqm)}</span></span>`;
     }
   };
   Dira.parts = parts;
@@ -2252,14 +2287,24 @@ h1:focus, h2:focus { outline: none; }
         </div>`;
     };
 
-    const matched = store.get().requests.some((r) => r.id === a.id && r.status === 'match');
+    /* הכרעה 14: הכתובת המלאה והטלפון רק אחרי התאמה. האזור הזה מצויר מחדש כשמגיע אישור */
+    const revealHTML = () => {
+      if (a.mine) return '';
+      const matched = store.get().requests.some((r) => r.id === a.id && r.status === 'match');
+      return matched ? `<dl class="kv"><dt>${esc(D.address)}</dt><dd>${esc(f.fullAddress(a))}</dd></dl>` : `<p class="note">${esc(D.hidden(a))}</p>`;
+    };
+
     const html = `
       <div class="sheet-photo">${parts.photo(a, 1)}</div>
       <h2 id="sh-apt">${esc(a.title)}</h2>
-      <p class="sub">${esc(f.place(a) ? f.place(a) + ', ' + a.city : a.city)}${a.example ? ' · ' + esc(D.example) : ''}</p>
+      <p class="sub">${esc([a.street, a.hood, a.city].filter(Boolean).join(', '))}${a.example ? ' · ' + esc(D.example) : ''}</p>
       <div class="detail-price"><span class="price">${esc(f.nis(a.rent))}</span>${parts.specs(a, S)}</div>
       <ul class="feat-list">${[a.type, a.cond].concat(a.features).filter(Boolean).map((x) => `<li>${esc(x)}</li>`).join('')}</ul>
       ${a.desc ? `<p>${esc(a.desc)}</p>` : ''}
+      <dl class="kv">
+        <dt>${esc(D.floor)}</dt><dd>${esc(D.floorVal(a))}</dd>
+        ${a.outSqm ? `<dt>${esc(D.outSqm)}</dt><dd>${esc(D.outSqmVal(a.outSqm))}</dd>` : ''}
+      </dl>
       <h3 class="sec-title">${esc(D.pay)}</h3>
       <dl class="kv">
         <dt>${esc(D.vaad)}</dt><dd>${esc(a.vaad != null ? f.nis(a.vaad) : D.notSaid)}</dd>
@@ -2270,10 +2315,10 @@ h1:focus, h2:focus { outline: none; }
         <dt>${esc(D.partners)}</dt><dd>${esc(yesNo(a.partners))}</dd>
         <dt>${esc(D.smoking)}</dt><dd>${esc(yesNo(a.smoking))}</dd>
         <dt>${esc(D.entry)}</dt><dd>${esc(!a.entry || a.entry <= today ? D.now : f.date(a.entry, true))}</dd>
+        ${a.notes ? `<dt>${esc(D.notes)}</dt><dd>${esc(a.notes)}</dd>` : ''}
         ${a.mine ? '' : `<dt>${esc(D.by)}</dt><dd>${esc(D.byLine(a))}</dd>`}
-        ${matched ? `<dt>${esc(D.address)}</dt><dd>${esc(f.fullAddress(a))}</dd>` : ''}
       </dl>
-      ${matched || a.mine ? '' : `<p class="note">${esc(D.hidden(a))}</p>`}
+      <div data-reveal>${revealHTML()}</div>
       <div class="sheet-actions btn-row">${actionsHTML()}</div>`;
 
     function mount(body) {
@@ -2285,8 +2330,9 @@ h1:focus, h2:focus { outline: none; }
         q('[data-star]').onclick = () => keep('U');
         q('[data-save]').onclick = () => keep('R');
       };
-      /* ציור מחדש של אזור הכפתורים בלבד, והפוקוס נשאר על אותו כפתור */
+      /* ציור מחדש של אזור הכתובת ושל אזור הכפתורים בלבד, והפוקוס נשאר על אותו כפתור */
       const redraw = () => {
+        body.querySelector('[data-reveal]').innerHTML = revealHTML();
         const act = document.activeElement;
         const key = box.contains(act) && ['data-star', 'data-save', 'data-req', 'data-match'].find((k) => act.hasAttribute(k));
         box.innerHTML = actionsHTML();
@@ -2426,7 +2472,7 @@ h1:focus, h2:focus { outline: none; }
     const add = (m) => { list.append(Dira.ui.el(`<p class="msg ${m.who}">${esc(m.text)}</p>`)); Dira.ui.scrollEnd(list); };
     const showAfter = () => {
       if (list.querySelector('.after-chat')) return;
-      const box = Dira.ui.el(`<div class="after-chat btn-row">${spec.after.map((x, i) => `<button class="${i ? 'btn-primary' : 'btn-ghost'}" type="button" data-i="${i}">${esc(x.label)}</button>`).join('')}</div>`);
+      const box = Dira.ui.el(`<div class="after-chat btn-row">${spec.after.map((x, i) => `<button class="${i ? 'btn-primary' : 'btn-ghost'}" type="button" data-i="${esc(i)}">${esc(x.label)}</button>`).join('')}</div>`);
       box.querySelectorAll('[data-i]').forEach((b) => { b.onclick = () => router.go(spec.after[Number(b.dataset.i)].go); });
       list.append(box); Dira.ui.scrollEnd(list);
     };
@@ -2725,7 +2771,7 @@ h1:focus, h2:focus { outline: none; }
     /* מה שהגיע מהעוזר או מ«מותאם לך» נשמר, ומוצג כשבבים */
     const kept = { rooms: cur.rooms, feats: cur.feats, places: cur.places, foryou: cur.foryou, label: cur.label };
     const keptLabels = [cur.foryou ? S.deck.chip.foryou : '', cur.rooms ? S.deck.chip.rooms(cur.rooms) : ''].concat(cur.feats || [], cur.places || []).filter(Boolean);
-    const seg = (key, vals) => vals.map(([v, l]) => `<button class="opt" type="button" data-k="${key}" data-v="${v}" aria-pressed="${f[key] === v}">${esc(l)}</button>`).join('');
+    const seg = (key, vals) => vals.map(([v, l]) => `<button class="opt" type="button" data-k="${esc(key)}" data-v="${esc(v)}" aria-pressed="${f[key] === v}">${esc(l)}</button>`).join('');
     const maxText = () => (f.max ? S.fmt.nis(f.max) : F.noLimit);
     const sqmText = () => (f.sqm ? F.sqmVal(f.sqm) : F.sqmNone);
     const build = () => {
@@ -2744,7 +2790,7 @@ h1:focus, h2:focus { outline: none; }
       <fieldset class="q"><legend class="q-label">${esc(F.baths)}</legend><div class="opts">${seg('baths', [[0, F.any], [1, '1'], [2, '2+']])}</div></fieldset>
       <div class="q"><label class="q-label" for="flt-sqm">${esc(F.sqm)} <output class="range-out" data-sqmout>${esc(sqmText())}</output></label>
         <input id="flt-sqm" class="range" type="range" min="0" max="${cfg.sqmCeil}" step="${cfg.sqmStep}" value="${f.sqm}" aria-valuetext="${esc(sqmText())}"></div>
-      <fieldset class="q"><legend class="q-label">${esc(F.cats)}</legend><div class="opts">${data.categories.filter((c) => c.test).map((c) => `<button class="chip" type="button" data-cat="${c.id}" aria-pressed="${f.cats.includes(c.id)}">${esc(c.label)}</button>`).join('')}</div></fieldset>
+      <fieldset class="q"><legend class="q-label">${esc(F.cats)}</legend><div class="opts">${data.categories.filter((c) => c.test).map((c) => `<button class="chip" type="button" data-cat="${esc(c.id)}" aria-pressed="${f.cats.includes(c.id)}">${esc(c.label)}</button>`).join('')}</div></fieldset>
       ${keptLabels.length ? `<p class="fine">${esc(F.kept)} ${esc(keptLabels.join(', '))}</p>` : ''}
       <div class="two-btn sheet-foot">
         <button class="btn-ghost" type="button" data-clear>${esc(F.clearAll)}</button>
@@ -2891,9 +2937,9 @@ h1:focus, h2:focus { outline: none; }
           : all.filter(c.test);
         const small = forYou ? (tune.n ? C.forYouOn(list.length) : C.forYouOff) : C.count(list.length);
         const pic = list[0] || all[0];
-        return `<li><button class="cat" type="button" data-cat="${c.id}">
+        return `<li><button class="cat" type="button" data-cat="${esc(c.id)}">
           ${Dira.parts.photo(pic, 0)}
-          <span class="badge2" aria-hidden="true">${c.badge}</span>
+          <span class="badge2" aria-hidden="true">${esc(c.badge)}</span>
           <span class="label">${esc(c.label)}<small>${esc(small)}</small></span></button></li>`;
       }).join('');
       grid.querySelectorAll('[data-cat]').forEach((b) => {
@@ -3097,31 +3143,44 @@ h1:focus, h2:focus { outline: none; }
         <p class="note">${esc(P.phoneNote)}</p>`;
     }
 
-    /* ——— ציור: רק הרשימה של השלבים. focusSel מחזיר את הפוקוס אחרי ציור ——— */
+    /*
+     * ——— ציור ———
+     * draw: כל רשימת השלבים, רק כשעוברים שלב. drawFields: רק השדות של השלב הפתוח, אחרי כל לחיצה בתוכו.
+     * focusSel מחזיר את הפוקוס למקום שבו היה
+     */
+    const focusOn = (sel) => { const f = sel && stepsEl.querySelector(sel); if (f) f.focus(); };
+
     function draw(focusSel) {
       const n = L.STEPS.length;
       stepsEl.innerHTML = L.STEPS.map((id, i) => `
         <li class="step${i === cur ? ' on' : ''}${i < cur ? ' done' : ''}" ${i === cur ? 'aria-current="step"' : ''}>
-          <span class="step-num" aria-hidden="true">${i < cur ? I.check : i + 1}</span>
-          <h2><button class="step-head" type="button" data-step="${i}" ${i < cur ? '' : 'aria-disabled="true"'}>
+          <span class="step-num" aria-hidden="true">${i < cur ? I.check : esc(i + 1)}</span>
+          <h2><button class="step-head" type="button" data-step="${esc(i)}" ${i < cur ? '' : 'aria-disabled="true"'}>
             <span class="sr-only">${esc(P.stepOf(i + 1, n))}: </span>${esc(P.steps[id])}</button></h2>
-          ${i === cur ? `<form class="step-body" novalidate>${body(id)}
+          ${i === cur ? `<form class="step-body" novalidate><div class="step-fields" data-fields>${body(id)}</div>
             <div class="step-actions">
               <button class="btn-primary" type="submit">${esc(i === n - 1 ? P.submit : P.next)}</button>
               ${i ? `<button class="btn-ghost" type="button" data-prev>${esc(P.prev)}</button>` : ''}
             </div></form>` : ''}
         </li>`).join('');
-      bind();
-      const f = focusSel && stepsEl.querySelector(focusSel);
-      if (f) f.focus();
+      bindStep();
+      bindFields();
+      focusOn(focusSel);
+    }
+
+    function drawFields(focusSel) {
+      stepsEl.querySelector('[data-fields]').innerHTML = body(L.STEPS[cur]);
+      bindFields();
+      focusOn(focusSel);
     }
 
     function go(i, focusFirst) {
       cur = i; errs = {};
-      draw(focusFirst ? `.step.on .step-head` : null);
+      draw(focusFirst ? '.step.on .step-head' : null);
     }
 
-    function bind() {
+    /* מה שנקשר פעם אחת לכל שלב: כותרות, «הקודם», הקלדה ושליחה */
+    function bindStep() {
       stepsEl.querySelectorAll('[data-step]').forEach((b) => { b.onclick = () => { const i = Number(b.dataset.step); if (i < cur) go(i, true); }; });
       const form = stepsEl.querySelector('.step-body');
       const prev = form.querySelector('[data-prev]');
@@ -3129,53 +3188,12 @@ h1:focus, h2:focus { outline: none; }
       const keep = (e) => { if (e.target.name) d[e.target.name] = e.target.value; };
       form.addEventListener('input', keep);
       form.addEventListener('change', keep);
-      form.querySelectorAll('[data-yn]').forEach((b) => {
-        b.onclick = () => { d[b.dataset.yn] = b.dataset.v; draw(`[data-yn="${b.dataset.yn}"][data-v="${b.dataset.v}"]`); };
-      });
-      form.querySelectorAll('[data-feat]').forEach((b) => {
-        b.onclick = () => {
-          const x = b.dataset.feat;
-          d.features = d.features.includes(x) ? d.features.filter((y) => y !== x) : d.features.concat(x);
-          if (!d.features.includes('מיזוג')) d.acType = '';
-          draw(`[data-feat="${CSS.escape(x)}"]`);
-        };
-      });
-      form.querySelectorAll('[data-park]').forEach((b) => { b.onclick = () => { d.parking = b.dataset.park; draw(`[data-park="${b.dataset.park}"]`); }; });
-      form.querySelectorAll('[data-ai]').forEach((b) => {
-        b.onclick = () => {
-          const name = b.dataset.ai;
-          b.classList.add('busy');
-          Dira.ui.toast(P.writing);
-          setTimeout(() => {
-            d[name] = name === 'title' ? L.autoTitle(d, data.types) : L.autoDesc(d, data.types);
-            draw('#p-' + name);
-            Dira.ui.toast(P.written, 'ok');
-          }, cfg.autowriteMs);
-        };
-      });
-      const ph = form.querySelector('[data-photos]');
-      if (ph) ph.onchange = () => {
-        const files = Array.from(ph.files).filter((f) => /^image\//.test(f.type)).slice(0, cfg.photosMax - photos.length);
-        let left = files.length;
-        files.forEach((file) => {
-          const rd = new FileReader();
-          rd.onload = () => {
-            if (/^data:image\//.test(rd.result)) photos.push(rd.result);
-            if (--left === 0) draw('[data-photos]');
-          };
-          rd.readAsDataURL(file);
-        });
-      };
-      const vd = form.querySelector('[data-video]');
-      if (vd) vd.onchange = () => { if (vd.files[0]) { videoName = vd.files[0].name; draw('[data-video]'); } };
-
       form.onsubmit = (ev) => {
         ev.preventDefault();
-        const step = L.STEPS[cur];
-        errs = L.validate(step, d, data);
+        errs = L.validate(L.STEPS[cur], d, data);
         const bad = Object.keys(errs);
         if (bad.length) {
-          draw('#p-' + bad[0]);
+          drawFields('#p-' + bad[0]);
           Dira.ui.toast(P.errToast(bad.length));
           return;
         }
@@ -3184,6 +3202,50 @@ h1:focus, h2:focus { outline: none; }
           { id: 'm' + Date.now(), today: new Date().toISOString().slice(0, 10), cfg, types: data.types });
         actions.publish(apt, photos, !!videoName);
       };
+    }
+
+    /* מה שנקשר מחדש אחרי כל ציור של השדות */
+    function bindFields() {
+      const box = stepsEl.querySelector('[data-fields]');
+      box.querySelectorAll('[data-yn]').forEach((b) => {
+        b.onclick = () => { d[b.dataset.yn] = b.dataset.v; drawFields(`[data-yn="${b.dataset.yn}"][data-v="${b.dataset.v}"]`); };
+      });
+      box.querySelectorAll('[data-feat]').forEach((b) => {
+        b.onclick = () => {
+          const x = b.dataset.feat;
+          d.features = d.features.includes(x) ? d.features.filter((y) => y !== x) : d.features.concat(x);
+          if (!d.features.includes('מיזוג')) d.acType = '';
+          drawFields(`[data-feat="${CSS.escape(x)}"]`);
+        };
+      });
+      box.querySelectorAll('[data-park]').forEach((b) => { b.onclick = () => { d.parking = b.dataset.park; drawFields(`[data-park="${b.dataset.park}"]`); }; });
+      box.querySelectorAll('[data-ai]').forEach((b) => {
+        b.onclick = () => {
+          const name = b.dataset.ai;
+          b.classList.add('busy');
+          Dira.ui.toast(P.writing);
+          setTimeout(() => {
+            d[name] = name === 'title' ? L.autoTitle(d, data.types) : L.autoDesc(d, data.types);
+            if (L.STEPS[cur] === 'details') drawFields('#p-' + name);
+            Dira.ui.toast(P.written, 'ok');
+          }, cfg.autowriteMs);
+        };
+      });
+      const ph = box.querySelector('[data-photos]');
+      if (ph) ph.onchange = () => {
+        const files = Array.from(ph.files).filter((f) => /^image\//.test(f.type)).slice(0, cfg.photosMax - photos.length);
+        let left = files.length;
+        files.forEach((file) => {
+          const rd = new FileReader();
+          rd.onload = () => {
+            if (/^data:image\//.test(rd.result)) photos.push(rd.result);
+            if (--left === 0) drawFields('[data-photos]');
+          };
+          rd.readAsDataURL(file);
+        });
+      };
+      const vd = box.querySelector('[data-video]');
+      if (vd) vd.onchange = () => { if (vd.files[0]) { videoName = vd.files[0].name; drawFields('[data-video]'); } };
     }
 
     draw();
@@ -3240,7 +3302,7 @@ h1:focus, h2:focus { outline: none; }
         const d = dec[s.id];
         const tag = d === 'ok' ? O.approved : d === 'no' ? O.rejected : f.ok ? O.fit : O.unfit;
         const cls = d === 'ok' || (!d && f.ok) ? 'fit' : 'unfit';
-        return `<li><button class="req${d ? ' decided' : ''}" type="button" data-sid="${s.id}" aria-label="${esc(O.rowAria(s, tag))}">
+        return `<li><button class="req${d ? ' decided' : ''}" type="button" data-sid="${esc(s.id)}" aria-label="${esc(O.rowAria(s, tag))}">
           <span class="req-name">${esc(s.first)}<small>${esc(O.arrived(s))}</small></span>
           <span class="fit-tag ${cls}">${esc(tag)}</span>
           <span class="req-meta">
@@ -3436,13 +3498,20 @@ h1:focus, h2:focus { outline: none; }
 
   Dira.app = ctx;
 
-  /* ——— יומן: פתיחה, ויציאה מהירה נמדדת רק מהפתיחה הראשונה להסתרה הראשונה ——— */
-  const openedAt = Date.now();
-  let exitLogged = false;
+  /*
+   * ——— יומן: יציאה מהירה נמדדת רק מהפתיחה הראשונה בביקור ועד ההסתרה הראשונה ———
+   * הביקור נשמר ב-sessionStorage, ולכן רענון או מעבר מסך לא פותחים מדידה חדשה
+   */
+  const VISIT = cfg.storageKey + '-visit';
+  let visit = {};
+  try { visit = JSON.parse(sessionStorage.getItem(VISIT) || '{}'); } catch (e) { /* בלי sessionStorage: מדידה לפי טעינה */ }
+  const keepVisit = () => { try { sessionStorage.setItem(VISIT, JSON.stringify(visit)); } catch (e) { /* כנ״ל */ } };
+  if (!visit.openedAt) { visit.openedAt = Date.now(); keepVisit(); }
   document.addEventListener('visibilitychange', () => {
-    if (document.visibilityState !== 'hidden' || exitLogged) return;
-    exitLogged = true;
-    ctx.store.setState('log', (s) => Dira.log.push(s, { type: 'exit', ms: Date.now() - openedAt }, Date.now()));
+    if (document.visibilityState !== 'hidden' || visit.exitLogged) return;
+    visit.exitLogged = true;
+    keepVisit();
+    ctx.store.setState('log', (s) => Dira.log.push(s, { type: 'exit', ms: Date.now() - visit.openedAt }, Date.now()));
   });
 
   ctx.store.setState('log', (s) => Dira.log.push(s, { type: 'open', side: /owner/.test(location.hash) ? 'owner' : 'seeker' }, Date.now()));
