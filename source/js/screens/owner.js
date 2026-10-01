@@ -66,7 +66,7 @@
       setTimeout(() => {
         if (router.current.route !== '/owner') return;   // יצאו מהמסך לפני שההתראה הספיקה לעלות
         actions.seenOwnerBanner();
-        Dira.ui.banner(O.banner(data.seekers.length), O.bannerText, null);
+        Dira.ui.banner(O.banner(data.seekers.length), O.bannerText, null, '/owner');
       }, cfg.ownerBannerDelayMs);
     }
     return { topics: { owner: draw } };

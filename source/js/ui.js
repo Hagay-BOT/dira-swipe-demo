@@ -35,7 +35,7 @@
   };
 
   /* ——— שכבות קבועות ——— */
-  let toastEl, bannerEl, toastTimer, bannerTimer, cfg, S;
+  let toastEl, bannerEl, toastTimer, bannerTimer, bannerScope, cfg, S;
 
   function init(opts) {
     cfg = opts.cfg; S = opts.S;
@@ -51,8 +51,12 @@
     toastTimer = setTimeout(() => toastEl.classList.remove('show'), ms || cfg.toastMs);
   }
 
-  /* התראה עליונה. הטקסט נקרא גם לקורא מסך דרך הטוסט, שהוא אזור ה-live היחיד */
-  function banner(title, text, onTap) {
+  /*
+   * התראה עליונה. הטקסט נקרא גם לקורא מסך דרך הטוסט, שהוא אזור ה-live היחיד.
+   * scope: נתיב שההתראה שייכת לו. יוצאים ממנו, וההתראה יורדת
+   */
+  function banner(title, text, onTap, scope) {
+    bannerScope = scope || null;
     bannerEl.innerHTML = `<span class="banner-sign" aria-hidden="true">${I.check}</span><span class="banner-text"><b>${esc(title)}</b><span>${esc(text)}</span></span>`;
     bannerEl.onclick = () => { hideBanner(); onTap && onTap(); };
     bannerEl.hidden = false;
@@ -64,6 +68,7 @@
     clearTimeout(bannerTimer);
     bannerTimer = setTimeout(hideBanner, cfg.bannerMs);
   }
+  function routeChanged(route) { if (bannerScope && route !== bannerScope) hideBanner(); }
   function hideBanner() {
     bannerEl.classList.remove('show');
     setTimeout(() => { if (!bannerEl.classList.contains('show')) bannerEl.hidden = true; }, cfg.bannerSlideMs);
@@ -137,5 +142,5 @@
   /* גלילה לסוף של רשימת הודעות */
   const scrollEnd = (node) => { node.scrollTop = node.scrollHeight; };
 
-  Dira.ui = { esc, el, I, init, toast, banner, openSheet, closeSheet, backBtn, bindBack, scrollEnd };
+  Dira.ui = { esc, el, I, init, toast, banner, routeChanged, openSheet, closeSheet, backBtn, bindBack, scrollEnd };
 })(globalThis.Dira = globalThis.Dira || {});

@@ -105,6 +105,7 @@
   let firstRoute = true;
   ctx.router = Dira.router.createRouter({
     onRoute(next, prev) {
+      ui.routeChanged(next.route);
       if (!prev || next.path !== prev.path) renderScreen(next, firstRoute);
       firstRoute = false;
       syncSheet(next);

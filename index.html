@@ -2081,7 +2081,7 @@ h1:focus, h2:focus { outline: none; box-shadow: none; }
   };
 
   /* ——— שכבות קבועות ——— */
-  let toastEl, bannerEl, toastTimer, bannerTimer, cfg, S;
+  let toastEl, bannerEl, toastTimer, bannerTimer, bannerScope, cfg, S;
 
   function init(opts) {
     cfg = opts.cfg; S = opts.S;
@@ -2097,8 +2097,12 @@ h1:focus, h2:focus { outline: none; box-shadow: none; }
     toastTimer = setTimeout(() => toastEl.classList.remove('show'), ms || cfg.toastMs);
   }
 
-  /* התראה עליונה. הטקסט נקרא גם לקורא מסך דרך הטוסט, שהוא אזור ה-live היחיד */
-  function banner(title, text, onTap) {
+  /*
+   * התראה עליונה. הטקסט נקרא גם לקורא מסך דרך הטוסט, שהוא אזור ה-live היחיד.
+   * scope: נתיב שההתראה שייכת לו. יוצאים ממנו, וההתראה יורדת
+   */
+  function banner(title, text, onTap, scope) {
+    bannerScope = scope || null;
     bannerEl.innerHTML = `<span class="banner-sign" aria-hidden="true">${I.check}</span><span class="banner-text"><b>${esc(title)}</b><span>${esc(text)}</span></span>`;
     bannerEl.onclick = () => { hideBanner(); onTap && onTap(); };
     bannerEl.hidden = false;
@@ -2110,6 +2114,7 @@ h1:focus, h2:focus { outline: none; box-shadow: none; }
     clearTimeout(bannerTimer);
     bannerTimer = setTimeout(hideBanner, cfg.bannerMs);
   }
+  function routeChanged(route) { if (bannerScope && route !== bannerScope) hideBanner(); }
   function hideBanner() {
     bannerEl.classList.remove('show');
     setTimeout(() => { if (!bannerEl.classList.contains('show')) bannerEl.hidden = true; }, cfg.bannerSlideMs);
@@ -2183,7 +2188,7 @@ h1:focus, h2:focus { outline: none; box-shadow: none; }
   /* גלילה לסוף של רשימת הודעות */
   const scrollEnd = (node) => { node.scrollTop = node.scrollHeight; };
 
-  Dira.ui = { esc, el, I, init, toast, banner, openSheet, closeSheet, backBtn, bindBack, scrollEnd };
+  Dira.ui = { esc, el, I, init, toast, banner, routeChanged, openSheet, closeSheet, backBtn, bindBack, scrollEnd };
 })(globalThis.Dira = globalThis.Dira || {});
 
 </script>
@@ -3418,7 +3423,7 @@ h1:focus, h2:focus { outline: none; box-shadow: none; }
       setTimeout(() => {
         if (router.current.route !== '/owner') return;   // יצאו מהמסך לפני שההתראה הספיקה לעלות
         actions.seenOwnerBanner();
-        Dira.ui.banner(O.banner(data.seekers.length), O.bannerText, null);
+        Dira.ui.banner(O.banner(data.seekers.length), O.bannerText, null, '/owner');
       }, cfg.ownerBannerDelayMs);
     }
     return { topics: { owner: draw } };
@@ -3579,6 +3584,7 @@ h1:focus, h2:focus { outline: none; box-shadow: none; }
   let firstRoute = true;
   ctx.router = Dira.router.createRouter({
     onRoute(next, prev) {
+      ui.routeChanged(next.route);
       if (!prev || next.path !== prev.path) renderScreen(next, firstRoute);
       firstRoute = false;
       syncSheet(next);
