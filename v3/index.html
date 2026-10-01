@@ -505,6 +505,60 @@ h1:focus, h2:focus { outline: none; box-shadow: none; }
 .tab svg { inline-size: 20px; block-size: 20px; }
 .tab[aria-current="page"] { background: #E4EDFF; color: #1F55D6; }
 
+/*
+ * ——— הכרעת חגי 1.10: שפת עיצוב 3 בכל המסכים ———
+ * משטחים לבנים מלאים עם טקסט כהה מעל הרקע המטושטש, מבטא כחול, גיליון לבן.
+ * המשתנים מוגדרים מחדש בתוך המשטח, כך שכל צבע משני שבתוכו נשאר קריא.
+ */
+.icon-btn, .chip, .opt, .yn button, .btn-ghost, .sheet-body, .composer, .chat-top, .fav, .req, .owner-apt, .empty, .reveal,
+.stat-row div, .ai-card, .search, .note, .step, .form, .log table, .page-top h1, .app-top .brand, .banner, .msg.them, .msg.bot,
+.typing, .match .hello, .cat .label, .toast {
+  --ink: #10202E; --ink-2: #5A6B7B; --like-soft: #13854F; --nope-soft: #C7363B; --star-soft: #1F55D6; --wait-soft: #93650A;
+  background: #FFFFFF; color: #10202E; border: 0; -webkit-backdrop-filter: none; backdrop-filter: none;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, .18); text-shadow: none;
+}
+.toast { background: #10202E; color: #FFFFFF; --ink: #FFFFFF; }
+.toast.ok { background: #13854F; }
+.chip.on, .chip[aria-pressed="true"], .opt[aria-pressed="true"], .yn button[aria-pressed="true"] { background: var(--accent); color: #FFFFFF; }
+.btn-primary { background: var(--accent); border: 0; box-shadow: 0 6px 16px rgba(46, 108, 246, .35); }
+.sheet-body { border-radius: 28px 28px 0 0; box-shadow: 0 -10px 40px rgba(0, 0, 0, .25); }
+.sheet-grip { background: #D5DDE6; }
+.sheet-x, .chat-top .icon-btn, .unsave { background: #F0F3F7; box-shadow: none; color: #10202E; }
+.sheet-actions { background: #FFFFFF; border-block-start: 1px solid #E3E9F0; }
+.kv { background: #F3F6FA; border: 0; }
+.kv dt { color: #5A6B7B; }
+.feat-list li { background: #E4EDFF; color: #1F55D6; border: 0; box-shadow: none; }
+.credit { color: #7A8A99; }
+.status.ok { background: #E3F4E8; color: #13854F; border: 0; }
+.status.wait { background: #FFF4DB; color: #93650A; border: 0; }
+.field input, .field select, .field textarea, .composer input { background: #F3F6FA; border: 1px solid #D5DDE6; color: #10202E; }
+.field input:focus, .field select:focus, .field textarea:focus, .composer input:focus { background: #FFFFFF; border-color: var(--accent); }
+.field.bad input, .field.bad select { background: #FFF0F0; border: 1.5px solid #E58C8F; }
+.sheet ::placeholder, .step ::placeholder, .form ::placeholder, .composer ::placeholder { color: #7A8A99; }
+.search input { color: #10202E; }
+.range { accent-color: var(--accent); }
+.anon > div { background: #F3F6FA; border: 0; }
+.msg.me { background: var(--accent); border: 0; box-shadow: 0 6px 16px rgba(46, 108, 246, .3); text-shadow: none; }
+.typing i { background: #5A6B7B; }
+.step { box-shadow: 0 4px 14px rgba(0, 0, 0, .15); }
+.step:not(.on):not(.done) { background: rgba(255, 255, 255, .78); }
+.step-num { color: #10202E; border: 0; background: #E3E9F0; }
+.step.on .step-num { background: var(--accent); color: #FFFFFF; }
+.step.done .step-num { background: #13854F; color: #FFFFFF; border: 0; }
+.ai-btn { background: #E4EDFF; color: var(--accent); border: 0; box-shadow: none; }
+.avatar { background: var(--accent); border: 0; }
+.pill-demo { background: #E4EDFF; color: #1F55D6; }
+.fit { background: #E3F4E8; color: #13854F; border: 0; }
+.unfit { background: #F0F3F7; color: #5A6B7B; border: 0; }
+.state { text-shadow: none; }
+.state.ok { background: #E3F4E8; color: #13854F; border: 0; }
+.state.wait { background: #FFF4DB; color: #93650A; border: 0; }
+.state.star { background: #E4EDFF; color: #1F55D6; border: 0; }
+.banner-sign, .empty .big { background: #E4EDFF; color: var(--accent); border: 0; }
+.match-art { border-color: #FFFFFF; }
+.cat .badge2 { background: #FFFFFF; border: 0; }
+.log td, .log th { border-block-end-color: #E3E9F0; }
+
 </style>
 </head>
 <body>
