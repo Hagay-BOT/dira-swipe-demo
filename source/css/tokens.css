@@ -57,8 +57,8 @@
   --r-pill: 999px;
 
   --tap: 44px;
-  --tabbar-room: 98px;                    /* כמה מקום להשאיר מעל התפריט הצף */
-  --rb-offset: 90px;                      /* מרחק ✕ ו-♥ ממרכז ★ */
+  --tabbar-room: 72px;                    /* כמה מקום להשאיר מעל התפריט הצף */
+  --rb-offset: 70px;                      /* מרחק ✕ ו-♥ ממרכז ★ */
   --app-w: 440px;
   --swipe-ms: 300ms;                      /* נדרס מ-config.swipeMs בהפעלה */
   --snap-ms: 200ms;
