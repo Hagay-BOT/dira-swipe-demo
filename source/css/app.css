@@ -375,3 +375,43 @@ h1:focus, h2:focus { outline: none; box-shadow: none; }
   .match h1 { font-size: 21px; }
   .reveal { padding: 12px 14px; gap: 8px; font-size: 13.5px; }
 }
+
+/*
+ * ——— הכרעת חגי 1.10: עיצוב 3 «תג מחיר» עם הכפתורים של עיצוב 1 «שקט» ———
+ * מחיר בתג בצבע המותג למעלה, שתי שורות מידע למטה, כפתורי פעולה כהים עם מסגרת לבנה, תפריט וכותרת לבנים מלאים
+ */
+.deck-screen .app-top { padding-block-start: 18px; }
+.deck-screen .app-top .brand { background: none; border: 0; box-shadow: none; -webkit-backdrop-filter: none; backdrop-filter: none; padding: 0; block-size: 44px; font-size: 19px; font-weight: 800; text-shadow: 0 1px 4px rgba(0, 0, 0, .55); }
+.deck-screen .app-top .icon-btn { inline-size: 44px; block-size: 44px; background: #FFFFFF; color: #10202E; border: 0; -webkit-backdrop-filter: none; backdrop-filter: none; box-shadow: 0 4px 14px rgba(0, 0, 0, .25); }
+.card::before { content: ""; position: absolute; inset-inline: 0; inset-block-start: 0; block-size: 120px; z-index: 1; background: linear-gradient(180deg, rgba(7, 14, 22, .5), rgba(7, 14, 22, 0)); pointer-events: none; }
+.card::after { block-size: 29%; background: linear-gradient(180deg, rgba(7, 14, 22, 0) 0%, rgba(7, 14, 22, .62) 30%, rgba(7, 14, 22, .78) 60%, rgba(7, 14, 22, .86) 100%); }
+.bars { inset-block-start: 8px; inset-inline: 14px; gap: 4px; }
+.bar { block-size: 3px; background: rgba(255, 255, 255, .5); }
+.filter-row:not([hidden]) ~ .deck .bars { inset-block-start: 8px; }
+.price-tag { position: absolute; z-index: 2; inset-inline-start: 14px; inset-block-start: 74px; block-size: 32px; padding-inline: 14px; border-radius: 16px; display: flex; align-items: center; gap: 6px; color: #FFFFFF; background: var(--accent); box-shadow: 0 4px 12px rgba(0, 0, 0, .25); text-shadow: none; }
+.price-tag .price { font-size: 18px; font-weight: 800; }
+.price-tag span:last-child { font-size: 11.5px; font-weight: 500; }
+.card-tags { inset-block-start: 77px; inset-inline: 14px; justify-content: flex-end; }
+.filter-row:not([hidden]) ~ .deck .price-tag { inset-block-start: 116px; }
+.filter-row:not([hidden]) ~ .deck .card-tags { inset-block-start: 119px; }
+.card-tags .tag { font-size: 11.5px; padding: 0 11px; line-height: 26px; border-radius: 13px; color: #10202E; background: rgba(255, 255, 255, .94); border: 0; -webkit-backdrop-filter: none; backdrop-filter: none; box-shadow: none; text-shadow: none; }
+.card-tags .tag-mine { background: var(--like); color: #FFFFFF; }
+.card-tags .tag-star { background: var(--accent); color: #FFFFFF; }
+.card-tags .tag-similar { background: #10202E; color: #FFFFFF; }
+.info { inset-inline: 18px; inset-block-end: 128px; gap: 0; text-shadow: 0 1px 3px rgba(0, 0, 0, .6); }
+.info .title { font-size: 17px; line-height: 24px; }
+.meta-row { display: flex; align-items: center; justify-content: space-between; gap: var(--sp-2); min-block-size: 20px; }
+.meta-row .loc { min-inline-size: 0; font-size: 12.5px; color: #EEF3F7; }
+.meta-row .loc span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.meta-row .specs { flex: none; gap: 11px; font-size: 13px; }
+.meta-row .specs svg { inline-size: 16px; block-size: 16px; }
+.actions .rb { inline-size: 52px; block-size: 52px; color: #FFFFFF; background: rgba(7, 12, 18, .5); border: 1.5px solid rgba(255, 255, 255, .7); -webkit-backdrop-filter: none; backdrop-filter: none; box-shadow: none; }
+.actions .rb svg { inline-size: 24px; block-size: 24px; }
+.actions .rb-star { inline-size: 46px; block-size: 46px; color: #FFC04D; }
+.actions .rb-star svg { inline-size: 21px; block-size: 21px; }
+.actions .rb-like { color: #FFFFFF; background: #E63B5C; border-color: rgba(255, 255, 255, .85); box-shadow: 0 8px 20px rgba(230, 59, 92, .38); }
+.actions { inset-block-end: 68px; }
+.tabbar { inset-inline: 14px; background: #FFFFFF; border: 0; -webkit-backdrop-filter: none; backdrop-filter: none; box-shadow: 0 8px 22px rgba(0, 0, 0, .28); gap: 2px; padding-inline: 4px; }
+.tab { color: #3A4A59; text-shadow: none; font-size: 12px; }
+.tab svg { inline-size: 20px; block-size: 20px; }
+.tab[aria-current="page"] { background: #E4EDFF; color: #1F55D6; }

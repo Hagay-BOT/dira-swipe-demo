@@ -48,6 +48,7 @@
         <article class="card${under ? ' under' : ''}" data-id="${esc(a.id)}" ${under ? 'aria-hidden="true"' : `tabindex="0" aria-roledescription="${esc(S.card.role)}" aria-label="${esc(S.card.aria(a))}"`}>
           ${Dira.parts.photo(a, 0)}
           <div class="bars" aria-hidden="true">${Array.from({ length: n }, (_, i) => `<i class="bar${i === 0 ? ' on' : ''}"></i>`).join('')}</div>
+          <div class="price-tag"><span class="price">${esc(S.fmt.nis(a.rent))}</span><span>${esc(S.card.perMonth)}</span></div>
           <div class="card-tags">
             ${a.mine ? `<span class="tag tag-mine">${esc(S.card.mine)}</span>` : ''}
             ${a.example ? `<span class="tag">${esc(S.card.example)}</span>` : ''}
@@ -59,8 +60,7 @@
           <div class="stamp stamp-star" aria-hidden="true">${esc(S.card.stampStar)}</div>
           <div class="info">
             <h2 class="title">${esc(a.title)}</h2>
-            <p class="loc">${I.pin}${esc(S.fmt.place(a) || a.city)}</p>
-            <div class="specs-row"><span class="price">${esc(S.fmt.nis(a.rent))}</span>${Dira.parts.specs(a, S)}</div>
+            <div class="meta-row"><p class="loc">${I.pin}<span>${esc(S.fmt.place(a) || a.city)}</span></p>${Dira.parts.specs(a, S)}</div>
           </div>
           <span class="sr-only" data-photo-label>${esc(S.card.photo(1, n))}</span>
         </article>`;
