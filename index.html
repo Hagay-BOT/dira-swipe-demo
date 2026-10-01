@@ -194,7 +194,7 @@ h1:focus, h2:focus { outline: none; box-shadow: none; }
 .card.fly { transition: transform var(--swipe-ms) cubic-bezier(.3, .6, .4, 1), opacity var(--swipe-ms); border-radius: 34px; }
 .card.snap { transition: transform var(--snap-ms) ease; }
 .card:focus-visible { outline-offset: -6px; }
-.card::after { content: ""; position: absolute; inset-inline: 0; inset-block-end: 0; block-size: 55%; background: linear-gradient(to top, rgba(10, 22, 34, .55), rgba(10, 22, 34, 0)); pointer-events: none; }
+.card::after { content: ""; position: absolute; inset-inline: 0; inset-block-end: 0; block-size: 42%; background: linear-gradient(to top, rgba(10, 22, 34, .6), rgba(10, 22, 34, 0)); pointer-events: none; }
 .photo, .photo svg, .photo img { position: absolute; inset: 0; inline-size: 100%; block-size: 100%; object-fit: cover; display: block; }
 .bars { position: absolute; inset-block-start: 122px; inset-inline: 28px; display: flex; gap: 5px; z-index: 2; }
 .filter-row:not([hidden]) ~ .deck .bars { inset-block-start: 116px; }
@@ -205,16 +205,19 @@ h1:focus, h2:focus { outline: none; box-shadow: none; }
 .tag-mine { background: rgba(52, 199, 123, .45); }
 .tag-star { background: rgba(46, 108, 246, .5); }
 .tag-similar { background: rgba(14, 42, 68, .45); }
-.info { position: absolute; z-index: 3; inset-inline: 16px; inset-block-end: 180px; padding: 20px 20px 18px; border-radius: var(--r-xl); display: grid; gap: 6px; cursor: pointer; background: rgba(255, 255, 255, .18); border: 1px solid var(--edge); -webkit-backdrop-filter: var(--blur); backdrop-filter: var(--blur); box-shadow: var(--shine), 0 18px 40px rgba(0, 0, 0, .25); text-shadow: var(--text-lift); }
-.info .title { font-size: 22px; font-weight: 700; line-height: 1.25; text-wrap: balance; }
-.loc { display: flex; align-items: center; gap: var(--sp-1); font-size: 14px; color: #EEF4FA; }
+.info { position: absolute; z-index: 3; inset-inline: 14px; inset-block-end: 170px; padding: 12px 16px 12px; border-radius: 24px; display: grid; gap: 2px; cursor: pointer; background: linear-gradient(to top, rgba(10, 22, 34, .5), rgba(10, 22, 34, .18)); border: 1px solid rgba(255, 255, 255, .35); -webkit-backdrop-filter: blur(6px) saturate(1.3); backdrop-filter: blur(6px) saturate(1.3); box-shadow: inset 0 1px 1px rgba(255, 255, 255, .55), 0 10px 28px rgba(0, 0, 0, .22); text-shadow: 0 1px 3px rgba(0, 0, 0, .55); }
+/* התמונה מוכרת את הדירה: המידע בשורה אחת לכותרת, קטן, צמוד לכפתורים, והזכוכית שקופה כמעט לגמרי */
+.info .title { font-size: 18px; font-weight: 700; line-height: 1.3; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.loc { display: flex; align-items: center; gap: var(--sp-1); font-size: 13px; color: #EEF4FA; }
 .loc svg { inline-size: 14px; block-size: 14px; flex: none; }
-.specs-row { display: flex; align-items: center; justify-content: space-between; gap: var(--sp-2); margin-block-start: 4px; }
+.specs-row { display: flex; align-items: center; justify-content: space-between; gap: var(--sp-2); margin-block-start: 2px; }
+.info .price { font-size: 22px; }
+.info .specs { font-size: 13px; }
 .price { font-size: var(--fs-price); font-weight: 700; font-variant-numeric: tabular-nums; white-space: nowrap; }
 .specs { display: flex; gap: var(--sp-3); font-size: 14px; font-weight: 600; font-variant-numeric: tabular-nums; }
 .specs > span { display: inline-flex; align-items: center; gap: var(--sp-1); white-space: nowrap; }
 .specs svg { inline-size: 16px; block-size: 16px; }
-.info .desc { font-size: var(--fs-s); color: #EEF4FA; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.info .desc { font-size: 12.5px; line-height: 1.4; color: #EEF4FA; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
 .stamp { position: absolute; inset-block-start: 200px; z-index: 4; opacity: 0; pointer-events: none; font-size: 26px; font-weight: 700; padding: 6px 18px; border-radius: 22px; border: 2px solid; background: rgba(255, 255, 255, .88); text-shadow: none; }
 .stamp-like { inset-inline-end: 26px; color: var(--like); transform: rotate(-10deg); }
 .stamp-nope { inset-inline-start: 26px; color: var(--nope); transform: rotate(10deg); }
@@ -223,14 +226,14 @@ h1:focus, h2:focus { outline: none; box-shadow: none; }
  * הכרעה 5: ✕ משמאל, ★ באמצע, ♥ מימין. המיקום קבוע במפורש ולא תלוי ב-direction:
  * שלושת הכפתורים באותו תא ממורכז, וכל אחד מוזז על ציר x הפיזי. סדר ה-DOM ♥ ★ ✕ שומר על סדר קריאה מימין לשמאל.
  */
-.actions { position: absolute; z-index: 5; inset-inline: 0; inset-block-end: 102px; display: grid; place-items: center; }
+.actions { position: absolute; z-index: 5; inset-inline: 0; inset-block-end: 98px; display: grid; place-items: center; }
 .actions > .rb { grid-area: 1 / 1; }
 .rb-like { translate: var(--rb-offset) 0; }
 .rb-nope { translate: calc(-1 * var(--rb-offset)) 0; }
-.rb { display: grid; place-items: center; inline-size: 64px; block-size: 64px; border-radius: 50%; padding: 0; background: var(--drop); border: 1px solid rgba(255, 255, 255, .8); -webkit-backdrop-filter: blur(10px) saturate(1.8); backdrop-filter: blur(10px) saturate(1.8); box-shadow: inset 0 -6px 14px rgba(255, 255, 255, .4), 0 12px 26px rgba(0, 0, 0, .22); transition: transform .12s; }
+.rb { display: grid; place-items: center; inline-size: 60px; block-size: 60px; border-radius: 50%; padding: 0; background: var(--drop); border: 1px solid rgba(255, 255, 255, .8); -webkit-backdrop-filter: blur(10px) saturate(1.8); backdrop-filter: blur(10px) saturate(1.8); box-shadow: inset 0 -6px 14px rgba(255, 255, 255, .4), 0 12px 26px rgba(0, 0, 0, .22); transition: transform .12s; }
 .rb svg { inline-size: 28px; block-size: 28px; }
 .rb-nope { color: var(--nope); }
-.rb-star { color: var(--star); inline-size: 56px; block-size: 56px; }
+.rb-star { color: var(--star); inline-size: 52px; block-size: 52px; }
 .rb-star svg { inline-size: 24px; block-size: 24px; }
 .rb-like { color: var(--like); }
 .rb:active { transform: scale(.92); }
