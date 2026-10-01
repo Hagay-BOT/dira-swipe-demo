@@ -61,7 +61,6 @@
             <h2 class="title">${esc(a.title)}</h2>
             <p class="loc">${I.pin}${esc(S.fmt.place(a) || a.city)}</p>
             <div class="specs-row"><span class="price">${esc(S.fmt.nis(a.rent))}</span>${Dira.parts.specs(a, S)}</div>
-            <p class="desc">${esc(a.desc)}</p>
           </div>
           <span class="sr-only" data-photo-label>${esc(S.card.photo(1, n))}</span>
         </article>`;

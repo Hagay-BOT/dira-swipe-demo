@@ -217,7 +217,6 @@ h1:focus, h2:focus { outline: none; box-shadow: none; }
 .specs { display: flex; gap: var(--sp-3); font-size: 14px; font-weight: 600; font-variant-numeric: tabular-nums; }
 .specs > span { display: inline-flex; align-items: center; gap: var(--sp-1); white-space: nowrap; }
 .specs svg { inline-size: 16px; block-size: 16px; }
-.info .desc { font-size: 12px; line-height: 1.35; color: #EEF4FA; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
 .stamp { position: absolute; inset-block-start: 200px; z-index: 4; opacity: 0; pointer-events: none; font-size: 26px; font-weight: 700; padding: 6px 18px; border-radius: 22px; border: 2px solid; background: rgba(255, 255, 255, .88); text-shadow: none; }
 .stamp-like { inset-inline-end: 26px; color: var(--like); transform: rotate(-10deg); }
 .stamp-nope { inset-inline-start: 26px; color: var(--nope); transform: rotate(10deg); }
@@ -2698,7 +2697,6 @@ h1:focus, h2:focus { outline: none; box-shadow: none; }
             <h2 class="title">${esc(a.title)}</h2>
             <p class="loc">${I.pin}${esc(S.fmt.place(a) || a.city)}</p>
             <div class="specs-row"><span class="price">${esc(S.fmt.nis(a.rent))}</span>${Dira.parts.specs(a, S)}</div>
-            <p class="desc">${esc(a.desc)}</p>
           </div>
           <span class="sr-only" data-photo-label>${esc(S.card.photo(1, n))}</span>
         </article>`;
