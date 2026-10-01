@@ -453,6 +453,15 @@ h1:focus, h2:focus { outline: none; box-shadow: none; }
   *, *::before, *::after { animation: none !important; transition: none !important; }
 }
 
+/* מסכים נמוכים (טלפון קטן): מסך ההתאמה נכנס בלי גלילה */
+@media (max-height: 700px) {
+  .match { padding-block: 24px 18px; gap: 12px; }
+  .match-center { gap: 10px; }
+  .match-art { inline-size: 120px; block-size: 120px; border-width: 6px; }
+  .match h1 { font-size: 21px; }
+  .reveal { padding: 12px 14px; gap: 8px; font-size: 13.5px; }
+}
+
 </style>
 </head>
 <body>
@@ -2835,7 +2844,7 @@ h1:focus, h2:focus { outline: none; box-shadow: none; }
 
     drawChips();
     drawDeck();
-    if (!store.get().flags.hint) setTimeout(() => { actions.seenHint(); Dira.ui.toast(S.deck.hint); }, cfg.hintDelayMs);
+    if (!store.get().flags.hint) setTimeout(() => { if (!root.contains(deckEl)) return; actions.seenHint(); Dira.ui.toast(S.deck.hint); }, cfg.hintDelayMs);
 
     return { topics: { deck: drawDeck, filter: () => { drawChips(); drawDeck(); } } };
   };
@@ -3303,6 +3312,7 @@ h1:focus, h2:focus { outline: none; box-shadow: none; }
           b.classList.add('busy');
           Dira.ui.toast(P.writing);
           setTimeout(() => {
+            if (!stepsEl.isConnected) return;   // יצאו מהמסך בינתיים
             d[name] = name === 'title' ? L.autoTitle(d, data.types) : L.autoDesc(d, data.types);
             if (L.STEPS[cur] === 'details') drawFields('#p-' + name);
             Dira.ui.toast(P.written, 'ok');
@@ -3398,6 +3408,7 @@ h1:focus, h2:focus { outline: none; box-shadow: none; }
     draw();
     if (!store.get().flags.ownerBanner) {
       setTimeout(() => {
+        if (router.current.route !== '/owner') return;   // יצאו מהמסך לפני שההתראה הספיקה לעלות
         actions.seenOwnerBanner();
         Dira.ui.banner(O.banner(data.seekers.length), O.bannerText, null);
       }, cfg.ownerBannerDelayMs);

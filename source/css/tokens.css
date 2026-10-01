@@ -1,0 +1,66 @@
+/*
+ * «זכוכית נוזלית» (הכרעת חגי 1.10.2026, כיוון 4): תמונה מלאה, פקדים צפים מזכוכית עבה, טקסט לבן.
+ * כל צבע וכל זכוכית מוגדרים כאן. מראה אחד, בלי מצב כהה נפרד: הזכוכית יושבת תמיד על תמונה.
+ */
+:root {
+  --ground: #1B3448;                      /* מתחת לתמונות, עד שהן נטענות */
+  --tint: rgba(10, 24, 38, .32);          /* כהות מעל הרקע המטושטש, לקריאות */
+  --ink: #FFFFFF;
+  --ink-2: #DCE6F0;
+  --ink-dark: #0E2A44;                    /* טקסט על זכוכית לבנה מלאה */
+  --accent: #2E6CF6;
+  --accent-2: #568FFF;
+  --like: #23A866;
+  --like-soft: #8EF5BE;
+  --star: #2E6CF6;
+  --star-soft: #A9C6FF;
+  --nope: #F0473F;
+  --nope-soft: #FFB4B4;
+  --wait-soft: #FFD99A;
+
+  /* זכוכית */
+  --glass: rgba(255, 255, 255, .2);
+  --glass-strong: rgba(255, 255, 255, .28);
+  --glass-dim: rgba(255, 255, 255, .12);
+  --glass-solid: rgba(255, 255, 255, .88);
+  --glass-dark: rgba(14, 28, 44, .86);
+  --edge: rgba(255, 255, 255, .6);
+  --edge-dim: rgba(255, 255, 255, .38);
+  --blur: blur(14px) saturate(1.9);
+  --blur-heavy: blur(26px) saturate(1.8);
+  --shine: inset 0 1.5px 1px rgba(255, 255, 255, .95), inset 0 -12px 26px rgba(255, 255, 255, .14);
+  --lift: 0 14px 32px rgba(0, 0, 0, .22);
+  --drop: radial-gradient(circle at 32% 26%, rgba(255, 255, 255, .95), rgba(255, 255, 255, .55) 42%, rgba(255, 255, 255, .35));
+  --primary-fill: linear-gradient(180deg, rgba(86, 144, 255, .95), rgba(46, 108, 246, .95));
+  --primary-glow: inset 0 1.5px 1px rgba(255, 255, 255, .7), inset 0 -8px 18px rgba(0, 0, 60, .2), 0 12px 26px rgba(46, 108, 246, .35);
+  --text-lift: 0 1px 2px rgba(0, 0, 0, .35);
+
+  --font: "IBM Plex Sans Hebrew", "Segoe UI", Arial, sans-serif;
+  --fs-xs: 12px;
+  --fs-s: 13.5px;
+  --fs-m: 15.5px;
+  --fs-l: 18px;
+  --fs-xl: 21px;
+  --fs-price: 28px;
+
+  --sp-1: 4px;
+  --sp-2: 8px;
+  --sp-3: 12px;
+  --sp-4: 16px;
+  --sp-5: 20px;
+  --sp-6: 24px;
+
+  --r-s: 14px;
+  --r-m: 20px;
+  --r-l: 26px;
+  --r-xl: 34px;
+  --r-pill: 999px;
+
+  --tap: 44px;
+  --tabbar-room: 98px;                    /* כמה מקום להשאיר מעל התפריט הצף */
+  --rb-offset: 90px;                      /* מרחק ✕ ו-♥ ממרכז ★ */
+  --app-w: 440px;
+  --swipe-ms: 300ms;                      /* נדרס מ-config.swipeMs בהפעלה */
+  --snap-ms: 200ms;
+  color-scheme: dark;
+}
