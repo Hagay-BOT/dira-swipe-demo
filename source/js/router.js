@@ -47,9 +47,18 @@
 
     const depth = () => (history.state && typeof history.state.i === 'number' ? history.state.i : 0);
 
+    /* מסגרת שחוסמת ניהול היסטוריה (למשל תצוגה מוטמעת): נופלים לקישור hash רגיל, והדמו ממשיך לעבוד */
+    function setUrl(url, state, replace) {
+      try {
+        if (replace) history.replaceState(state, '', url); else history.pushState(state, '', url);
+      } catch (e) {
+        if (replace) location.replace(url); else location.hash = url;
+      }
+    }
+
     function handle() {
       /* קישור ישן (#owner, #log) או כתובת ריקה: מיישרים את הכתובת בלי להוסיף צעד להיסטוריה */
-      if (LEGACY[location.hash] !== undefined) history.replaceState({ i: depth() }, '', '#' + LEGACY[location.hash]);
+      if (LEGACY[location.hash] !== undefined) setUrl('#' + LEGACY[location.hash], { i: depth() }, true);
       const next = parse(location.hash);
       const prev = current;
       current = next;
@@ -63,8 +72,7 @@
       o = o || {};
       const url = hashOf(path, o.sheet);
       if (url === location.hash && !o.replace) return handle();
-      if (o.replace) history.replaceState({ i: depth() }, '', url);
-      else history.pushState({ i: depth() + 1 }, '', url);
+      setUrl(url, { i: o.replace ? depth() : depth() + 1 }, !!o.replace);
       handle();
     }
 
@@ -78,7 +86,7 @@
     function closeSheet() { if (current && current.sheet) back(current.path); }
 
     function start() {
-      if (!history.state || typeof history.state.i !== 'number') history.replaceState({ i: 0 }, '', location.hash || '#/deck');
+      if (!history.state || typeof history.state.i !== 'number') setUrl(location.hash || '#/deck', { i: 0 }, true);
       /* שניהם יורים על קישור או הקלדה בשורת הכתובת. onRoute מתעלם כשלא השתנה כלום */
       window.addEventListener('popstate', handle);
       window.addEventListener('hashchange', handle);
