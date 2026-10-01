@@ -440,7 +440,7 @@ h1:focus, h2:focus { outline: none; box-shadow: none; }
 .kv dt { color: #5A6B7B; }
 .feat-list li { background: #E4EDFF; color: #1F55D6; border: 0; box-shadow: none; }
 .credit { color: #7A8A99; }
-.status.ok { background: #E3F4E8; color: #13854F; border: 0; }
+.status.ok { background: #E3F4E8; color: #0E6A3E; border: 0; }
 .status.wait { background: #FFF4DB; color: #93650A; border: 0; }
 .field input, .field select, .field textarea, .composer input { background: #F3F6FA; border: 1px solid #D5DDE6; color: #10202E; }
 .field input:focus, .field select:focus, .field textarea:focus, .composer input:focus { background: #FFFFFF; border-color: var(--accent); }
@@ -459,10 +459,10 @@ h1:focus, h2:focus { outline: none; box-shadow: none; }
 .ai-btn { background: #E4EDFF; color: var(--accent); border: 0; box-shadow: none; }
 .avatar { background: var(--accent); border: 0; }
 .pill-demo { background: #E4EDFF; color: #1F55D6; }
-.fit { background: #E3F4E8; color: #13854F; border: 0; }
+.fit { background: #E3F4E8; color: #0E6A3E; border: 0; }
 .unfit { background: #F0F3F7; color: #5A6B7B; border: 0; }
 .state { text-shadow: none; }
-.state.ok { background: #E3F4E8; color: #13854F; border: 0; }
+.state.ok { background: #E3F4E8; color: #0E6A3E; border: 0; }
 .state.wait { background: #FFF4DB; color: #93650A; border: 0; }
 .state.star { background: #E4EDFF; color: #1F55D6; border: 0; }
 .banner-sign, .empty .big { background: #E4EDFF; color: var(--accent); border: 0; }
