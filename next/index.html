@@ -712,6 +712,11 @@ h1:focus, h2:focus { outline: none; box-shadow: none; }
 .fit-ring i { inline-size: 56px; block-size: 56px; }
 .fit-ring b { inline-size: 46px; block-size: 46px; display: grid; place-content: center; text-align: center; line-height: 1; font-size: 14px; }
 .fit-ring small { display: block; font-size: 9.5px; font-weight: 600; color: var(--ink-2); margin-block-start: 2px; }
+/* שורת המיקום והמטרים נכנסת לרוחב הלוח: המיקום מתקצר בשלוש נקודות, המטרים נשארים שלמים */
+.info-text { overflow: visible; grid-template-columns: minmax(0, 1fr); }
+.info-text > * { min-inline-size: 0; }
+.meta-row .loc { flex: 1 1 auto; overflow: hidden; }
+.meta-row .loc span { min-inline-size: 0; }
 
 </style>
 </head>
