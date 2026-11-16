@@ -689,6 +689,25 @@ h1:focus, h2:focus { outline: none; box-shadow: none; }
 .cat .label small { color: var(--ink-2); }
 .composer button, .avatar, .msg.me { border: 0; }
 
+/* ——— תיקונים מהסרטון של חגי, 16.11 (אייפון) ——— */
+/* ההודעה הקופצת קיבלה רקע לבן עם טקסט לבן, ונראתה כפס לבן ריק */
+.toast { --ink: #FFFFFF; background: #14181F; color: #FFFFFF; }
+.toast.ok { background: #13854F; }
+/* באייפון התפריט התחתון גבוה יותר בגובה פס הבית, והוא הסתיר את חצי הכפתורים */
+:root { --tabbar-room: calc(56px + env(safe-area-inset-bottom)); }
+/* כשהמקלדת פתוחה התפריט התחתון לא צף מעליה */
+#app:has(.composer input:focus, .field input:focus, .field textarea:focus) .tabbar { display: none; }
+#app:has(.composer input:focus, .field input:focus, .field textarea:focus) .screen { padding-block-end: 0; }
+/* מסך ההתאמה: רקע בהיר, ותוויות כהות וקריאות במקום תכלת */
+.match::before { background: none; }
+.match h1 { text-shadow: none; color: var(--ink); }
+.match .sub { color: var(--ink-2); }
+.reveal dt { color: var(--ink-2); }
+.match .hello svg { color: var(--fit); }
+.match-art { box-shadow: 0 12px 30px rgba(20, 24, 31, .2); }
+/* כפתור הסינון לא נשבר לשתי שורות */
+.sheet-foot .btn-primary { white-space: nowrap; font-size: 14.5px; padding-inline: 10px; }
+
 </style>
 </head>
 <body>
