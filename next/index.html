@@ -707,6 +707,11 @@ h1:focus, h2:focus { outline: none; box-shadow: none; }
 .match-art { box-shadow: 0 12px 30px rgba(20, 24, 31, .2); }
 /* כפתור הסינון לא נשבר לשתי שורות */
 .sheet-foot .btn-primary { white-space: nowrap; font-size: 14.5px; padding-inline: 10px; }
+/* טבעת ההתאמה: המילה «התאמה» בתוך הטבעת, כדי שלא תעלה על שורת המטרים. וטקסט הלוח לא גולש אל הטבעת */
+.info-text { overflow: hidden; }
+.fit-ring i { inline-size: 56px; block-size: 56px; }
+.fit-ring b { inline-size: 46px; block-size: 46px; display: grid; place-content: center; text-align: center; line-height: 1; font-size: 14px; }
+.fit-ring small { display: block; font-size: 9.5px; font-weight: 600; color: var(--ink-2); margin-block-start: 2px; }
 
 </style>
 </head>
@@ -2960,7 +2965,7 @@ h1:focus, h2:focus { outline: none; box-shadow: none; }
               <h2 class="title">${esc(a.title)}</h2>
               <div class="meta-row"><p class="loc">${I.pin}<span>${esc(S.fmt.place(a) || a.city)}</span></p>${Dira.parts.specs(a, S)}</div>
             </div>
-            ${fit ? `<div class="fit-ring" role="img" aria-label="${esc(S.card.fitAria(fit))}" style="--pct:${fit}"><i><b>${fit}%</b></i><span aria-hidden="true">${esc(S.card.fit)}</span></div>` : ''}
+            ${fit ? `<div class="fit-ring" role="img" aria-label="${esc(S.card.fitAria(fit))}" style="--pct:${fit}"><i><b>${fit}%<small aria-hidden="true">${esc(S.card.fit)}</small></b></i></div>` : ''}
           </div>
           <span class="sr-only" data-photo-label>${esc(S.card.photo(1, n))}</span>
         </article>`;
