@@ -9,8 +9,8 @@
 <meta property="og:title" content="דירה בהחלקה · דמו">
 <meta property="og:description" content="מחליקים על דירות להשכרה. שומרים, מסמנים כוכב, ושולחים פנייה לבעל הדירה.">
 <meta property="og:type" content="website">
-<meta property="og:url" content="https://hagay-bot.github.io/dira-swipe-demo/v3/">
-<meta property="og:image" content="https://hagay-bot.github.io/dira-swipe-demo/v3/og.png">
+<meta property="og:url" content="https://hagay-bot.github.io/dira-swipe-demo/">
+<meta property="og:image" content="https://hagay-bot.github.io/dira-swipe-demo/og.png">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
 <meta name="twitter:card" content="summary_large_image">
@@ -717,6 +717,20 @@ h1:focus, h2:focus { outline: none; box-shadow: none; }
 .info-text > * { min-inline-size: 0; }
 .meta-row .loc { flex: 1 1 auto; overflow: hidden; }
 .meta-row .loc span { min-inline-size: 0; }
+
+/* ——— סרטון פתיחה (19.11). הרקע בצבע הסרטון, כדי שהשוליים לא ייראו כמסגרת ——— */
+.intro { position: fixed; inset: 0; z-index: 1000; background: #F3E9EA; display: grid; place-items: center; transition: opacity .45s ease; }
+.intro.out { opacity: 0; pointer-events: none; }
+.intro video { inline-size: 100%; block-size: 100%; object-fit: contain; }
+.intro-bar { position: absolute; inset-inline: 16px; inset-block-start: calc(14px + env(safe-area-inset-top)); display: flex; justify-content: space-between; }
+.intro-bar button { font: inherit; font-size: 15px; font-weight: 700; min-block-size: 44px; padding: 0 18px; border-radius: 999px; border: 0;
+  background: rgba(20, 24, 31, .78); color: #FFFFFF; cursor: pointer; }
+.intro-bar .intro-sound[aria-pressed="false"] { background: #FFFFFF; color: var(--ink); box-shadow: 0 4px 14px rgba(20, 24, 31, .18); }
+.intro-on body { overflow: hidden; }
+@media (min-width: 760px) {
+  .intro video { block-size: min(880px, calc(100dvh - 40px)); inline-size: auto; aspect-ratio: 9 / 16; border-radius: 32px; box-shadow: 0 30px 80px rgba(20, 24, 31, .22); }
+  .intro-bar { inset-inline: auto; inline-size: min(495px, calc((100dvh - 40px) * 9 / 16)); inset-block-start: calc(20px + 14px); padding-inline: 14px; box-sizing: border-box; }
+}
 
 </style>
 </head>
@@ -3910,6 +3924,56 @@ h1:focus, h2:focus { outline: none; box-shadow: none; }
   ctx.router.start();
   ctx.scheduler.start();
 })(globalThis.Dira = globalThis.Dira || {});
+
+</script>
+<script>
+/*
+ * סרטון פתיחה (חגי 19.11.2026): בכניסה לאתר מתנגן סרטון ההדגמה, ואחריו נפתחת האפליקציה.
+ * פעם אחת בכל ביקור (sessionStorage). ?intro מכריח הצגה. בלי קול כברירת מחדל, כי דפדפנים חוסמים ניגון אוטומטי עם קול.
+ */
+(function () {
+  const KEY = 'dira-intro-seen';
+  const force = /[?&]intro\b/.test(location.search);
+  let seen = false;
+  try { seen = sessionStorage.getItem(KEY) === '1'; } catch (e) { /* גלישה פרטית */ }
+  if (seen && !force) return;
+
+  const el = document.createElement('div');
+  el.className = 'intro';
+  el.innerHTML =
+    '<video src="media/intro.mp4" poster="media/intro.jpg" autoplay muted playsinline preload="auto"></video>' +
+    '<div class="intro-bar">' +
+    '<button type="button" class="intro-sound" aria-pressed="false">עם קול</button>' +
+    '<button type="button" class="intro-skip">דילוג</button>' +
+    '</div>';
+  document.body.appendChild(el);
+  document.documentElement.classList.add('intro-on');
+  const v = el.querySelector('video');
+  const sound = el.querySelector('.intro-sound');
+
+  let done = false;
+  function close() {
+    if (done) return;
+    done = true;
+    try { sessionStorage.setItem(KEY, '1'); } catch (e) { /* גלישה פרטית */ }
+    el.classList.add('out');
+    document.documentElement.classList.remove('intro-on');
+    setTimeout(() => { v.pause(); el.remove(); }, 450);
+  }
+
+  el.querySelector('.intro-skip').addEventListener('click', close);
+  sound.addEventListener('click', () => {
+    v.muted = !v.muted;
+    sound.setAttribute('aria-pressed', String(!v.muted));
+    sound.textContent = v.muted ? 'עם קול' : 'בלי קול';
+    if (v.paused) v.play().catch(() => {});
+  });
+  v.addEventListener('ended', close);
+  // הסרטון לא נטען (למשל בגרסת ה-Artifact, שאין לידה קובץ): נכנסים ישר לאפליקציה
+  v.addEventListener('error', () => { done = true; el.remove(); document.documentElement.classList.remove('intro-on'); });
+  const p = v.play();
+  if (p && p.catch) p.catch(() => { /* ניגון אוטומטי נחסם: הכפתור «עם קול» מפעיל */ });
+})();
 
 </script>
 </body>
