@@ -721,14 +721,14 @@ h1:focus, h2:focus { outline: none; box-shadow: none; }
 /* ——— סרטון פתיחה (19.11). הרקע בצבע הסרטון, כדי שהשוליים לא ייראו כמסגרת ——— */
 .intro { position: fixed; inset: 0; z-index: 1000; background: #F3E9EA; display: grid; place-items: center; transition: opacity .45s ease; }
 .intro.out { opacity: 0; pointer-events: none; }
-.intro video { inline-size: 100%; block-size: 100%; object-fit: contain; }
+.intro video { inline-size: 100%; block-size: 100%; object-fit: cover; }  /* בטלפון ממלא את המסך; הצדדים שנחתכים ריקים */
 .intro-bar { position: absolute; inset-inline: 16px; inset-block-start: calc(14px + env(safe-area-inset-top)); display: flex; justify-content: space-between; }
 .intro-bar button { font: inherit; font-size: 15px; font-weight: 700; min-block-size: 44px; padding: 0 18px; border-radius: 999px; border: 0;
   background: rgba(20, 24, 31, .78); color: #FFFFFF; cursor: pointer; }
 .intro-bar .intro-sound[aria-pressed="false"] { background: #FFFFFF; color: var(--ink); box-shadow: 0 4px 14px rgba(20, 24, 31, .18); }
 .intro-on body { overflow: hidden; }
 @media (min-width: 760px) {
-  .intro video { block-size: min(880px, calc(100dvh - 40px)); inline-size: auto; aspect-ratio: 9 / 16; border-radius: 32px; box-shadow: 0 30px 80px rgba(20, 24, 31, .22); }
+  .intro video { block-size: min(880px, calc(100dvh - 40px)); inline-size: auto; aspect-ratio: 9 / 16; object-fit: contain; border-radius: 32px; box-shadow: 0 30px 80px rgba(20, 24, 31, .22); }
   .intro-bar { inset-inline: auto; inline-size: min(495px, calc((100dvh - 40px) * 9 / 16)); inset-block-start: calc(20px + 14px); padding-inline: 14px; box-sizing: border-box; }
 }
 
